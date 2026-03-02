@@ -1,6 +1,6 @@
 export default function Hero() {
     return (
-        <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden bg-white pt-20 dark:bg-black">
+        <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden bg-white pt-20">
             {/* Decorative background elements */}
             <div className="absolute top-1/4 -left-20 h-96 w-96 rounded-full bg-primary/10 blur-3xl"></div>
             <div className="absolute bottom-1/4 -right-20 h-96 w-96 rounded-full bg-secondary/10 blur-3xl"></div>
@@ -12,7 +12,7 @@ export default function Hero() {
                         Expertos en IA y Software a Medida
                     </div>
 
-                    <h1 className="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 md:text-7xl lg:leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                    <h1 className="text-5xl font-bold tracking-tight text-black md:text-7xl lg:leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-1000">
                         Ayudamos a las personas a conectar con sus <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">mentores adecuados</span>
                     </h1>
 

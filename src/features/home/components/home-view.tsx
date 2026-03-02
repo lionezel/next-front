@@ -22,7 +22,7 @@ export default function HomeView() {
                 <Hero />
 
                 {/* Aliados Section */}
-                <section className="border-y border-zinc-100 bg-white py-12 dark:border-zinc-900 dark:bg-black">
+                <section className="border-y border-zinc-100 bg-white py-12">
                     <div className="container mx-auto px-6 text-center">
                         <h3 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
                             Nuestros Aliados y Clientes Que Han Confiado en Nosotros
@@ -41,7 +41,7 @@ export default function HomeView() {
                 <Strengths />
 
                 {/* Services Section */}
-                <section id="servicios" className="bg-white py-24 dark:bg-black">
+                <section id="servicios" className="bg-white py-24">
                     <div className="container mx-auto px-6 lg:px-12">
                         <div className="mb-16">
                             <h2 className="text-sm font-bold uppercase tracking-widest text-primary">
@@ -56,10 +56,10 @@ export default function HomeView() {
                             {services.map((service, index) => (
                                 <div
                                     key={index}
-                                    className="flex flex-col items-center justify-center rounded-2xl border border-zinc-100 bg-zinc-50/50 p-8 text-center transition-all hover:scale-105 hover:border-primary/20 hover:bg-white hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:bg-zinc-900"
+                                    className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-8 text-center transition-all hover:scale-105 hover:border-primary/20 hover:shadow-xl"
                                 >
                                     <span className="mb-4 text-4xl">{service.icon}</span>
-                                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">{service.name}</span>
+                                    <span className="font-semibold text-zinc-900">{service.name}</span>
                                 </div>
                             ))}
                         </div>

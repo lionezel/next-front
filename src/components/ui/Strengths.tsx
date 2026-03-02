@@ -31,7 +31,7 @@ const strengths = [
 
 export default function Strengths() {
     return (
-        <section className="bg-zinc-50 py-24 dark:bg-zinc-950/50">
+        <section className="bg-white py-24">
             <div className="container mx-auto px-6 lg:px-12">
                 <div className="mb-16 text-center">
                     <h2 className="text-sm font-bold uppercase tracking-widest text-primary">
@@ -49,15 +49,15 @@ export default function Strengths() {
                     {strengths.map((item, index) => (
                         <div
                             key={index}
-                            className="group relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-8 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 dark:border-zinc-800 dark:bg-zinc-900"
+                            className="group relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-8 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10"
                         >
                             <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
                                 {item.icon}
                             </div>
-                            <h3 className="mb-3 text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                            <h3 className="mb-3 text-xl font-bold text-zinc-900">
                                 {item.title}
                             </h3>
-                            <p className="text-zinc-600 dark:text-zinc-400">
+                            <p className="text-zinc-600">
                                 {item.description}
                             </p>
                         </div>
