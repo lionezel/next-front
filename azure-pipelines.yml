@@ -18,3 +18,4 @@ extends:
     deploymentType: "frontend"
     backendAppName: "prioritech-backend"
     subdomain: "prioritech"
+    namespace: "prioritech"
