@@ -7,7 +7,7 @@ resources:
   repositories:
     - repository: devops
       type: git
-      name: Prioritech/Devops
+      name: Devops
 
 extends:
   template: templates/build-microservice.yml@devops
