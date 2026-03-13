@@ -1,0 +1,20 @@
+trigger:
+  branches:
+    include:
+      - main
+
+resources:
+  repositories:
+    - repository: devops
+      type: git
+      name: Prioritech/Devops
+
+extends:
+  template: templates/build-microservice.yml@devops
+  parameters:
+    appName: "prioritech-front"
+    imageRepository: "prioritech-front"
+    secretFileName: "prioritech-front-secret.yaml"
+    deploymentType: "frontend"
+    backendAppName: "prioritech-backend"
+    subdomain: "prioritech"
