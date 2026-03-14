@@ -36,7 +36,7 @@ export default function Navbar() {
                         Inicio
                     </Link>
                     <Link
-                        href="/servicios"
+                        href="/services"
                         className="text-sm font-medium transition-colors hover:text-primary"
                     >
                         Servicios
