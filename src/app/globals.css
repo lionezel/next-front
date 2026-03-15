@@ -8,6 +8,17 @@
   --color-tertiary: #205EA9;
   --color-accent: #E11D48;
   --font-sans: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+
+  --animate-marquee: marquee 30s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - 3rem));
+    }
+  }
 }
 
 @layer base {

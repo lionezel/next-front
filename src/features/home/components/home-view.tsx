@@ -1,19 +1,81 @@
+"use client";
+
 import Footer from "@/src/components/ui/Footer";
 import Hero from "@/src/components/ui/Hero";
 import Navbar from "@/src/components/ui/Navbar";
 import Strengths from "@/src/components/ui/Strengths";
+import { motion, Variants } from "framer-motion";
 
 export default function HomeView() {
     const services = [
-        { name: "Páginas Web", icon: "🌐" },
-        { name: "Aplicaciones Móviles", icon: "📱" },
-        { name: "Soporte Cloud", icon: "☁️" },
-        { name: "Ciberseguridad", icon: "🛡️" },
-        { name: "DevOps", icon: "🚀" },
-        { name: "Calidad | QA", icon: "✅" },
-        { name: "Arquitectura", icon: "🏗️" },
-        { name: "Sistemas de Información", icon: "📊" },
+        { 
+            name: "Arquitectura de Software", 
+            icon: "🏗️", 
+            desc: "Diseñamos la base tecnológica estructural para sistemas complejos de alta concurrencia y escalabilidad.",
+            classes: "md:col-span-2 md:row-span-2 bg-zinc-950 text-white hover:border-zinc-700",
+            iconClasses: "bg-white/10"
+        },
+        { 
+            name: "Aplicaciones Móviles", 
+            icon: "📱", 
+            desc: "Apps nativas e híbridas de alto rendimiento.",
+            classes: "md:col-span-1 md:row-span-1 bg-white hover:border-primary/30",
+            iconClasses: "bg-primary/10"
+        },
+        { 
+            name: "Soporte Cloud", 
+            icon: "☁️", 
+            desc: "Despliegues infraestructura Serverless y Cloud.",
+            classes: "md:col-span-1 md:row-span-1 bg-gradient-to-br from-primary/10 to-transparent hover:border-primary/50",
+            iconClasses: "bg-white"
+        },
+        { 
+            name: "Ciberseguridad", 
+            icon: "🛡️", 
+            desc: "Protección estructurada de datos e infraestructura.",
+            classes: "md:col-span-1 md:row-span-1 bg-white hover:border-secondary/30",
+            iconClasses: "bg-secondary/10"
+        },
+        { 
+            name: "DevOps & CI/CD", 
+            icon: "🚀", 
+            desc: "Integración y despliegue continuo automatizado.",
+            classes: "md:col-span-1 md:row-span-1 bg-white hover:border-zinc-400",
+            iconClasses: "bg-zinc-100"
+        },
+        { 
+            name: "Sistemas de Información", 
+            icon: "📊", 
+            desc: "Plataformas a medida (ERP, CRM) conectadas a tu modelo de negocio central.",
+            classes: "md:col-span-2 md:row-span-1 bg-zinc-50 hover:border-zinc-300",
+            iconClasses: "bg-white"
+        },
+        { 
+            name: "Calidad y QA", 
+            icon: "✅", 
+            desc: "Testing automatizado, pruebas de rendimiento y garantía total del código fuente.",
+            classes: "md:col-span-2 md:row-span-1 bg-gradient-to-r from-zinc-900 to-zinc-800 text-white hover:border-zinc-600",
+            iconClasses: "bg-white/10"
+        },
     ];
+
+    const partners = [
+        { name: "Telecafé", id: "telecafe" },
+        { name: "Centus", id: "centus" },
+        { name: "QR Supplies", id: "qr-supplies" },
+        { name: "ZUM", id: "zum" },
+        { name: "Banco de Proyectos", id: "banco-proyectos" },
+        { name: "Restabar la bello", id: "restabar" }
+    ];
+
+    const sectionVariants: Variants = {
+        hidden: { opacity: 0, y: 30 },
+        show: { 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.8, ease: "easeOut" } 
+        }
+    };
 
     return (
         <>
@@ -21,63 +83,162 @@ export default function HomeView() {
             <main className="min-h-screen">
                 <Hero />
 
-                {/* Aliados Section */}
-                <section className="border-y border-zinc-100 bg-white py-12">
-                    <div className="container mx-auto px-6 text-center">
+                {/* Aliados Section - Marquee */}
+                <section className="border-y border-zinc-100 bg-white py-16 overflow-hidden">
+                    <div className="container mx-auto px-6 text-center lg:px-12 mb-10">
                         <h3 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
-                            Nuestros Aliados y Clientes Que Han Confiado en Nosotros
+                            Empresas que confían en nuestra Ingeniería
                         </h3>
-                        <div className="mt-8 flex flex-wrap justify-center gap-12 opacity-50 grayscale transition-all hover:opacity-100 hover:grayscale-0">
-                            {/* Placeholders for logos */}
-                            <span className="text-xl font-bold italic">Telecafé</span>
-                            <span className="text-xl font-bold italic">Centus</span>
-                            <span className="text-xl font-bold italic">QR Supplies</span>
-                            <span className="text-xl font-bold italic">ZUM</span>
-                            <span className="text-xl font-bold italic">Banco de Proyectos</span>
+                    </div>
+                    
+                    <div className="relative flex overflow-hidden w-full group mask-image-linear-edges">
+                        <div className="animate-marquee flex whitespace-nowrap group-hover:[animation-play-state:paused]">
+                            {/* First set of logos */}
+                            <div className="flex items-center gap-16 md:gap-24 px-8 md:px-12">
+                                {partners.map((partner, index) => (
+                                    <div key={index} className="flex flex-col items-center justify-center opacity-50 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 min-w-[150px]">
+                                        <img
+                                            src={`/logos/${partner.id}.png`}
+                                            alt={`Logo de ${partner.name}`}
+                                            className="h-12 w-auto object-contain cursor-pointer"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.parentElement?.querySelector('span')?.classList.remove('hidden');
+                                            }}
+                                        />
+                                        <span className="hidden text-xl font-bold font-mono text-zinc-500 cursor-pointer">
+                                            {partner.name}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Second set of logos for infinite loop */}
+                            <div className="flex items-center gap-16 md:gap-24 px-8 md:px-12">
+                                {partners.map((partner, index) => (
+                                    <div key={`dup-${index}`} className="flex flex-col items-center justify-center opacity-50 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 min-w-[150px]">
+                                        <img
+                                            src={`/logos/${partner.id}.png`}
+                                            alt={`Logo de ${partner.name}`}
+                                            className="h-12 w-auto object-contain cursor-pointer"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.parentElement?.querySelector('span')?.classList.remove('hidden');
+                                            }}
+                                        />
+                                        <span className="hidden text-xl font-bold font-mono text-zinc-500 cursor-pointer">
+                                            {partner.name}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
+                    {/* Inline CSS trick for generic mask image fade left and right edges */}
+                    <style dangerouslySetInnerHTML={{__html: `
+                        .mask-image-linear-edges {
+                            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+                        }
+                    `}} />
                 </section>
 
                 <Strengths />
 
-                {/* Services Section */}
-                <section id="servicios" className="bg-white py-24">
+                {/* Services Section - Bento Box */}
+                <motion.section 
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: "-100px" }}
+                    id="servicios" 
+                    className="bg-white py-24"
+                >
                     <div className="container mx-auto px-6 lg:px-12">
-                        <div className="mb-16">
-                            <h2 className="text-sm font-bold uppercase tracking-widest text-primary">
-                                Nuestros Servicios
+                        <motion.div variants={sectionVariants} className="mb-16 max-w-2xl">
+                            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-4">
+                                <span className="h-px w-10 bg-primary"></span>
+                                Catálogo de Servicios
                             </h2>
-                            <p className="mt-4 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                                Soluciones integrales de software
+                            <p className="text-4xl font-extrabold tracking-tight text-black">
+                                Soluciones integrales de software para toda necesidad.
                             </p>
-                        </div>
+                        </motion.div>
 
-                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[250px] md:auto-rows-[200px]">
                             {services.map((service, index) => (
-                                <div
+                                <motion.div
+                                    variants={{
+                                        hidden: { opacity: 0, scale: 0.95 },
+                                        show: { opacity: 1, scale: 1, transition: { duration: 0.5, delay: index * 0.1 } }
+                                    }}
                                     key={index}
-                                    className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-8 text-center transition-all hover:scale-105 hover:border-primary/20 hover:shadow-xl"
+                                    className={`group flex flex-col justify-between rounded-3xl border border-zinc-200 p-8 transition-all duration-300 hover:shadow-xl cursor-default ${service.classes}`}
                                 >
-                                    <span className="mb-4 text-4xl">{service.icon}</span>
-                                    <span className="font-semibold text-zinc-900">{service.name}</span>
-                                </div>
+                                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${service.iconClasses}`}>
+                                        {service.icon}
+                                    </div>
+                                    <div className="mt-8">
+                                        <h3 className="mb-2 text-xl font-bold">{service.name}</h3>
+                                        <p className={`text-sm opacity-80 ${service.classes.includes('text-white') ? "text-zinc-300" : "text-zinc-600"}`}>
+                                            {service.desc}
+                                        </p>
+                                    </div>
+                                </motion.div>
                             ))}
                         </div>
                     </div>
-                </section>
+                </motion.section>
 
-                {/* Call to Action */}
-                <section className="bg-gradient-to-br from-primary to-secondary py-20 text-white">
-                    <div className="container mx-auto px-6 text-center lg:px-12">
-                        <h2 className="text-4xl font-bold md:text-5xl">¿Listo para transformar tu idea en realidad?</h2>
-                        <p className="mx-auto mt-6 max-w-2xl text-lg opacity-90">
-                            Llevemos tu proyecto al siguiente nivel con tecnología de punta y metodologías ágiles.
-                        </p>
-                        <button className="mt-10 rounded-full bg-white px-10 py-4 text-lg font-bold text-primary transition-transform hover:scale-105 active:scale-95">
-                            Contáctanos hoy
-                        </button>
+                {/* Call to Action - Dark Modern */}
+                <motion.section 
+                    variants={sectionVariants}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: "-50px" }}
+                    className="py-24"
+                >
+                    <div className="container mx-auto px-6 lg:px-12">
+                        <div className="relative overflow-hidden rounded-[3rem] bg-zinc-950 p-12 md:p-20 text-center shadow-2xl">
+                            {/* Decorative glowing lines */}
+                            <div className="absolute -top-px left-1/2 -ml-[200px] w-[400px] h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-70"></div>
+                            <div className="absolute -bottom-px left-1/2 -ml-[150px] w-[300px] h-px bg-gradient-to-r from-transparent via-secondary to-transparent opacity-70"></div>
+                            
+                            <motion.div 
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                                className="absolute -top-[20rem] -left-[10rem] h-[40rem] w-[40rem] rounded-full bg-primary/10 blur-[100px]"
+                            />
+                            
+                            <div className="relative z-10 max-w-3xl mx-auto">
+                                <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-zinc-300 backdrop-blur-md mb-8 ring-1 ring-white/20">
+                                    Empecemos a construir
+                                </span>
+                                <h2 className="text-4xl font-extrabold text-white md:text-6xl tracking-tight mb-8">
+                                    ¿Listo para transformar tu idea en <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">código real?</span>
+                                </h2>
+                                <p className="text-lg text-zinc-400 mb-12">
+                                    Conectamos ingeniería de software avanzada con metodologías ágiles para entregar productos que dominan el mercado. Déjanos ser tu partner de tecnología.
+                                </p>
+                                
+                                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="rounded-full bg-white px-8 py-4 text-lg font-bold text-black shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] transition-shadow hover:shadow-[0_0_60px_-10px_rgba(255,255,255,0.7)]"
+                                    >
+                                        Agendar Consultoría
+                                    </motion.button>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="rounded-full border border-zinc-700 bg-zinc-900/50 px-8 py-4 text-lg font-bold text-white transition-colors hover:bg-zinc-800"
+                                    >
+                                        Ver Casos de Éxito
+                                    </motion.button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </section>
+                </motion.section>
             </main>
             <Footer />
         </>

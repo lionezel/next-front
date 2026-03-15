@@ -1,107 +1,182 @@
 "use client";
 
-import { useState } from "react";
-import { servicesData } from "../services/services-data";
+import Footer from "@/src/components/ui/Footer";
 import Navbar from "@/src/components/ui/Navbar";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import Link from "next/link";
 
-export default function ServicesView() {
-    const [activeServiceId, setActiveServiceId] = useState("web");
+export default function servicesView() {
+    const targetRef = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: targetRef,
+        offset: ["start start", "end start"]
+    });
 
-    const activeService = servicesData.find(s => s.id === activeServiceId) || servicesData[0];
+    // Background opacity based on scroll
+    const backgroundOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.5]);
+
+    const features = [
+        {
+            title: "Adaptabilidad Total",
+            description: "Creemos en la importancia de adaptar nuestras soluciones a las necesidades específicas de cada cliente. Garantizamos que el sistema sea único y se adapte perfectamente a tu modelo de negocio central.",
+            icon: "🧩",
+            color: "from-blue-500/20 to-cyan-500/20",
+            iconColor: "text-blue-500"
+        },
+        {
+            title: "Optimización y Eficiencia",
+            description: "¿Sientes que tus sistemas actuales son lentos o costosos? Analizamos, re-arquitecturamos y optimizamos sistemas existentes para maximizar el rendimiento y reducir costos de infraestructura.",
+            icon: "⚡",
+            color: "from-amber-500/20 to-orange-500/20",
+            iconColor: "text-amber-500"
+        },
+        {
+            title: "Desarrollo a Medida",
+            description: "No forzamos tu empresa a usar software rígido. Nuestro equipo de ingeniería desarrolla soluciones nativas y web altamente escalables que satisfacen exactamente tus reglas de negocio.",
+            icon: "⚙️",
+            color: "from-primary/20 to-purple-500/20",
+            iconColor: "text-primary"
+        },
+        {
+            title: "Soporte Experto 24/7",
+            description: "Desde la recolección de requisitos hasta el despliegue en producción y más allá. Nos aseguramos de que tu empresa esté cubierta en todo momento con soporte técnico especializado.",
+            icon: "🛡️",
+            color: "from-emerald-500/20 to-teal-500/20",
+            iconColor: "text-emerald-500"
+        }
+    ];
 
     return (
-        <div className="min-h-screen bg-[#FDFDFD] font-sans pb-20 mt-20">
+        <div className="bg-white text-zinc-900 min-h-screen selection:bg-primary/30">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-12">
-                {/* Sidebar */}
-                <aside className="w-full lg:w-[35%] flex flex-col gap-4">
-                    {servicesData.map((service) => {
-                        const isActive = activeServiceId === service.id;
-                        return (
-                            <div
-                                key={service.id}
-                                onClick={() => setActiveServiceId(service.id)}
-                                className={`cursor-pointer p-6 rounded-[1.5rem] transition-all duration-300 border-2 ${isActive
-                                    ? "border-[#F9A826] bg-[#F8F9FA] shadow-sm transform scale-[1.02]"
-                                    : "border-transparent bg-[#F8F9FA] hover:bg-slate-100/70"
-                                    }`}
+            <main>
+                {/* Hero Section */}
+                <section className="relative min-h-[80vh] flex items-center pt-24 pb-12 overflow-hidden">
+                    {/* Light/Cybernetic Background */}
+                    <div className="absolute inset-0 z-0">
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+                        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary opacity-[0.08] blur-[100px]"></div>
+                    </div>
+
+                    <div className="container relative z-10 mx-auto px-6 lg:px-12">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                            className="max-w-4xl"
+                        >
+                            <Link href="/home" className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 mb-8 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="m15 18-6-6 6-6" /></svg>
+                                Volver al inicio
+                            </Link>
+
+                            <div className="inline-flex items-center rounded-full border border-zinc-200 bg-white/50 px-4 py-1.5 text-sm font-medium text-zinc-600 backdrop-blur-md mb-6 shadow-sm">
+                                <span className="mr-2 inline-block h-2 w-2 rounded-full bg-primary shadow-[0_0_10px_rgba(105,67,203,0.3)]"></span>
+                                Servicio Especializado
+                            </div>
+
+                            <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 md:text-7xl lg:leading-[1.1] mb-8">
+                                Sistemas de Información <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                                    A Nivel Empresarial
+                                </span>
+                            </h1>
+
+                            <p className="text-xl text-zinc-600 leading-relaxed max-w-2xl border-l-2 border-primary/30 pl-6">
+                                Ofrecemos soluciones robustas para empresas de cualquier tamaño. Nuestro enfoque es entender tu arquitectura actual para diseñar sistemas a medida que realmente impulsen tus objetivos.
+                            </p>
+                        </motion.div>
+                    </div>
+                </section>
+
+                {/* Sticky Scroll Features Section */}
+                <section ref={targetRef} className="relative w-full bg-zinc-50 border-y border-zinc-100">
+                    {/* Container for sticky layout */}
+                    <div className="container mx-auto px-6 lg:px-12 flex flex-col md:flex-row relative">
+
+                        {/* Sticky Left Column */}
+                        <div className="md:w-1/3 md:sticky md:top-32 h-fit pb-12 md:pb-0 pt-12 md:pr-12">
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
                             >
-                                <h3 className={`font-bold text-lg mb-2 ${isActive ? "text-slate-900" : "text-slate-600"}`}>
-                                    {service.title}
-                                </h3>
-                                <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
-                                    {service.sidebarDesc}
+                                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-zinc-900">
+                                    Nuestro <br />
+                                    <span className="text-primary">Enfoque</span>
+                                </h2>
+                                <p className="text-zinc-600 text-lg">
+                                    Desde la modernización de sistemas heredados (Legacy) hasta la creación de plataformas integrales desde cero.
                                 </p>
-
-                                {isActive && (
-                                    <button className="mt-4 bg-[#6943CB] hover:bg-[#5837A9] transition-colors text-white px-5 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 fill-current" viewBox="0 0 24 24">
-                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                        </svg>
-                                        QUIERO ESTO
-                                    </button>
-                                )}
-                            </div>
-                        );
-                    })}
-                </aside>
-
-                {/* Main Content */}
-                <section className="w-full lg:w-[65%] flex flex-col items-center">
-                    <div className="text-center max-w-3xl mb-12">
-                        <h1 className="text-3xl font-bold text-slate-900 mb-4">{activeService.title}</h1>
-                        <p className="text-slate-600 leading-relaxed text-[15px]">
-                            {activeService.mainDesc}
-                        </p>
-                    </div>
-
-                    {/* Illustration Placeholder */}
-                    <div className="relative w-80 h-80 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#EA580C] mb-16 flex items-center justify-center shadow-lg shadow-orange-100">
-                        {/* Monitor Graphic */}
-                        <div className="relative w-48 h-36 bg-slate-800 rounded-lg p-1.5 flex flex-col shadow-2xl transform -rotate-12 hover:rotate-0 transition-transform duration-500 ease-out z-10">
-                            <div className="flex-1 bg-white flex flex-col rounded-sm overflow-hidden">
-                                <div className="w-full h-8 bg-pink-500 flex items-center px-3">
-                                    <div className="w-16 h-3 bg-white/30 rounded-full"></div>
-                                </div>
-                                <div className="flex-1 bg-slate-50 p-3 flex gap-3">
-                                    <div className="w-1/3 bg-slate-200 rounded-sm"></div>
-                                    <div className="w-2/3 bg-slate-200 rounded-sm"></div>
-                                </div>
-                            </div>
-                            <div className="h-4 bg-slate-800"></div>
-                            {/* Stand */}
-                            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-8 h-6 bg-slate-700"></div>
-                            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-24 h-2 bg-slate-400 rounded-full shadow-md"></div>
+                            </motion.div>
                         </div>
-                        {/* Mouse */}
-                        <div className="absolute bottom-10 right-10 w-8 h-12 bg-white rounded-full border border-slate-200 shadow-md transform rotate-12 z-20">
-                            <div className="w-full h-1/2 border-b border-slate-100"></div>
-                        </div>
-                    </div>
 
-                    {/* Features Grid */}
-                    {activeService.features && activeService.features.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                            {activeService.features.map((feature, idx) => (
-                                <div key={idx} className="bg-[#FFF6F0] p-8 rounded-2xl relative shadow-sm hover:shadow-md transition-shadow">
-                                    <span className="text-[#F9A826] font-bold text-lg mb-3 block">
-                                        {feature.num}
-                                    </span>
-                                    <h4 className="font-bold text-slate-800 mb-2">{feature.title}</h4>
-                                    <p className="text-sm text-slate-600 leading-relaxed">
-                                        {feature.desc}
-                                    </p>
-                                </div>
+                        {/* Scrolling Right Column */}
+                        <div className="md:w-2/3 pt-12 md:pt-32 pb-32 space-y-24 md:space-y-48">
+                            {features.map((feature, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 50 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: false, margin: "-20%" }}
+                                    transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
+                                    className="relative"
+                                >
+                                    <div className={`absolute -inset-4 rounded-3xl bg-gradient-to-br ${feature.color} opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100`}></div>
+                                    <div className="relative flex flex-col md:flex-row gap-8 items-start rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm hover:shadow-xl hover:border-zinc-300 transition-all">
+                                        <div className={`flex shrink-0 h-16 w-16 items-center justify-center rounded-2xl bg-zinc-50 text-3xl border border-zinc-100 ${feature.iconColor}`}>
+                                            {feature.icon}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-zinc-900 mb-4">
+                                                {feature.title}
+                                            </h3>
+                                            <p className="text-zinc-600 leading-relaxed text-lg">
+                                                {feature.description}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Connecting Line (except last) */}
+                                    {index !== features.length - 1 && (
+                                        <div className="hidden md:block absolute left-8 top-32 w-px h-64 bg-gradient-to-b from-zinc-200 to-transparent -z-10"></div>
+                                    )}
+                                </motion.div>
                             ))}
                         </div>
-                    ) : (
-                        <div className="bg-slate-50 border border-slate-100 p-8 rounded-2xl w-full text-center">
-                            <p className="text-slate-500">Más detalles de {activeService.title} próximamente.</p>
-                        </div>
-                    )}
+                    </div>
+                </section>
+
+                {/* Light Call to Action */}
+                <section className="py-24 relative overflow-hidden bg-white">
+                    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none"></div>
+
+                    <div className="container mx-auto px-6 lg:px-12 text-center relative z-10">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            className="max-w-3xl mx-auto"
+                        >
+                            <h2 className="text-4xl md:text-6xl font-extrabold mb-8 text-zinc-900">
+                                ¿Cuándo empezamos?
+                            </h2>
+                            <p className="text-xl text-zinc-600 mb-12">
+                                Un analista de arquitectura de software está listo para evaluar el estado actual de tu ecosistema tecnológico.
+                            </p>
+                            <button className="group relative rounded-full bg-zinc-950 px-8 py-4 text-lg font-bold text-white transition-all hover:scale-105 shadow-xl hover:bg-zinc-800">
+                                Iniciar Evaluación Gratuita
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block ml-2 transition-transform group-hover:translate-x-1"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                            </button>
+                        </motion.div>
+                    </div>
                 </section>
             </main>
+
+            <Footer />
         </div>
     );
 }
