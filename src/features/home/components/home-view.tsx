@@ -5,75 +5,17 @@ import Hero from "@/src/components/ui/Hero";
 import Navbar from "@/src/components/ui/Navbar";
 import Strengths from "@/src/components/ui/Strengths";
 import { motion, Variants } from "framer-motion";
+import { services } from "../services/skills-data";
+import { partners } from "../services/partners-data";
 
 export default function HomeView() {
-    const services = [
-        { 
-            name: "Arquitectura de Software", 
-            icon: "🏗️", 
-            desc: "Diseñamos la base tecnológica estructural para sistemas complejos de alta concurrencia y escalabilidad.",
-            classes: "md:col-span-2 md:row-span-2 bg-zinc-950 text-white hover:border-zinc-700",
-            iconClasses: "bg-white/10"
-        },
-        { 
-            name: "Aplicaciones Móviles", 
-            icon: "📱", 
-            desc: "Apps nativas e híbridas de alto rendimiento.",
-            classes: "md:col-span-1 md:row-span-1 bg-white hover:border-primary/30",
-            iconClasses: "bg-primary/10"
-        },
-        { 
-            name: "Soporte Cloud", 
-            icon: "☁️", 
-            desc: "Despliegues infraestructura Serverless y Cloud.",
-            classes: "md:col-span-1 md:row-span-1 bg-gradient-to-br from-primary/10 to-transparent hover:border-primary/50",
-            iconClasses: "bg-white"
-        },
-        { 
-            name: "Ciberseguridad", 
-            icon: "🛡️", 
-            desc: "Protección estructurada de datos e infraestructura.",
-            classes: "md:col-span-1 md:row-span-1 bg-white hover:border-secondary/30",
-            iconClasses: "bg-secondary/10"
-        },
-        { 
-            name: "DevOps & CI/CD", 
-            icon: "🚀", 
-            desc: "Integración y despliegue continuo automatizado.",
-            classes: "md:col-span-1 md:row-span-1 bg-white hover:border-zinc-400",
-            iconClasses: "bg-zinc-100"
-        },
-        { 
-            name: "Sistemas de Información", 
-            icon: "📊", 
-            desc: "Plataformas a medida (ERP, CRM) conectadas a tu modelo de negocio central.",
-            classes: "md:col-span-2 md:row-span-1 bg-zinc-50 hover:border-zinc-300",
-            iconClasses: "bg-white"
-        },
-        { 
-            name: "Calidad y QA", 
-            icon: "✅", 
-            desc: "Testing automatizado, pruebas de rendimiento y garantía total del código fuente.",
-            classes: "md:col-span-2 md:row-span-1 bg-gradient-to-r from-zinc-900 to-zinc-800 text-white hover:border-zinc-600",
-            iconClasses: "bg-white/10"
-        },
-    ];
-
-    const partners = [
-        { name: "Telecafé", id: "telecafe" },
-        { name: "Centus", id: "centus" },
-        { name: "QR Supplies", id: "qr-supplies" },
-        { name: "ZUM", id: "zum" },
-        { name: "Banco de Proyectos", id: "banco-proyectos" },
-        { name: "Restabar la bello", id: "restabar" }
-    ];
 
     const sectionVariants: Variants = {
         hidden: { opacity: 0, y: 30 },
-        show: { 
-            opacity: 1, 
+        show: {
+            opacity: 1,
             y: 0,
-            transition: { duration: 0.8, ease: "easeOut" } 
+            transition: { duration: 0.8, ease: "easeOut" }
         }
     };
 
@@ -90,7 +32,7 @@ export default function HomeView() {
                             Empresas que confían en nuestra Ingeniería
                         </h3>
                     </div>
-                    
+
                     <div className="relative flex overflow-hidden w-full group mask-image-linear-edges">
                         <div className="animate-marquee flex whitespace-nowrap group-hover:[animation-play-state:paused]">
                             {/* First set of logos */}
@@ -134,7 +76,8 @@ export default function HomeView() {
                         </div>
                     </div>
                     {/* Inline CSS trick for generic mask image fade left and right edges */}
-                    <style dangerouslySetInnerHTML={{__html: `
+                    <style dangerouslySetInnerHTML={{
+                        __html: `
                         .mask-image-linear-edges {
                             mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
                             -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
@@ -145,11 +88,11 @@ export default function HomeView() {
                 <Strengths />
 
                 {/* Services Section - Bento Box */}
-                <motion.section 
+                <motion.section
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true, margin: "-100px" }}
-                    id="servicios" 
+                    id="servicios"
                     className="bg-white py-24"
                 >
                     <div className="container mx-auto px-6 lg:px-12">
@@ -189,7 +132,7 @@ export default function HomeView() {
                 </motion.section>
 
                 {/* Call to Action - Dark Modern */}
-                <motion.section 
+                <motion.section
                     variants={sectionVariants}
                     initial="hidden"
                     whileInView="show"
@@ -201,13 +144,13 @@ export default function HomeView() {
                             {/* Decorative glowing lines */}
                             <div className="absolute -top-px left-1/2 -ml-[200px] w-[400px] h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-70"></div>
                             <div className="absolute -bottom-px left-1/2 -ml-[150px] w-[300px] h-px bg-gradient-to-r from-transparent via-secondary to-transparent opacity-70"></div>
-                            
-                            <motion.div 
+
+                            <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                                 className="absolute -top-[20rem] -left-[10rem] h-[40rem] w-[40rem] rounded-full bg-primary/10 blur-[100px]"
                             />
-                            
+
                             <div className="relative z-10 max-w-3xl mx-auto">
                                 <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-zinc-300 backdrop-blur-md mb-8 ring-1 ring-white/20">
                                     Empecemos a construir
@@ -218,16 +161,16 @@ export default function HomeView() {
                                 <p className="text-lg text-zinc-400 mb-12">
                                     Conectamos ingeniería de software avanzada con metodologías ágiles para entregar productos que dominan el mercado. Déjanos ser tu partner de tecnología.
                                 </p>
-                                
+
                                 <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                    <motion.button 
+                                    <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         className="rounded-full bg-white px-8 py-4 text-lg font-bold text-black shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] transition-shadow hover:shadow-[0_0_60px_-10px_rgba(255,255,255,0.7)]"
                                     >
                                         Agendar Consultoría
                                     </motion.button>
-                                    <motion.button 
+                                    <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         className="rounded-full border border-zinc-700 bg-zinc-900/50 px-8 py-4 text-lg font-bold text-white transition-colors hover:bg-zinc-800"
