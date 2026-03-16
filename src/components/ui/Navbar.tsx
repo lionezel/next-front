@@ -42,7 +42,7 @@ export default function Navbar() {
                         Servicios
                     </Link>
                     <Link
-                        href="/proyectos"
+                        href="/proyect/restabar"
                         className="text-sm font-medium transition-colors hover:text-primary"
                     >
                         Proyectos
