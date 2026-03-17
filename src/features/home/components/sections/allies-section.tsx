@@ -11,7 +11,7 @@ export function AlliesSection() {
             </div>
 
             <div className="relative flex overflow-hidden w-full group mask-image-linear-edges">
-                <div className="animate-marquee flex whitespace-nowrap group-hover:[animation-play-state:paused]">
+                <div className="flex whitespace-nowrap group-hover:[animation-play-state:paused]">
                     {/* First set of logos */}
                     <div className="flex items-center gap-16 md:gap-24 px-8 md:px-12">
                         {partners.map((partner, index) => (
@@ -26,29 +26,6 @@ export function AlliesSection() {
                                     height={48}
                                     className="h-12 w-auto object-contain cursor-pointer"
                                 />
-                                <span className="hidden text-xl font-bold font-mono text-zinc-500 cursor-pointer">
-                                    {partner.name}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                    {/* Second set of logos for infinite loop */}
-                    <div className="flex items-center gap-16 md:gap-24 px-8 md:px-12">
-                        {partners.map((partner, index) => (
-                            <div
-                                key={`dup-${index}`}
-                                className="flex flex-col items-center justify-center opacity-50 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 min-w-[150px]"
-                            >
-                                <Image
-                                    src={`/logos/${partner.id}.png`}
-                                    alt={`Logo de ${partner.name}`}
-                                    width={120}
-                                    height={48}
-                                    className="h-12 w-auto object-contain cursor-pointer"
-                                />
-                                <span className="hidden text-xl font-bold font-mono text-zinc-500 cursor-pointer">
-                                    {partner.name}
-                                </span>
                             </div>
                         ))}
                     </div>

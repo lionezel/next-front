@@ -7,7 +7,7 @@ import Strengths from "@/src/components/ui/Strengths";
 import { Variants } from "framer-motion";
 import { AlliesSection } from "./sections/allies-section";
 import { ServicesSection } from "./sections/services-section";
-import { Floating } from "./Floating";
+import { Floating } from "@/src/components/ui/Floating";
 
 const sectionVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
