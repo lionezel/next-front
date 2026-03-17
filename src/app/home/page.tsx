@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import HomeView from "@/src/features/home/components/home-view";
+import HomeFeature from "@/src/features/home/HomeFeature";
 
 export default function Home() {
-    return (
-        <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading...</div>}>
-            <HomeView />
-        </Suspense>
-    );
+    return <HomeFeature />;
 }
