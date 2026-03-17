@@ -54,7 +54,7 @@ export const projectsData: Project[] = [
         subtitle: "Plataforma de Medios Digitales",
         description: "IMPACTO es una perfumeria, la cual se acerco a nosotros con la necesidad principal de exponer de mejor manera su negocio en la web. Por lo cual decidimos crear un software tipo e-commerce que permitiera gestionar su inventario y ventas de forma online.",
         heroImage: "/projects/telecafe-hero.jpg",
-        logo: "/logos/impacto.jpeg",
+        logo: "/logos/impacto.png",
         techStack: [
             { name: "Next.js", icon: "Next", category: "Frontend" },
             { name: "Tailwind CSS", icon: "Tailwind", category: "Styling" },
