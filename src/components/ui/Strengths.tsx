@@ -96,7 +96,7 @@ export default function Strengths() {
                             Arquitectura Tecnológica
                         </h2>
                     </div>
-                    <p className="text-4xl font-extrabold tracking-tight text-black md:text-5xl">
+                    <p className="text-3xl font-extrabold tracking-tight text-black sm:text-4xl md:text-5xl">
                         Construimos Sistemas,<br/>
                         <span className="text-zinc-400 font-medium">Bloque por Bloque.</span>
                     </p>
@@ -114,7 +114,7 @@ export default function Strengths() {
                             variants={itemVariants}
                             key={index}
                             whileHover={{ y: -8, scale: 1.01 }}
-                            className={`group relative overflow-hidden rounded-[2rem] border p-8 transition-all duration-300 shadow-sm hover:shadow-xl cursor-default ${item.classes}`}
+                            className={`group relative overflow-hidden rounded-[2rem] border p-6 md:p-8 transition-all duration-300 shadow-sm hover:shadow-xl cursor-default ${item.classes}`}
                         >
                             <div className="relative z-10">
                                 <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl transition-colors duration-300 ${item.iconClasses}`}>

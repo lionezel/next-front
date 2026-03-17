@@ -4,7 +4,7 @@ export default function Footer() {
     return (
         <footer className="border-t border-zinc-200 bg-white pt-16 pb-8">
             <div className="container mx-auto px-6 lg:px-12">
-                <div className="grid gap-12 lg:grid-cols-4">
+                <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-6 lg:col-span-1">
                         <Link href="/" className="text-2xl font-bold tracking-tighter text-primary">
                             Priori<span className="text-secondary">Tech</span>
@@ -33,11 +33,8 @@ export default function Footer() {
                             Proyectos
                         </h4>
                         <ul className="space-y-4 text-zinc-600">
-                            <li>Telecafe</li>
-                            <li>Centus</li>
-                            <li>Qr Supplies</li>
-                            <li>ZUM</li>
-                            <li>Uriel</li>
+                            <li>Restabar la bello</li>
+                            <li>Impacto</li>
                         </ul>
                     </div>
 
