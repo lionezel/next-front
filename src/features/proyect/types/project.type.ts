@@ -17,8 +17,8 @@ export interface Project {
     }[];
     overview: {
         vision: string;
-        highlight1: string;
-        highlight2: string;
+        highlight1?: string;
+        highlight2?: string;
     };
     stats: {
         indicator: string;

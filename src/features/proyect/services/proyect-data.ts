@@ -29,8 +29,7 @@ export const projectsData: Project[] = [
             }
         ],
         overview: {
-            vision: "Diseñamos una plataforma que no solo resuelve problemas técnicos, sino que potencia el modelo de negocio. Restabar se convierte en el núcleo operativo para empresas que buscan escala global.",
-            highlight1: "+4 Integraciones Core",
+            vision: "Diseñamos una web la cual permitiera a el restaurante tener una mayor eficiencia en cuanto a sus pedidos y manejo de producto",
             highlight2: "Cloud Native"
         },
         stats: {
@@ -78,15 +77,14 @@ export const projectsData: Project[] = [
             }
         ],
         overview: {
-            vision: "Creamos una experiencia mediática inmersiva que conecta a la audiencia regional con contenido de calidad. Impacto redefine el consumo de noticias en el Eje Cafetero.",
-            highlight1: "+1M Visitas Mensuales",
-            highlight2: "Streaming HQ"
+            vision: "Realizamos una plataforma en la cual el cliente pudiera conectar de una forma mas comoda con el producto",
+            highlight1: "+100 Productos por mes",
         },
         stats: {
             indicator: "📺",
             title: "Rendimiento",
-            description: "Optimizado para entrega de contenido ultra rápida y streaming sin interrupciones.",
-            statusLabel: "Operativo"
+            description: "Optimizado para generar un contacto seguro entre el cliente y el producto",
+            statusLabel: "Activo"
         },
         design: {
             description: "Una interfaz vibrante que refleja la identidad cultural del Eje Cafetero. Uso de colores tierra combinados con una tipografía moderna y una disposición de elementos tipo 'Newsroom' que facilita el consumo de información.",
