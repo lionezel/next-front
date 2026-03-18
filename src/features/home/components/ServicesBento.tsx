@@ -43,7 +43,7 @@ export function ServicesBento({ services, animations }: Readonly<ServicesBentoPr
                             style={{
                                 '--card-shadow': service.hoverShadow
                             } as React.CSSProperties}
-                            className={`group relative z-0 overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900 text-white p-6 md:p-8 flex flex-col justify-between cursor-default shadow-sm transition-all duration-300 hover:shadow-[0_0_40px_-10px_var(--card-shadow)] hover:border-white/40 ${service.classes}`}
+                            className={`group relative z-0 overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900/40 backdrop-blur-md text-white p-6 md:p-8 flex flex-col justify-between cursor-default shadow-sm transition-all duration-300 hover:shadow-[0_0_40px_-10px_var(--card-shadow)] hover:border-white/40 ${service.classes}`}
                         >
                             {/* Media Layer: Background Image */}
                             <div className="absolute inset-0 z-0 overflow-hidden">
@@ -56,7 +56,7 @@ export function ServicesBento({ services, animations }: Readonly<ServicesBentoPr
                                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                                 />
                                 {/* Gradient Overlays */}
-                                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none transition-opacity duration-300 group-hover:opacity-60" />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent pointer-events-none transition-opacity duration-300 group-hover:opacity-40" />
                             </div>
 
                             {/* Contenedor del ícono */}

@@ -40,9 +40,9 @@ export function ArchitectureSection({ animations }: ArchitectureSectionProps) {
     const { sectionVariants, architectureContainer, architectureItem } = animations;
 
     return (
-        <section className="bg-zinc-50 py-24 overflow-hidden">
+        <section className="bg-zinc-50 py-20 md:py-32 overflow-hidden">
             <div className="container mx-auto px-6 lg:px-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-16 items-center">
                     
                     {/* Contenido (Izquierda) */}
                     <motion.div 
@@ -65,13 +65,13 @@ export function ArchitectureSection({ animations }: ArchitectureSectionProps) {
 
                         <motion.div 
                             variants={architectureContainer}
-                            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-6"
                         >
                             {pillars.map((pillar) => (
                                 <motion.div
                                     key={pillar.title}
                                     variants={architectureItem}
-                                    className="group relative bg-white p-6 rounded-4xl border border-zinc-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+                                    className="group relative bg-white/80 backdrop-blur-md p-6 rounded-4xl border border-zinc-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
                                 >
                                     <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/5 transition-colors group-hover:bg-primary/10">
                                         {pillar.icon}
