@@ -21,4 +21,6 @@ export interface HomeAnimations {
     sectionVariants: Variants;
     containerVariants: Variants;
     cardVariants: Variants;
+    architectureContainer: Variants;
+    architectureItem: Variants;
 }

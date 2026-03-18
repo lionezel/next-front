@@ -5,10 +5,9 @@ import Image from "next/image";
 import { HomeService, HomeAnimations } from "../types/home.types";
 
 interface ServicesBentoProps {
-    services: HomeService[];
-    animations: HomeAnimations;
+    readonly services: HomeService[];
+    readonly animations: HomeAnimations;
 }
-
 
 export function ServicesBento({ services, animations }: Readonly<ServicesBentoProps>) {
     const { sectionVariants, containerVariants, cardVariants } = animations;
@@ -24,7 +23,7 @@ export function ServicesBento({ services, animations }: Readonly<ServicesBentoPr
             <div className="container mx-auto px-6 lg:px-12">
                 <motion.div variants={sectionVariants} className="mb-16 max-w-2xl">
                     <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-4">
-                        <span className="h-px w-10 bg-primary" />
+                        <span className="h-px w-10 bg-primary" /> {' '}
                         Catálogo de Servicios
                     </h2>
                     <p className="text-3xl font-extrabold tracking-tight text-black sm:text-4xl">
@@ -44,9 +43,9 @@ export function ServicesBento({ services, animations }: Readonly<ServicesBentoPr
                             style={{
                                 '--card-shadow': service.hoverShadow
                             } as React.CSSProperties}
-                            className={`group relative z-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 text-white p-6 md:p-8 flex flex-col justify-between cursor-default shadow-sm transition-all duration-300 hover:shadow-[0_0_30px_-5px_var(--card-shadow)] hover:border-white/40 ${service.classes}`}
+                            className={`group relative z-0 overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-900 text-white p-6 md:p-8 flex flex-col justify-between cursor-default shadow-sm transition-all duration-300 hover:shadow-[0_0_40px_-10px_var(--card-shadow)] hover:border-white/40 ${service.classes}`}
                         >
-                            {/* Fondo con imagen */}
+                            {/* Media Layer: Background Image */}
                             <div className="absolute inset-0 z-0 overflow-hidden">
                                 <Image
                                     src={service.image}
@@ -56,7 +55,8 @@ export function ServicesBento({ services, animations }: Readonly<ServicesBentoPr
                                     sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
                                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                                 />
-                                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent pointer-events-none transition-opacity duration-300 group-hover:opacity-60" />
+                                {/* Gradient Overlays */}
+                                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none transition-opacity duration-300 group-hover:opacity-60" />
                             </div>
 
                             {/* Contenedor del ícono */}

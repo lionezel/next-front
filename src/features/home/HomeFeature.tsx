@@ -1,14 +1,13 @@
 "use client";
 
-import React from "react";
 import Navbar from "@/src/components/ui/Navbar";
 import Footer from "@/src/components/ui/Footer";
 import Hero from "@/src/components/ui/Hero";
-import Strengths from "@/src/components/ui/Strengths";
 import { Floating } from "@/src/components/ui/Floating";
 
 import { AlliesSection } from "./components/sections/allies-section";
 import { ServicesBento } from "./components/ServicesBento";
+import { ArchitectureSection } from "./components/ArchitectureSection";
 
 import { useHomeAnimations } from "./hooks/useHomeAnimations";
 import { services } from "./services/skills-data";
@@ -26,10 +25,9 @@ export default function HomeFeature() {
                 {/* Allies/Partners Marquee */}
                 <AlliesSection />
 
-                {/* Value Propositions / Strengths */}
-                <Strengths />
+                <ArchitectureSection animations={animations} />
 
-                {/* Services Bento Grid (Dumb Component) */}
+                {/* Services Bento Grid (Core Experience) */}
                 <ServicesBento 
                     services={services} 
                     animations={animations} 
