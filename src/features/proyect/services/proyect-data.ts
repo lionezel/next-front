@@ -7,6 +7,7 @@ export const projectsData: Project[] = [
         subtitle: "Ecosistema Digital Turístico",
         description: "Restabar es un restaurante, el cual se acerco a nosotros con la necesidad de optimizar tiempo en la gestion de sus pedidos. en el transcurso de la realizacion de su software tambien vimos la necesidad de tener una mayor claridad en cuanto a el orden de su inventario y las metricas de su negocio. Por lo cual decidimos crear un software que permitiera gestionar los pedidos, el inventario y sus metricas. mas a detalle nuestro software tiene unos puntos claves: tiene conctividad inalambrica la cual permitia realizar pedidos desde un dispositivo movil y la comanda se imprimiera de forma automaticca en cocina, aparte de eso tiene un dashboard que permite ver las metricas de su negocio en tiempo real. cabe recalcar que cada parte del software fue hecho a medida milimetrica de la necesidad de nuestro cliente.    Tu comodidad es nuestra PRIORIdad.",
         heroImage: "/projects/centus-hero.jpg",
+        vanguardImage: "/projects/restabar-vanguard.png",
         logo: "/logos/restabar.png",
         techStack: [
             { name: "Nextjs", icon: "Nextjs", category: "Frontend" },
@@ -40,7 +41,7 @@ export const projectsData: Project[] = [
         },
         design: {
             description: "Un sistema de diseño impresionante que combina elegancia, funcionalidad y modernidad. Basado en Material Design con una sinergia de colores única que ofrece una experiencia de usuario humana y fluida.",
-            palette: ["#6943CB", "#ae0b8e", "#205EA9", "#f3f4f6"],
+            palette: ["#f7d4b2", "#6a544b", "#ffffff"],
             screenshots: [
                 "/projects/centus-ss1.jpg",
                 "/projects/centus-ss2.jpg",
@@ -54,6 +55,7 @@ export const projectsData: Project[] = [
         subtitle: "Plataforma de Medios Digitales",
         description: "IMPACTO es una perfumeria, la cual se acerco a nosotros con la necesidad principal de exponer de mejor manera su negocio en la web. Por lo cual decidimos crear un software tipo e-commerce que permitiera gestionar su inventario y ventas de forma online.",
         heroImage: "/projects/telecafe-hero.jpg",
+        vanguardImage: "/projects/impacto-vanguard.png",
         logo: "/logos/impacto.png",
         techStack: [
             { name: "Next.js", icon: "Next", category: "Frontend" },
@@ -88,7 +90,7 @@ export const projectsData: Project[] = [
         },
         design: {
             description: "Una interfaz vibrante que refleja la identidad cultural del Eje Cafetero. Uso de colores tierra combinados con una tipografía moderna y una disposición de elementos tipo 'Newsroom' que facilita el consumo de información.",
-            palette: ["#8B4513", "#D2691E", "#F4A460", "#ffffff"],
+            palette: ["#3b3a38", "#f5f3ef"],
             screenshots: [
                 "/projects/telecafe-ss1.jpg",
                 "/projects/telecafe-ss2.jpg"

@@ -52,25 +52,72 @@ export function ServicesSection({ sectionVariants, servicesContainerVariants, se
 
                             {/* Contenedor del ícono estructurado en capas - Agregado relative z-10 */}
                             <div className="relative z-10 flex items-center gap-4">
-                                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:text-white">
+                                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl text-2xl transition-all duration-500 group-hover:text-white">
                                     {/* Capa 1: Glassmorphism base */}
-                                    <div className="absolute inset-0 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 transition-opacity duration-300 group-hover:opacity-0 shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
+                                    <div className="absolute inset-0 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 transition-all duration-500 group-hover:opacity-0 shadow-[0_4px_15px_rgba(0,0,0,0.1)]" />
 
-                                    {/* Capa 2: Gradiente de color en hover */}
-                                    <div className={`absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br ${service.hoverGradient} shadow-[0_0_20px_var(--card-shadow)]`} />
+                                    {/* Capa 2: Gradiente de color en hover con efecto de pulso */}
+                                    <motion.div 
+                                        className={`absolute inset-0 rounded-2xl opacity-0 bg-gradient-to-br ${service.hoverGradient}`}
+                                        variants={{
+                                            hover: { 
+                                                opacity: 1,
+                                                scale: 1.1,
+                                                boxShadow: `0 0 25px ${service.hoverShadow}`,
+                                                transition: { duration: 0.4 }
+                                            }
+                                        }}
+                                    />
 
-                                    {/* Ícono de Lucide */}
-                                    <div className="relative z-10 text-white">
+                                    {/* Ícono animado */}
+                                    <motion.div 
+                                        className="relative z-10 text-white flex items-center justify-center"
+                                        variants={{
+                                            hidden: { scale: 1, rotate: 0 },
+                                            show: { 
+                                                scale: 1, 
+                                                rotate: 0,
+                                                transition: { duration: 0.5 }
+                                            },
+                                            hover: { 
+                                                scale: 1.25,
+                                                rotate: [0, -10, 10, 0],
+                                                filter: "drop-shadow(0 0 8px rgba(255,255,255,0.8))",
+                                                transition: { 
+                                                    rotate: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+                                                    scale: { duration: 0.3 }
+                                                }
+                                            }
+                                        }}
+                                    >
                                         {service.icon}
-                                    </div>
+                                    </motion.div>
+
+                                    {/* Partículas de brillo en hover (Efecto extra) */}
+                                    <motion.div 
+                                        className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-40"
+                                        variants={{
+                                            hover: {
+                                                opacity: 0.4,
+                                                scale: [1, 1.2, 1],
+                                                transition: { repeat: Infinity, duration: 2 }
+                                            }
+                                        }}
+                                        style={{ background: `radial-gradient(circle, ${service.hoverShadow} 0%, transparent 70%)` }}
+                                    />
                                 </div>
 
                                 {/* Insignia al lado del ícono */}
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-300/80 leading-none mb-1 drop-shadow-md">
+                                    <motion.span 
+                                        className="text-[10px] uppercase tracking-[0.2em] font-black text-white/90 leading-none mb-1 drop-shadow-md"
+                                        variants={{
+                                            hover: { x: 2, color: "#fff", transition: { duration: 0.3 } }
+                                        }}
+                                    >
                                         Premium
-                                    </span>
-                                    <span className="text-[11px] uppercase tracking-[0.15em] font-semibold text-white leading-none drop-shadow-md">
+                                    </motion.span>
+                                    <span className="text-[11px] uppercase tracking-[0.15em] font-semibold text-white/60 leading-none group-hover:text-white transition-colors duration-300">
                                         Prioritech
                                     </span>
                                 </div>

@@ -19,41 +19,61 @@ export default function DesignSection({ project }: { project: Project }) {
                             <h2 className="text-4xl font-extrabold tracking-tight mb-8">
                                 Diseño con Propósito & <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">UI/UX Humana.</span>
                             </h2>
-                            <p className="text-zinc-400 text-lg leading-relaxed mb-10">
+                            <p className="text-zinc-400 text-lg leading-relaxed mb-12 max-w-xl">
                                 {project.design.description}
                             </p>
 
-                            <div className="flex flex-wrap gap-8">
+                            <div className="flex flex-wrap gap-12">
                                 {project.design.palette.map((color, colorIdx) => (
-                                    <div key={colorIdx} className="flex flex-col items-center gap-3">
+                                    <motion.div 
+                                        key={colorIdx} 
+                                        className="flex flex-col items-center gap-4 group/color"
+                                        whileHover={{ y: -5 }}
+                                    >
                                         <div
-                                            className="w-12 h-12 rounded-full border border-white/10 shadow-lg"
-                                            style={{ backgroundColor: color }}
+                                            className="w-16 h-16 rounded-full border-4 border-white/5 shadow-2xl transition-transform duration-300 group-hover/color:scale-110"
+                                            style={{ backgroundColor: color, boxShadow: `0 10px 30px -10px ${color}80` }}
                                         />
-                                        <span className="text-[10px] font-mono text-zinc-500 uppercase">{color}</span>
-                                    </div>
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-[10px] font-bold font-mono text-zinc-400 tracking-tighter mb-1 uppercase">Primary Tone</span>
+                                            <span className="text-xs font-mono text-white/60 uppercase">{color}</span>
+                                        </div>
+                                    </motion.div>
                                 ))}
                             </div>
                         </motion.div>
                     </div>
 
-                    <div className="w-full md:w-1/2 relative group">
+                    <div className="w-full md:w-1/2 relative">
                         <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                            className="relative z-10 rounded-[2.5rem] overflow-hidden border border-white/10 shadow-[0_0_80px_-20px_rgba(105,67,203,0.3)] bg-zinc-900 aspect-video flex items-center justify-center p-12"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            className="relative z-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900/50 backdrop-blur-3xl aspect-square flex items-center justify-center p-16"
                         >
-                            {/* Mockup Placeholder */}
-                            <div className="text-center">
-                                <div className="inline-block p-4 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 mb-6">
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="w-12 h-2 rounded bg-primary/50" />
-                                        <div className="w-8 h-2 rounded bg-zinc-700" />
-                                        <div className="w-16 h-2 rounded bg-secondary/50" />
-                                    </div>
-                                </div>
-                                <p className="text-sm font-medium text-zinc-500">Visual Capture System Active</p>
-                            </div>
+                            {/* Branding Focus */}
+                            <motion.div 
+                                animate={{ 
+                                    y: [0, -10, 0],
+                                    rotate: [0, 2, 0]
+                                }}
+                                transition={{ 
+                                    duration: 6,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="relative w-full h-full flex items-center justify-center"
+                            >
+                                <img 
+                                    src={project.logo} 
+                                    alt={project.title} 
+                                    className="max-w-[70%] max-h-[70%] object-contain filter drop-shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                                />
+                            </motion.div>
+                            
+                            {/* Decorative Elements */}
+                            <div className="absolute top-10 right-10 w-20 h-20 bg-primary/20 blur-3xl rounded-full"></div>
+                            <div className="absolute bottom-10 left-10 w-32 h-32 bg-secondary/10 blur-3xl rounded-full"></div>
                         </motion.div>
 
                         <div className="absolute -inset-4 bg-primary/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />

@@ -22,15 +22,12 @@ export default function HomeFeature() {
                 {/* Hero Section */}
                 <Hero />
 
-                {/* Allies/Partners Marquee */}
-                <AlliesSection />
-
                 <ArchitectureSection animations={animations} />
 
                 {/* Services Bento Grid (Core Experience) */}
-                <ServicesBento 
-                    services={services} 
-                    animations={animations} 
+                <ServicesBento
+                    services={services}
+                    animations={animations}
                 />
             </main>
             <Floating />

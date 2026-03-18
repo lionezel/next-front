@@ -4,6 +4,7 @@ export interface Project {
     subtitle: string;
     description: string;
     heroImage: string;
+    vanguardImage: string;
     logo: string;
     techStack: {
         name: string;
