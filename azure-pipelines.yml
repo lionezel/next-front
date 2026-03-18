@@ -17,5 +17,5 @@ extends:
     secretFileName: "prioritech-front-secret.yaml"
     deploymentType: "frontend"
     backendAppName: "prioritech-backend"
-    subdomain: "prioritech"
+    #subdomain: "prioritech"
     namespace: "prioritech"
