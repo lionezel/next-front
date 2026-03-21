@@ -8,7 +8,7 @@ import { Home, Zap, Rocket } from "lucide-react";
 const navLinks = [
     { href: "/", label: "Inicio", icon: Home },
     { href: "/services", label: "Servicios", icon: Zap },
-    { href: "/proyect/restabar", label: "Proyectos", icon: Rocket },
+    { href: "/proyect", label: "Proyectos", icon: Rocket },
 ];
 
 export default function Navbar() {
