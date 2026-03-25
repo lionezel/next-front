@@ -34,6 +34,8 @@ export default function Footer() {
                         <ul className="space-y-4 text-zinc-600">
                             <li>Restabar la bello</li>
                             <li>Impacto</li>
+                            <li>Colores de vida</li>
+                            <li>Ensamblicol</li>
                         </ul>
                     </div>
 
@@ -42,9 +44,9 @@ export default function Footer() {
                             Redes
                         </h4>
                         <div className="flex gap-4">
-                            <a 
-                                href="https://www.instagram.com/prioritech.co/" 
-                                target="_blank" 
+                            <a
+                                href="https://www.instagram.com/prioritech.co/"
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-all hover:bg-primary hover:text-white hover:scale-110"
                             >
