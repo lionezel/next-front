@@ -69,7 +69,7 @@ export default function Hero() {
 
                         {/* CTAs */}
                         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
-                            <a href="https://wa.me/573053617422" target="_blank" rel="noopener noreferrer"
+                            <a href="https://wa.me/573052165507" target="_blank" rel="noopener noreferrer"
                                 className="group relative overflow-hidden rounded-full bg-zinc-950 px-7 py-4 text-sm sm:text-base font-semibold text-white shadow-xl transition-all hover:scale-105 active:scale-95 text-center">
                                 <span className="absolute inset-0 bg-gradient-to-r from-primary/80 to-secondary/80 opacity-0 transition-opacity group-hover:opacity-100" />
                                 <span className="relative flex items-center justify-center gap-2">
@@ -85,7 +85,6 @@ export default function Hero() {
                         <motion.div variants={itemVariants}
                             className="flex justify-center gap-6 pt-2 lg:hidden">
                             {[
-                                { value: "4", label: "Proyectos" },
                                 { value: "5★", label: "Calificación" },
                                 { value: "24h", label: "Respuesta" },
                             ].map((stat) => (

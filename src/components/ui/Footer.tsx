@@ -45,7 +45,7 @@ export default function Footer() {
                         </h4>
                         <div className="flex gap-4">
                             <a
-                                href="https://www.instagram.com/prioritech.co/"
+                                href="https://www.instagram.com/priori.tech?igsh=MTN2OTFueGpueGloeA%3D%3D&utm_source=qr"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-all hover:bg-primary hover:text-white hover:scale-110"

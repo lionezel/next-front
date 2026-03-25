@@ -12,7 +12,7 @@ const navLinks = [
 ];
 
 const SOCIAL_LINKS = [
-    { href: "https://www.instagram.com/prioritech.co/", label: "Instagram", icon: Instagram },
+    { href: "https://www.instagram.com/priori.tech?igsh=MTN2OTFueGpueGloeA%3D%3D&utm_source=qr", label: "Instagram", icon: Instagram },
 ];
 
 export default function Navbar() {
@@ -47,14 +47,14 @@ export default function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
-                        
+
                         <div className="flex items-center gap-6 pl-4 border-l border-zinc-200">
                             {SOCIAL_LINKS.map((social) => (
                                 <a key={social.href} href={social.href} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-primary transition-colors hover:scale-110">
                                     <social.icon size={20} strokeWidth={2} />
                                 </a>
                             ))}
-                            <a href="https://wa.me/573053617422" target="_blank" rel="noopener noreferrer"
+                            <a href="https://wa.me/573052165507" target="_blank" rel="noopener noreferrer"
                                 className="rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg active:scale-95">
                                 Hablemos
                             </a>
@@ -170,7 +170,7 @@ export default function Navbar() {
 
                             {/* CTA */}
                             <div className="relative px-4 pb-8">
-                                <motion.a href="https://wa.me/573053617422" target="_blank" rel="noopener noreferrer"
+                                <motion.a href="https://wa.me/573052165507" target="_blank" rel="noopener noreferrer"
                                     onClick={() => setIsMenuOpen(false)}
                                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
                                     className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-primary to-secondary px-6 py-4 text-base font-bold text-white shadow-[0_0_40px_-10px_rgba(105,67,203,0.3)] transition-all hover:shadow-[0_0_50px_-5px_rgba(105,67,203,0.5)] hover:scale-[1.02] active:scale-[0.98]">

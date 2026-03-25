@@ -1,7 +1,7 @@
 export function Floating() {
     return (
         <a
-            href="https://wa.me/573053617422"
+            href="https://wa.me/573052165507"
             target="_blank"
             rel="noopener noreferrer"
             className="fixed bottom-6 right-6 z-40 flex md:hidden h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary shadow-[0_0_30px_-4px_rgba(105,67,203,0.7)] transition-all hover:scale-110 active:scale-95"
