@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Instagram } from "lucide-react";
 
 export default function Footer() {
     return (
@@ -19,12 +20,10 @@ export default function Footer() {
                             Servicios
                         </h4>
                         <ul className="space-y-4 text-zinc-600">
-                            <li>Páginas Web</li>
-                            <li>Aplicaciones Móviles</li>
-                            <li>Soporte y gestión Cloud</li>
-                            <li>Sistemas de información</li>
-                            <li>Ciberseguridad</li>
-                            <li>QA | Testeo</li>
+                            <li>Adaptabilidad Total</li>
+                            <li>Optimización y Eficiencia</li>
+                            <li>Desarrollo a Medida</li>
+                            <li>Soporte Experto 24/7</li>
                         </ul>
                     </div>
 
@@ -43,12 +42,14 @@ export default function Footer() {
                             Redes
                         </h4>
                         <div className="flex gap-4">
-                            {/* Dummy social icons */}
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 transition-colors hover:bg-primary hover:text-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /></svg>
-                                </div>
-                            ))}
+                            <a 
+                                href="https://www.instagram.com/prioritech.co/" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-all hover:bg-primary hover:text-white hover:scale-110"
+                            >
+                                <Instagram size={20} />
+                            </a>
                         </div>
                     </div>
                 </div>

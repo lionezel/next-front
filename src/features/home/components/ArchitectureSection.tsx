@@ -91,7 +91,7 @@ export function ArchitectureSection({ animations }: ArchitectureSectionProps) {
                     </motion.div>
 
                     {/* Gráfico Animado (Derecha) */}
-                    <div className="relative">
+                    <div className="relative hidden lg:block">
                         <div className="absolute inset-0 bg-primary/20 blur-[120px] rounded-full opacity-30 transform scale-150 animate-pulse" />
                         <div className="relative z-10 w-full aspect-square border-2 border-dashed border-zinc-200 rounded-[3rem] overflow-hidden bg-white/50 backdrop-blur-sm p-4">
                             <CloudTopologyVisual />

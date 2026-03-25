@@ -79,16 +79,13 @@ export default function Hero() {
                                     </svg>
                                 </span>
                             </a>
-                            <button className="flex items-center justify-center rounded-full border-2 border-zinc-200 bg-transparent px-7 py-4 text-sm sm:text-base font-semibold text-zinc-900 transition-all hover:border-primary/40 hover:bg-zinc-50 hover:shadow-lg active:scale-95">
-                                Explorar Portafolio
-                            </button>
                         </motion.div>
 
                         {/* ── Mobile-only mini stats strip ── */}
                         <motion.div variants={itemVariants}
                             className="flex justify-center gap-6 pt-2 lg:hidden">
                             {[
-                                { value: "50+", label: "Proyectos" },
+                                { value: "4", label: "Proyectos" },
                                 { value: "5★", label: "Calificación" },
                                 { value: "24h", label: "Respuesta" },
                             ].map((stat) => (

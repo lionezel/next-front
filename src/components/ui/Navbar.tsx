@@ -3,12 +3,16 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Zap, Rocket } from "lucide-react";
+import { Home, Zap, Rocket, Instagram } from "lucide-react";
 
 const navLinks = [
     { href: "/", label: "Inicio", icon: Home },
     { href: "/services", label: "Servicios", icon: Zap },
     { href: "/proyect", label: "Proyectos", icon: Rocket },
+];
+
+const SOCIAL_LINKS = [
+    { href: "https://www.instagram.com/prioritech.co/", label: "Instagram", icon: Instagram },
 ];
 
 export default function Navbar() {
@@ -39,14 +43,22 @@ export default function Navbar() {
                     {/* Desktop Nav */}
                     <div className="hidden items-center gap-8 md:flex">
                         {navLinks.map((link) => (
-                            <Link key={link.href} href={link.href} className="text-sm font-medium transition-colors hover:text-primary">
+                            <Link key={link.href} href={link.href} className="text-sm font-medium transition-colors hover:text-primary text-zinc-600">
                                 {link.label}
                             </Link>
                         ))}
-                        <a href="https://wa.me/573053617422" target="_blank" rel="noopener noreferrer"
-                            className="rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg active:scale-95">
-                            Hablemos
-                        </a>
+                        
+                        <div className="flex items-center gap-6 pl-4 border-l border-zinc-200">
+                            {SOCIAL_LINKS.map((social) => (
+                                <a key={social.href} href={social.href} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-primary transition-colors hover:scale-110">
+                                    <social.icon size={20} strokeWidth={2} />
+                                </a>
+                            ))}
+                            <a href="https://wa.me/573053617422" target="_blank" rel="noopener noreferrer"
+                                className="rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg active:scale-95">
+                                Hablemos
+                            </a>
+                        </div>
                     </div>
 
                     {/* Hamburger */}
@@ -105,7 +117,7 @@ export default function Navbar() {
                             </div>
 
                             {/* Nav links */}
-                            <nav className="relative flex flex-col gap-1 px-4 py-6 flex-1">
+                            <nav className="relative flex flex-col gap-1 px-4 py-6">
                                 <p className="px-3 mb-3 text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-semibold">Navegación</p>
                                 {navLinks.map((link, i) => (
                                     <motion.div key={link.href} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 + 0.05 }}>
@@ -126,6 +138,20 @@ export default function Navbar() {
                                     </motion.div>
                                 ))}
                             </nav>
+
+                            {/* Social Area */}
+                            <div className="px-4 py-4 mt-auto">
+                                <p className="px-3 mb-4 text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-semibold">Nuestras Redes</p>
+                                <div className="flex gap-4 px-3">
+                                    {SOCIAL_LINKS.map((social, i) => (
+                                        <motion.a key={social.href} href={social.href} target="_blank" rel="noopener noreferrer"
+                                            initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.1 }}
+                                            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-50 border border-zinc-200 text-zinc-500 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all">
+                                            <social.icon size={22} strokeWidth={2} />
+                                        </motion.a>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* Status widget */}
                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}

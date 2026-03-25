@@ -98,11 +98,11 @@ export const projectsData: Project[] = [
     {
         id: "coloresdevidac3",
         title: "Colores de Vida",
-        subtitle: "Ecosistema Digital Turístico",
+        subtitle: "Restaurante y museo cultural",
         description: "Restabar es un restaurante, el cual se acerco a nosotros con la necesidad de optimizar tiempo en la gestion de sus pedidos. en el transcurso de la realizacion de su software tambien vimos la necesidad de tener una mayor claridad en cuanto a el orden de su inventario y las metricas de su negocio. Por lo cual decidimos crear un software que permitiera gestionar los pedidos, el inventario y sus metricas. mas a detalle nuestro software tiene unos puntos claves: tiene conctividad inalambrica la cual permitia realizar pedidos desde un dispositivo movil y la comanda se imprimiera de forma automaticca en cocina, aparte de eso tiene un dashboard que permite ver las metricas de su negocio en tiempo real. cabe recalcar que cada parte del software fue hecho a medida milimetrica de la necesidad de nuestro cliente.    Tu comodidad es nuestra PRIORIdad.",
         heroImage: "/projects/coloresdevidac3-hero.png",
         vanguardImage: "/projects/coloresdevidac3-hero.png",
-        logo: "/logos/restabar.png",
+        logo: "/logos/coloresdevida.png",
         techStack: [
             { name: "Nextjs", icon: "Nextjs", category: "Frontend" },
             { name: "Tailwind", icon: "Tailwind", category: "Styling" },
@@ -134,7 +134,7 @@ export const projectsData: Project[] = [
         },
         design: {
             description: "Un sistema de diseño impresionante que combina elegancia, funcionalidad y modernidad. Basado en Material Design con una sinergia de colores única que ofrece una experiencia de usuario humana y fluida.",
-            palette: ["#f7d4b2", "#6a544b", "#ffffff"],
+            palette: ["#feb50e", "#fc0316", "#fdfcfe"],
             screenshots: [
                 "/projects/centus-ss1.jpg",
                 "/projects/centus-ss2.jpg",
@@ -145,11 +145,11 @@ export const projectsData: Project[] = [
     {
         id: "ensamblicol",
         title: "Ensamblicol",
-        subtitle: "Ecosistema Digital Turístico",
-        description: "Restabar es un restaurante, el cual se acerco a nosotros con la necesidad de optimizar tiempo en la gestion de sus pedidos. en el transcurso de la realizacion de su software tambien vimos la necesidad de tener una mayor claridad en cuanto a el orden de su inventario y las metricas de su negocio. Por lo cual decidimos crear un software que permitiera gestionar los pedidos, el inventario y sus metricas. mas a detalle nuestro software tiene unos puntos claves: tiene conctividad inalambrica la cual permitia realizar pedidos desde un dispositivo movil y la comanda se imprimiera de forma automaticca en cocina, aparte de eso tiene un dashboard que permite ver las metricas de su negocio en tiempo real. cabe recalcar que cada parte del software fue hecho a medida milimetrica de la necesidad de nuestro cliente.    Tu comodidad es nuestra PRIORIdad.",
+        subtitle: "empresa dedicada a el blindaje vehicular",
+        description: "ensamblicol es una empresa Costa ricense dedicada a la instalacion y fabricacion de blindaje, se acerco a nosotros con la necesidad principl de cubrir incomodades que tenian en cuanto a su inventario y registo de ventas. le hicimos un sistema operativo en el cual llevan un registro especifico por producto y el cual se puede modificar por medio de un comando de voz, aparte le hicimos un sistema de supervcion en cuanto a tiempo trata por trabajador para asi tener datos reales en cuant ala eficiencia en operacion.",
         heroImage: "/projects/ensamblicol-hero.png",
         vanguardImage: "/projects/ensamblicol-hero.png",
-        logo: "/logos/restabar.png",
+        logo: "/logos/ensamblicol2.png",
         techStack: [
             { name: "Nextjs", icon: "Nextjs", category: "Frontend" },
             { name: "Tailwind", icon: "Tailwind", category: "Styling" },
@@ -181,7 +181,7 @@ export const projectsData: Project[] = [
         },
         design: {
             description: "Un sistema de diseño impresionante que combina elegancia, funcionalidad y modernidad. Basado en Material Design con una sinergia de colores única que ofrece una experiencia de usuario humana y fluida.",
-            palette: ["#f7d4b2", "#6a544b", "#ffffff"],
+            palette: ["#050a26", "#041d3e", "#ff9206"],
             screenshots: [
                 "/projects/centus-ss1.jpg",
                 "/projects/centus-ss2.jpg",
