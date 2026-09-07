@@ -1,155 +1,191 @@
 "use client";
 
-import { motion, Variants } from "framer-motion";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import {
+  ShieldCheck,
+  Sparkles,
+  ArrowRight,
+  Calculator,
+  Truck,
+  Layers,
+  Award,
+  CheckCircle2,
+} from "lucide-react";
+import { COMPANY_INFO } from "@/src/data/uniforms-data";
 
 export default function Hero() {
-    const containerVariants: Variants = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.18, delayChildren: 0.1 }
-        }
-    };
+  const quickBadges = [
+    { icon: ShieldCheck, text: "Telas de Alta Durabilidad" },
+    { icon: Sparkles, text: "Bordado Computarizado HD" },
+    { icon: Truck, text: "Despachos a Toda Colombia" },
+    { icon: Award, text: "Precios Mayoristas de Fábrica" },
+  ];
 
-    const itemVariants: Variants = {
-        hidden: { opacity: 0, y: 30 },
-        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 12 } }
-    };
+  return (
+    <section className="relative min-h-[90vh] pt-28 lg:pt-36 pb-16 overflow-hidden bg-white text-slate-900 flex items-center border-b border-slate-100">
+      {/* Background Subtle Grid Texture */}
+      <div className="absolute inset-0 bg-[radial-gradient(#CBD5E1_1px,transparent_1px)] [background-size:28px_28px] opacity-40 pointer-events-none" />
+      
+      {/* Ambient Lighting Orbs */}
+      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#1B3A6B]/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-0 w-96 h-96 bg-amber-100/40 rounded-full blur-[160px] pointer-events-none" />
 
-    return (
-        <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-white pt-20 pb-10">
-            {/* Architectural Grid */}
-            <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-
-            {/* Glowing Orbs */}
-            <motion.div
-                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/4 -left-20 h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] rounded-full bg-primary/20 blur-[100px]"
-            />
-            <motion.div
-                animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute bottom-0 right-0 h-[350px] w-[350px] sm:h-[600px] sm:w-[600px] rounded-full bg-secondary/20 blur-[120px]"
-            />
-
-            <div className="container relative z-10 px-6 lg:px-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-
-                    {/* Content column – centered on mobile */}
-                    <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="show"
-                        className="space-y-7 text-center lg:text-left"
-                    >
-                        {/* Badge */}
-                        <motion.div variants={itemVariants} className="inline-flex items-center rounded-full border border-zinc-200 bg-white/60 backdrop-blur-md px-4 py-2 text-xs sm:text-sm font-medium text-zinc-800 shadow-sm gap-3">
-                            <span className="relative flex h-2.5 w-2.5 shrink-0">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-                            </span>
-                            Fábrica de Desarrollo & IA Avanzada
-                        </motion.div>
-
-                        {/* Headline */}
-                        <motion.h1 variants={itemVariants}
-                            className="text-[2.6rem] font-extrabold leading-[1.1] tracking-tight text-zinc-900 sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[1.05]">
-                            Transformamos Ideas en{" "}
-                            <span className="bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent">
-                                Código de Alto Valor
-                            </span>
-                        </motion.h1>
-
-                        {/* Sub */}
-                        <motion.p variants={itemVariants}
-                            className="mx-auto max-w-lg text-base leading-relaxed text-zinc-500 sm:text-lg md:text-xl lg:mx-0">
-                            Construimos plataformas digitales robustas, escalables y seguras. Somos tu socio tecnológico estratégico.
-                        </motion.p>
-
-                        {/* CTAs */}
-                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
-                            <a href="https://wa.me/573052165507" target="_blank" rel="noopener noreferrer"
-                                className="group relative overflow-hidden rounded-full bg-zinc-950 px-7 py-4 text-sm sm:text-base font-semibold text-white shadow-xl transition-all hover:scale-105 active:scale-95 text-center">
-                                <span className="absolute inset-0 bg-gradient-to-r from-primary/80 to-secondary/80 opacity-0 transition-opacity group-hover:opacity-100" />
-                                <span className="relative flex items-center justify-center gap-2">
-                                    Iniciar un Proyecto
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-1">
-                                        <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                                    </svg>
-                                </span>
-                            </a>
-                        </motion.div>
-
-                        {/* ── Mobile-only mini stats strip ── */}
-                        <motion.div variants={itemVariants}
-                            className="flex justify-center gap-6 pt-2 lg:hidden">
-                            {[
-                                { value: "5★", label: "Calificación" },
-                                { value: "24h", label: "Respuesta" },
-                            ].map((stat) => (
-                                <div key={stat.label} className="flex flex-col items-center">
-                                    <span className="text-xl font-extrabold text-zinc-900">{stat.value}</span>
-                                    <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-medium">{stat.label}</span>
-                                </div>
-                            ))}
-                        </motion.div>
-                    </motion.div>
-
-                    {/* Right Column - Tech Visual (desktop only) */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                        transition={{ duration: 1, type: "spring", bounce: 0.4 }}
-                        className="relative hidden lg:block"
-                    >
-                        <div className="relative w-full aspect-square max-w-[500px] ml-auto">
-                            {/* Glass Panel 1 */}
-                            <motion.div
-                                animate={{ y: [0, -20, 0] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-10 right-10 z-20 h-64 w-64 rounded-2xl border border-white/40 bg-white/20 p-6 backdrop-blur-xl shadow-2xl"
-                            >
-                                <div className="space-y-4">
-                                    <div className="h-4 w-1/3 rounded-full bg-primary/40" />
-                                    <div className="h-4 w-3/4 rounded-full bg-zinc-200" />
-                                    <div className="h-4 w-1/2 rounded-full bg-zinc-200" />
-                                    <div className="mt-8 flex gap-2">
-                                        <div className="h-12 w-12 rounded-lg bg-secondary/20" />
-                                        <div className="h-12 w-12 rounded-lg bg-primary/20" />
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                            <motion.div
-                                animate={{ y: [0, 20, 0] }}
-                                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                                className="absolute bottom-10 left-0 z-10 h-72 w-64 rounded-2xl border border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 p-6 backdrop-blur-lg shadow-xl"
-                            >
-                                <div className="flex flex-col h-full justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-3 w-3 rounded-full bg-green-400" />
-                                        <div className="text-xs font-mono text-zinc-500">system_status: optimal</div>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <div className="h-2 w-full rounded-full bg-white/50" />
-                                        <div className="h-2 w-full rounded-full bg-white/50 overflow-hidden">
-                                            <motion.div animate={{ width: ["0%", "100%", "0%"] }} transition={{ duration: 3, repeat: Infinity }} className="h-full bg-primary" />
-                                        </div>
-                                        <div className="h-2 w-4/5 rounded-full bg-white/50" />
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                            {/* Central Sphere */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                                    className="h-48 w-48 rounded-full bg-gradient-to-tr from-primary to-secondary blur-md opacity-60" />
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
+      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          {/* Left Column: Headline & Value Proposition */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="lg:col-span-7 space-y-7 text-center lg:text-left"
+          >
+            {/* Trust Pill */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 shadow-sm mx-auto lg:mx-0">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1B3A6B] opacity-80" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1B3A6B]" />
+              </span>
+              <span>Dotaciones Empresariales & Confección Textil</span>
             </div>
-        </section>
-    );
+
+            {/* Main Headline */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.12] text-slate-900">
+              Uniformes que Proyectan{" "}
+              <span className="bg-gradient-to-r from-[#142D55] via-[#1B3A6B] to-[#142D55] bg-clip-text text-transparent">
+                Seguridad, Identidad y Calidad
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Dotación integral para el sector industrial, administrativo, salud y alimentos. Confección en telas certificadas de alta durabilidad (Lafayette, Dril pesado, Antifluido) con bordado computarizado de precisión.
+            </p>
+
+            {/* CTA Group */}
+            <div className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start pt-2">
+              <a
+                href="#cotizador"
+                className="group inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-[#1B3A6B] hover:bg-[#2557A7] text-white font-extrabold text-sm sm:text-base shadow-lg shadow-[#1B3A6B]/25 hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <Calculator size={18} />
+                <span>Cotizar Pedido en Línea</span>
+                <ArrowRight
+                  size={16}
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              </a>
+
+              <a
+                href="#simulador-3d"
+                className="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl bg-gradient-to-r from-slate-900 via-[#1B3A6B] to-slate-900 hover:from-slate-800 hover:to-[#2557A7] text-white font-extrabold text-sm sm:text-base shadow-md transition-all hover:-translate-y-0.5 border border-slate-700/80"
+              >
+                <Sparkles size={17} className="text-amber-400 animate-pulse" />
+                <span>Simulador 3D</span>
+              </a>
+
+              <a
+                href="#catalogo"
+                className="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-sm sm:text-base transition-all hover:-translate-y-0.5 shadow-xs"
+              >
+                <Layers size={17} className="text-[#1B3A6B]" />
+                <span>Ver Catálogo</span>
+              </a>
+            </div>
+
+            {/* Feature Highlights Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+              {quickBadges.map((badge, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm"
+                >
+                  <badge.icon size={15} className="text-[#1B3A6B] shrink-0" />
+                  <span className="leading-tight text-left">{badge.text}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Right Column: Hero Visual Showcase */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="lg:col-span-5 relative"
+          >
+            <div className="relative mx-auto max-w-[500px] lg:max-w-none">
+              {/* Main Card Frame */}
+              <div className="relative rounded-3xl overflow-hidden border-2 border-slate-200 shadow-2xl shadow-slate-300/50 bg-white group">
+                <div className="relative aspect-[4/3] w-full">
+                  <Image
+                    src="/images/hero/hero-banner.jpg"
+                    alt="Dotación de uniformes industriales Distripako"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                </div>
+
+                {/* Overlay Card Details */}
+                <div className="absolute bottom-0 inset-x-0 p-5 bg-white/95 backdrop-blur-md border-t border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider text-[#1B3A6B] font-bold">
+                        Garantía de Fábrica
+                      </p>
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900">
+                        Confección & Bordado Directo
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        <CheckCircle2 size={12} /> Stock Disponible
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Stat Widget Top Left */}
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-6 -left-4 sm:-left-6 bg-white text-slate-900 p-3.5 sm:p-4 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 z-20"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-[#1B3A6B] border border-amber-200/60">
+                  <Award size={22} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 font-medium">Experiencia</p>
+                  <p className="text-base font-extrabold text-slate-900 leading-none mt-0.5">
+                    {COMPANY_INFO.experienceYears} Años en el Mercado
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Floating Stat Widget Bottom Right */}
+              <motion.div
+                animate={{ y: [0, 6, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute -bottom-6 -right-4 sm:-right-6 bg-white text-slate-900 p-3.5 sm:p-4 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 z-20"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50 text-[#1B3A6B] border border-slate-200">
+                  <Sparkles size={22} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 font-medium">Producción</p>
+                  <p className="text-base font-extrabold text-slate-900 leading-none mt-0.5">
+                    {COMPANY_INFO.deliveredUniforms} Prendas
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
 }

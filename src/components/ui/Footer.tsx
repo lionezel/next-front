@@ -1,67 +1,132 @@
+"use client";
+
 import Link from "next/link";
-import { Instagram } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, ShieldCheck, Heart } from "lucide-react";
+import DistripakoLogo from "./DistripakoLogo";
+import { COMPANY_INFO, CATEGORIES } from "@/src/data/uniforms-data";
 
 export default function Footer() {
-    return (
-        <footer className="border-t border-zinc-200 bg-white pt-16 pb-8">
-            <div className="container mx-auto px-6 lg:px-12">
-                <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="space-y-6 lg:col-span-1">
-                        <Link href="/" className="text-2xl font-bold tracking-tighter text-primary">
-                            Priori<span className="text-secondary">Tech</span>
-                        </Link>
-                        <p className="text-zinc-600">
-                            Soluciones innovadoras en IA y desarrollo de software a medida para impulsar tu negocio al siguiente nivel.
-                        </p>
-                    </div>
-
-                    <div>
-                        <h4 className="mb-6 font-bold uppercase tracking-wider text-zinc-900">
-                            Servicios
-                        </h4>
-                        <ul className="space-y-4 text-zinc-600">
-                            <li>Adaptabilidad Total</li>
-                            <li>Optimización y Eficiencia</li>
-                            <li>Desarrollo a Medida</li>
-                            <li>Soporte Experto 24/7</li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 className="mb-6 font-bold uppercase tracking-wider text-zinc-900">
-                            Proyectos
-                        </h4>
-                        <ul className="space-y-4 text-zinc-600">
-                            <li>Restabar la bello</li>
-                            <li>Impacto</li>
-                            <li>Colores de vida</li>
-                            <li>Ensamblicol</li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 className="mb-6 font-bold uppercase tracking-wider text-zinc-900">
-                            Redes
-                        </h4>
-                        <div className="flex gap-4">
-                            <a
-                                href="https://www.instagram.com/priori.tech?igsh=MTN2OTFueGpueGloeA%3D%3D&utm_source=qr"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-all hover:bg-primary hover:text-white hover:scale-110"
-                            >
-                                <Instagram size={20} />
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-16 border-t border-zinc-100 pt-8 text-center">
-                    <p className="text-sm text-zinc-500">
-                        Copyright © {new Date().getFullYear()} Prioritech. Designed by Prioritech
-                    </p>
-                </div>
+  return (
+    <footer className="bg-white text-slate-700 pt-16 pb-12 border-t border-slate-200">
+      <div className="container mx-auto px-6 lg:px-12">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 pb-14 border-b border-slate-200">
+          {/* Brand Info */}
+          <div className="space-y-5">
+            <DistripakoLogo theme="light" size="md" />
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Especialistas en dotación de uniformes industriales, ejecutivos, salud y gastronomía. Confección de alta durabilidad y bordado computarizado para empresas en toda Colombia.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-[#1B3A6B] font-bold">
+              <ShieldCheck size={16} />
+              <span>Garantía de Calidad Textil</span>
             </div>
-        </footer>
-    );
+          </div>
+
+          {/* Catalog Categories */}
+          <div>
+            <h4 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 mb-5">
+              Líneas de Dotación
+            </h4>
+            <ul className="space-y-3 text-xs text-slate-600">
+              {CATEGORIES.map((cat) => (
+                <li key={cat.id}>
+                  <a
+                    href="#catalogo"
+                    className="hover:text-[#1B3A6B] transition-colors"
+                  >
+                    {cat.name}
+                  </a>
+                </li>
+              ))}
+              <li>
+                <a
+                  href="#cotizador"
+                  className="text-[#1B3A6B] font-extrabold hover:underline"
+                >
+                  Cotizador en Línea →
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 mb-5">
+              Navegación
+            </h4>
+            <ul className="space-y-3 text-xs text-slate-600">
+              <li>
+                <a href="/" className="hover:text-slate-950 transition-colors">
+                  Inicio
+                </a>
+              </li>
+              <li>
+                <a href="#catalogo" className="hover:text-slate-950 transition-colors">
+                  Catálogo de Prendas
+                </a>
+              </li>
+              <li>
+                <a href="#cotizador" className="hover:text-slate-950 transition-colors">
+                  Cotizar Pedido
+                </a>
+              </li>
+              <li>
+                <a href="#servicios" className="hover:text-slate-950 transition-colors">
+                  Taller de Bordado
+                </a>
+              </li>
+              <li>
+                <a href="#nosotros" className="hover:text-slate-950 transition-colors">
+                  Por qué Distripako
+                </a>
+              </li>
+              <li>
+                <a href="#contacto" className="hover:text-slate-950 transition-colors">
+                  Contacto & Asesoría
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h4 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 mb-5">
+              Atención Comercial
+            </h4>
+            <ul className="space-y-3 text-xs text-slate-600">
+              <li className="flex items-start gap-2.5">
+                <Phone size={15} className="text-[#1B3A6B] shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-slate-900 font-bold">{COMPANY_INFO.phone}</p>
+                  <p className="text-[11px] text-slate-500">Línea directa y WhatsApp</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Mail size={15} className="text-[#1B3A6B] shrink-0 mt-0.5" />
+                <span>{COMPANY_INFO.email}</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <MapPin size={15} className="text-[#1B3A6B] shrink-0 mt-0.5" />
+                <span>{COMPANY_INFO.address}</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Clock size={15} className="text-[#1B3A6B] shrink-0 mt-0.5" />
+                <span>{COMPANY_INFO.schedule}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <p>
+            © {new Date().getFullYear()} {COMPANY_INFO.name}. Todos los derechos reservados.
+          </p>
+          <p className="flex items-center gap-1 font-medium">
+            Dotaciones y Confección Textil Profesional para Empresas
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
 }

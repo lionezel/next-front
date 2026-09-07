@@ -1,37 +1,52 @@
 "use client";
 
 import Navbar from "@/src/components/ui/Navbar";
-import Footer from "@/src/components/ui/Footer";
 import Hero from "@/src/components/ui/Hero";
+import { AlliesSection } from "./components/sections/allies-section";
+import CategoriesSection from "./components/CategoriesSection";
+import Simulador3DSection from "./components/Simulador3DSection";
+import InteractiveQuoter from "@/src/features/cotizador/InteractiveQuoter";
+import QualityAndPersonalization from "./components/QualityAndPersonalization";
+import ProcessSteps from "./components/ProcessSteps";
+import WhyChooseDistripako from "./components/WhyChooseDistripako";
+import ContactSection from "./components/ContactSection";
+import Footer from "@/src/components/ui/Footer";
 import { Floating } from "@/src/components/ui/Floating";
 
-import { AlliesSection } from "./components/sections/allies-section";
-import { ServicesBento } from "./components/ServicesBento";
-import { ArchitectureSection } from "./components/ArchitectureSection";
-
-import { useHomeAnimations } from "./hooks/useHomeAnimations";
-import { services } from "./services/skills-data";
-
 export default function HomeFeature() {
-    const animations = useHomeAnimations();
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen">
+        {/* Main Hero Showcase */}
+        <Hero />
 
-    return (
-        <>
-            <Navbar />
-            <main className="min-h-screen">
-                {/* Hero Section */}
-                <Hero />
+        {/* Dynamic Allies & Client Logos */}
+        <AlliesSection />
 
-                <ArchitectureSection animations={animations} />
+        {/* Uniform Categories & Catalog Preview */}
+        <CategoriesSection />
 
-                {/* Services Bento Grid (Core Experience) */}
-                <ServicesBento
-                    services={services}
-                    animations={animations}
-                />
-            </main>
-            <Floating />
-            <Footer />
-        </>
-    );
+        {/* 3D Uniform Studio & Interactive Customizer */}
+        <Simulador3DSection />
+
+        {/* Real-time Interactive Quoter Engine */}
+        <InteractiveQuoter />
+
+        {/* Quality, Machinery & Custom Embroidery */}
+        <QualityAndPersonalization />
+
+        {/* 4-Step Process: From Inquiry to Nationwide Delivery */}
+        <ProcessSteps />
+
+        {/* Why Choose Distripako: Guarantees & Volume Stats */}
+        <WhyChooseDistripako />
+
+        {/* Contact & Quote Request Form */}
+        <ContactSection />
+      </main>
+      <Floating />
+      <Footer />
+    </>
+  );
 }

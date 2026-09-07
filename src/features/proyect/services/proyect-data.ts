@@ -1,192 +1,192 @@
 import { Project } from "../types/project.type";
 
 export const projectsData: Project[] = [
-    {
-        id: "restabar",
-        title: "Restabar la bello",
-        subtitle: "Ecosistema Digital Turístico",
-        description: "Restabar es un restaurante, el cual se acerco a nosotros con la necesidad de optimizar tiempo en la gestion de sus pedidos. en el transcurso de la realizacion de su software tambien vimos la necesidad de tener una mayor claridad en cuanto a el orden de su inventario y las metricas de su negocio. Por lo cual decidimos crear un software que permitiera gestionar los pedidos, el inventario y sus metricas. mas a detalle nuestro software tiene unos puntos claves: tiene conctividad inalambrica la cual permitia realizar pedidos desde un dispositivo movil y la comanda se imprimiera de forma automaticca en cocina, aparte de eso tiene un dashboard que permite ver las metricas de su negocio en tiempo real. cabe recalcar que cada parte del software fue hecho a medida milimetrica de la necesidad de nuestro cliente.    Tu comodidad es nuestra PRIORIdad.",
-        heroImage: "/projects/restabar-hero.png",
-        vanguardImage: "/projects/restabar-hero.png",
-        logo: "/logos/restabar.png",
-        techStack: [
-            { name: "Nextjs", icon: "Nextjs", category: "Frontend" },
-            { name: "Tailwind", icon: "Tailwind", category: "Styling" },
-            { name: "Firebase", icon: "Firebase", category: "Database" },
-        ],
-        features: [
-            {
-                title: "Alianzas Estratégicas",
-                description: "Conexión directa con los líderes del mercado para expandir el alcance de tu negocio."
-            },
-            {
-                title: "Centralización",
-                description: "Toda la gestión de tu inventario y tarifas en un solo lugar con sincronización en tiempo real."
-            },
-            {
-                title: "Business Intelligence",
-                description: "Dashboards avanzados para analizar tendencias de mercado y rendimiento interno."
-            }
-        ],
-        overview: {
-            vision: "Diseñamos una web la cual permitiera a el restaurante tener una mayor eficiencia en cuanto a sus pedidos y manejo de producto",
-            highlight2: "Cloud Native"
-        },
-        stats: {
-            indicator: "🚀",
-            title: "Escalabilidad",
-            description: "Arquitectura pensada para manejar picos de demanda turística sin comprometer latencia.",
-            statusLabel: "Producción Activa"
-        },
-        design: {
-            description: "Un sistema de diseño impresionante que combina elegancia, funcionalidad y modernidad. Basado en Material Design con una sinergia de colores única que ofrece una experiencia de usuario humana y fluida.",
-            palette: ["#f7d4b2", "#6a544b", "#ffffff"],
-            screenshots: [
-                "/projects/centus-ss1.jpg",
-                "/projects/centus-ss2.jpg",
-                "/projects/centus-ss3.jpg"
-            ]
-        }
+  {
+    id: "consorcio-industrial",
+    title: "Consorcio Minero & Vial",
+    subtitle: "Dotación Industrial Pesada & Seguridad 3M",
+    description: "Confección y entrega de más de 4.500 prendas de trabajo pesado en dril 100% algodón con costuras triples de seguridad y cintas reflectivas normadas de alta visibilidad para más de 900 operarios en terreno y planta.",
+    heroImage: "/images/products/industrial.jpg",
+    vanguardImage: "/images/products/industrial.jpg",
+    logo: "/distripako-icon.png",
+    techStack: [
+      { name: "Dril Vulcano 7x7", icon: "Layers", category: "Textil" },
+      { name: "Reflectivo 3M", icon: "Sun", category: "Seguridad" },
+      { name: "Bordado HD", icon: "Sparkles", category: "Personalización" },
+    ],
+    features: [
+      {
+        title: "Alta Resistencia al Rasgado",
+        description: "Gramaje superior de 310g/m² para soportar fricción mecánica constante y soldadura.",
+      },
+      {
+        title: "Rotulado Individual por Operario",
+        description: "Empaque individual con nombre, cédula y talla para entrega ágil en campamentos.",
+      },
+      {
+        title: "Cumplimiento de Pliegos de Seguridad",
+        description: "Certificados de calidad de tela y reflectividad entregados a la interventoría.",
+      },
+    ],
+    overview: {
+      vision: "Equipar a 900 operarios con dotación de máxima seguridad y confort térmico en jornadas de 12 horas.",
+      highlight1: "4.500+ Prendas Entregadas",
+      highlight2: "Cero Devoluciones",
     },
-    {
-        id: "impacto",
-        title: "Impacto",
-        subtitle: "Plataforma de Medios Digitales",
-        description: "IMPACTO es una perfumeria, la cual se acerco a nosotros con la necesidad principal de exponer de mejor manera su negocio en la web. Por lo cual decidimos crear un software tipo e-commerce que permitiera gestionar su inventario y ventas de forma online.",
-        heroImage: "/projects/impacto-hero.png",
-        vanguardImage: "/projects/impacto-hero.png",
-        logo: "/logos/impacto.png",
-        techStack: [
-            { name: "Next.js", icon: "Next", category: "Frontend" },
-            { name: "Tailwind CSS", icon: "Tailwind", category: "Styling" },
-            { name: "Vercel", icon: "Vercel", category: "Infrastructure" },
-            { name: "Strapi", icon: "Strapi", category: "CMS" }
-        ],
-        features: [
-            {
-                title: "Streaming 24/7",
-                description: "Integración de transmisión en vivo con baja latencia y alta disponibilidad."
-            },
-            {
-                title: "Gestión de Contenidos",
-                description: "Sistema robusto para la publicación inmediata de noticias y programas."
-            },
-            {
-                title: "Optimización SEO",
-                description: "Estructura optimizada para motores de búsqueda, aumentando el tráfico orgánico en un 40%."
-            }
-        ],
-        overview: {
-            vision: "Realizamos una plataforma en la cual el cliente pudiera conectar de una forma mas comoda con el producto",
-            highlight1: "+100 Productos por mes",
-        },
-        stats: {
-            indicator: "📺",
-            title: "Rendimiento",
-            description: "Optimizado para generar un contacto seguro entre el cliente y el producto",
-            statusLabel: "Activo"
-        },
-        design: {
-            description: "Una interfaz vibrante que refleja la identidad cultural del Eje Cafetero. Uso de colores tierra combinados con una tipografía moderna y una disposición de elementos tipo 'Newsroom' que facilita el consumo de información.",
-            palette: ["#3b3a38", "#f5f3ef"],
-            screenshots: [
-                "/projects/telecafe-ss1.jpg",
-                "/projects/telecafe-ss2.jpg"
-            ]
-        }
+    stats: {
+      indicator: "🏗️",
+      title: "Despacho Eficiente",
+      description: "Entrega completa en 18 días hábiles en 4 frentes de obra simultáneos.",
+      statusLabel: "Entrega Exitosa",
     },
-    {
-        id: "coloresdevidac3",
-        title: "Colores de Vida",
-        subtitle: "Restaurante y museo cultural",
-        description: "Restabar es un restaurante, el cual se acerco a nosotros con la necesidad de optimizar tiempo en la gestion de sus pedidos. en el transcurso de la realizacion de su software tambien vimos la necesidad de tener una mayor claridad en cuanto a el orden de su inventario y las metricas de su negocio. Por lo cual decidimos crear un software que permitiera gestionar los pedidos, el inventario y sus metricas. mas a detalle nuestro software tiene unos puntos claves: tiene conctividad inalambrica la cual permitia realizar pedidos desde un dispositivo movil y la comanda se imprimiera de forma automaticca en cocina, aparte de eso tiene un dashboard que permite ver las metricas de su negocio en tiempo real. cabe recalcar que cada parte del software fue hecho a medida milimetrica de la necesidad de nuestro cliente.    Tu comodidad es nuestra PRIORIdad.",
-        heroImage: "/projects/coloresdevidac3-hero.png",
-        vanguardImage: "/projects/coloresdevidac3-hero.png",
-        logo: "/logos/coloresdevida.png",
-        techStack: [
-            { name: "Nextjs", icon: "Nextjs", category: "Frontend" },
-            { name: "Tailwind", icon: "Tailwind", category: "Styling" },
-            { name: "Firebase", icon: "Firebase", category: "Database" },
-        ],
-        features: [
-            {
-                title: "Alianzas Estratégicas",
-                description: "Conexión directa con los líderes del mercado para expandir el alcance de tu negocio."
-            },
-            {
-                title: "Centralización",
-                description: "Toda la gestión de tu inventario y tarifas en un solo lugar con sincronización en tiempo real."
-            },
-            {
-                title: "Business Intelligence",
-                description: "Dashboards avanzados para analizar tendencias de mercado y rendimiento interno."
-            }
-        ],
-        overview: {
-            vision: "Diseñamos una web la cual permitiera a el restaurante tener una mayor eficiencia en cuanto a sus pedidos y manejo de producto",
-            highlight2: "Cloud Native"
-        },
-        stats: {
-            indicator: "🚀",
-            title: "Escalabilidad",
-            description: "Arquitectura pensada para manejar picos de demanda turística sin comprometer latencia.",
-            statusLabel: "Producción Activa"
-        },
-        design: {
-            description: "Un sistema de diseño impresionante que combina elegancia, funcionalidad y modernidad. Basado en Material Design con una sinergia de colores única que ofrece una experiencia de usuario humana y fluida.",
-            palette: ["#feb50e", "#fc0316", "#fdfcfe"],
-            screenshots: [
-                "/projects/centus-ss1.jpg",
-                "/projects/centus-ss2.jpg",
-                "/projects/centus-ss3.jpg"
-            ]
-        }
+    design: {
+      description: "Diseño ergonómico con fuelles en espalda y refuerzo en rodillas con combinación Azul Noche y Khaki.",
+      palette: ["#0F1D36", "#1B3A6B", "#F8FAFC"],
+      screenshots: [
+        "/images/products/industrial.jpg",
+        "/images/products/bordados.jpg",
+      ],
     },
-    {
-        id: "ensamblicol",
-        title: "Ensamblicol",
-        subtitle: "empresa dedicada a el blindaje vehicular",
-        description: "ensamblicol es una empresa Costa ricense dedicada a la instalacion y fabricacion de blindaje, se acerco a nosotros con la necesidad principl de cubrir incomodades que tenian en cuanto a su inventario y registo de ventas. le hicimos un sistema operativo en el cual llevan un registro especifico por producto y el cual se puede modificar por medio de un comando de voz, aparte le hicimos un sistema de supervcion en cuanto a tiempo trata por trabajador para asi tener datos reales en cuant ala eficiencia en operacion.",
-        heroImage: "/projects/ensamblicol-hero.png",
-        vanguardImage: "/projects/ensamblicol-hero.png",
-        logo: "/logos/ensamblicol2.png",
-        techStack: [
-            { name: "Nextjs", icon: "Nextjs", category: "Frontend" },
-            { name: "Tailwind", icon: "Tailwind", category: "Styling" },
-            { name: "Firebase", icon: "Firebase", category: "Database" },
-        ],
-        features: [
-            {
-                title: "Alianzas Estratégicas",
-                description: "Conexión directa con los líderes del mercado para expandir el alcance de tu negocio."
-            },
-            {
-                title: "Centralización",
-                description: "Toda la gestión de tu inventario y tarifas en un solo lugar con sincronización en tiempo real."
-            },
-            {
-                title: "Business Intelligence",
-                description: "Dashboards avanzados para analizar tendencias de mercado y rendimiento interno."
-            }
-        ],
-        overview: {
-            vision: "Diseñamos una web la cual permitiera a el restaurante tener una mayor eficiencia en cuanto a sus pedidos y manejo de producto",
-            highlight2: "Cloud Native"
-        },
-        stats: {
-            indicator: "🚀",
-            title: "Escalabilidad",
-            description: "Arquitectura pensada para manejar picos de demanda turística sin comprometer latencia.",
-            statusLabel: "Producción Activa"
-        },
-        design: {
-            description: "Un sistema de diseño impresionante que combina elegancia, funcionalidad y modernidad. Basado en Material Design con una sinergia de colores única que ofrece una experiencia de usuario humana y fluida.",
-            palette: ["#050a26", "#041d3e", "#ff9206"],
-            screenshots: [
-                "/projects/centus-ss1.jpg",
-                "/projects/centus-ss2.jpg",
-                "/projects/centus-ss3.jpg"
-            ]
-        }
+  },
+  {
+    id: "red-hospitalaria",
+    title: "Red Hospitalaria & Clínicas",
+    subtitle: "Dotación Médica Antifluido & Laboratorio",
+    description: "Suministro de uniformes clínicos tipo jogger antifluido Lafayette y batas médicas para 1.200 profesionales de la salud. Telas repelentes al agua y resistentes al cloro con bordado de especialidad médica.",
+    heroImage: "/images/products/salud.jpg",
+    vanguardImage: "/images/products/salud.jpg",
+    logo: "/distripako-icon.png",
+    techStack: [
+      { name: "Antifluido Lafayette", icon: "Layers", category: "Textil" },
+      { name: "Bordado Institucional", icon: "Sparkles", category: "Personalización" },
+      { name: "Corte Ergonómico Jogger", icon: "Scissors", category: "Confección" },
+    ],
+    features: [
+      {
+        title: "Protección Repelente Antifluido",
+        description: "Barrera biológica que previene el paso de salpicaduras y fluidos corporales.",
+      },
+      {
+        title: "Secado Rápido y Fácil Planchado",
+        description: "Tela liviana de tacto suave que no absorbe manchas y seca en minutos.",
+      },
+      {
+        title: "Bordado de Logo y Nombre",
+        description: "Identificación bordada con alta definición del nombre y especialidad del médico.",
+      },
+    ],
+    overview: {
+      vision: "Modernizar la imagen del personal asistencial con prendas flexibles, frescas y elegantes.",
+      highlight1: "1.200 Médicos y Enfermeros",
+      highlight2: "Garantía de Color",
     },
+    stats: {
+      indicator: "🏥",
+      title: "Satisfacción 100%",
+      description: "Aprobación total por parte del comité de salud ocupacional de la clínica.",
+      statusLabel: "Dotación Activa",
+    },
+    design: {
+      description: "Paleta Azul Marino Distripako y Verde Quirófano con bordados en hilo blanco perla.",
+      palette: ["#0F1D36", "#0D9488", "#FFFFFF"],
+      screenshots: [
+        "/images/products/salud.jpg",
+        "/images/products/bordados.jpg",
+      ],
+    },
+  },
+  {
+    id: "cadena-restaurantes",
+    title: "Cadena de Restaurantes Gourmet",
+    subtitle: "Uniformes Gastronómicos & Delantales en Cuero",
+    description: "Diseño y confección de filipinas ejecutivas con espalda de malla transpirable y delantales mandil con herrajes metálicos y cargaderas en cuero para cocineros, bartenders y meseros.",
+    heroImage: "/images/products/gastronomia.jpg",
+    vanguardImage: "/images/products/gastronomia.jpg",
+    logo: "/distripako-icon.png",
+    techStack: [
+      { name: "Dril Algodón Pesado", icon: "Layers", category: "Textil" },
+      { name: "Apliques de Cuero", icon: "Sparkles", category: "Detalles" },
+      { name: "Malla Cool-Vent", icon: "Sun", category: "Frescura" },
+    ],
+    features: [
+      {
+        title: "Disipación de Calor en Cocina",
+        description: "Paneles transpirables que reducen la sensación térmica frente a fogones y hornos.",
+      },
+      {
+        title: "Estilo Rústico Contemporáneo",
+        description: "Refuerza la identidad visual de la marca y eleva la experiencia del comensal.",
+      },
+      {
+        title: "Resistencia a Grasas y Lavado Continuo",
+        description: "Telas tratadas que conservan su color oscuro y textura firme.",
+      },
+    ],
+    overview: {
+      vision: "Brindar una imagen premium y uniforme en las 14 sedes de la cadena restaurantera.",
+      highlight1: "14 Restaurantes Equipados",
+      highlight2: "Bordado Dorado",
+    },
+    stats: {
+      indicator: "🍳",
+      title: "Impacto Visual",
+      description: "Mejora sustancial en la presentación del personal de cocina y servicio.",
+      statusLabel: "Cliente Frecuente",
+    },
+    design: {
+      description: "Negro carbón con vivos en tono arena tostada y correas de cuero café moka.",
+      palette: ["#18181B", "#1B3A6B", "#451A03"],
+      screenshots: [
+        "/images/products/gastronomia.jpg",
+        "/images/products/bordados.jpg",
+      ],
+    },
+  },
+  {
+    id: "banca-corporativa",
+    title: "Entidad Financiera & Seguros",
+    subtitle: "Camisería Oxford & Vestuario Ejecutivo",
+    description: "Dotación corporativa de camisas y blusas oxford de corte sastre, pantalones formales y chaquetas institucionales para 850 asesores comerciales en oficinas principales.",
+    heroImage: "/images/products/corporativo.jpg",
+    vanguardImage: "/images/products/corporativo.jpg",
+    logo: "/distripako-icon.png",
+    techStack: [
+      { name: "Oxford Fil a Fil", icon: "Layers", category: "Textil" },
+      { name: "Easy Iron", icon: "Sparkles", category: "Tecnología" },
+      { name: "Corte Slim & Regular", icon: "Scissors", category: "Confección" },
+    ],
+    features: [
+      {
+        title: "Tratamiento Anti-Arrugas",
+        description: "Las prendas mantienen su presencia lisa e impecable durante todo el día laboral.",
+      },
+      {
+        title: "Cuellos Fusionados de Alta Durabilidad",
+        description: "Estructura que no se deforma tras decenas de lavados domésticos.",
+      },
+      {
+        title: "Bordado Discreto y Elegante",
+        description: "Monograma corporativo bordado en tono sobre tono en el puño o pecho.",
+      },
+    ],
+    overview: {
+      vision: "Proyectar seriedad, confianza y modernidad en la atención a clientes bancarios.",
+      highlight1: "850 Asesores Comerciales",
+      highlight2: "Ajuste a Medida",
+    },
+    stats: {
+      indicator: "💼",
+      title: "Presencia Corporativa",
+      description: "Estandarización del código de vestimenta en 32 agencias a nivel nacional.",
+      statusLabel: "Contrato Anual",
+    },
+    design: {
+      description: "Azul cielo ejecutivo y blanco puro combinados con pantalón azul marino noche.",
+      palette: ["#93C5FD", "#0F1D36", "#FFFFFF"],
+      screenshots: [
+        "/images/products/corporativo.jpg",
+        "/images/products/bordados.jpg",
+      ],
+    },
+  },
 ];

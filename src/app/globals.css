@@ -2,14 +2,29 @@
 
 @theme {
   --color-background: #ffffff;
-  --color-foreground: #171717;
-  --color-primary: #6943CB;
-  --color-secondary: #ae0b8e;
-  --color-tertiary: #205EA9;
-  --color-accent: #E11D48;
-  --font-sans: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+  --color-foreground: #0f172a;
+  
+  /* Distripako Brand Palette */
+  --color-primary: #0F1D36;
+  --color-primary-light: #1E3A5F;
+  --color-primary-dark: #091222;
+  
+  --color-secondary: #1B3A6B;
+  --color-secondary-light: #2557A7;
+  --color-secondary-dark: #142D55;
+  
+  --color-tertiary: #1E3A5F;
+  --color-accent: #2563EB;
+  --color-accent-blue: #1B3A6B;
 
-  --primary-rgb: 105 67 203;
+  --color-surface-subtle: #F8FAFC;
+  --color-surface-card: #FFFFFF;
+  --color-border-subtle: #E2E8F0;
+
+  --font-sans: var(--font-roboto), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --primary-rgb: 15 29 54;
+  --secondary-rgb: 27 58 107;
 
   --animate-marquee: marquee 30s linear infinite;
 
@@ -28,6 +43,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    scroll-behavior: smooth;
   }
 }
 
@@ -35,5 +51,19 @@
   .mask-image-linear-edges {
     mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
     -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  .glass-dark {
+    background: rgba(15, 29, 54, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(27, 58, 107, 0.2);
   }
 }
