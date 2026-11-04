@@ -1,9 +1,7 @@
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export const dynamic = "force-dynamic";
 
 const SYSTEM_PROMPT = `Eres "Nova", asesora virtual de créditos de Next Connection Group. Tu misión es ayudar a los clientes a entender y solicitar el crédito ideal para sus necesidades de forma amable, clara y profesional.
 
@@ -43,6 +41,10 @@ type ChatMessage = {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: "OPENAI_API_KEY no está configurada" }, { status: 500 });
+    }
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const { messages } = (await req.json()) as { messages: ChatMessage[] };
 
     if (!messages || !Array.isArray(messages)) {

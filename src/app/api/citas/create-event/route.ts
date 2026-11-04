@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import { sendAppointmentInvitationEmail } from "@/src/services/email/appointmentEmailService";
 
+export const dynamic = "force-dynamic";
+
 // Helper to construct ISO strings with Colombia offset (UTC-5)
 function buildDateTimeISO(dateStr: string, timeStr: string, durationMinutes = 45) {
   const match = timeStr.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);

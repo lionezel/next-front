@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+
+export const dynamic = "force-dynamic";
 import { sendAppointmentCancellationEmail } from "@/src/services/email/appointmentEmailService";
 
 export async function POST(request: NextRequest) {
