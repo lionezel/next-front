@@ -7,6 +7,7 @@ import {
   onSnapshot,
   updateDoc,
   setDoc,
+  deleteDoc,
   serverTimestamp,
   Unsubscribe,
 } from "firebase/firestore";
@@ -35,26 +36,131 @@ const COLLECTION_NAME = "credit_cases";
 
 /**
  * Iniciar sesión o registrarse con Google
+ * Si el administrador precargó previamente los datos del cliente (C.C., teléfono, etc.)
+ * con este mismo correo, se fusionan automáticamente al perfil de Google.
  */
 export async function loginWithGoogle(): Promise<FirebaseUser> {
   if (!auth || !db) throw new Error("Firebase Auth no inicializado");
   const provider = new GoogleAuthProvider();
   const cred = await signInWithPopup(auth, provider);
   const user = cred.user;
+  const email = user.email ? user.email.trim().toLowerCase() : "";
 
   const userRef = doc(db, "users", user.uid);
+
+  // Buscar si existía una ficha precargada por el administrador con este correo
+  let preloadedData: any = null;
+  let preloadedDocId: string | null = null;
+
+  if (email) {
+    try {
+      const q = query(collection(db, "users"), where("email", "==", email));
+      const snap = await getDocs(q);
+      for (const d of snap.docs) {
+        if (d.id !== user.uid) {
+          preloadedData = d.data();
+          preloadedDocId = d.id;
+          break;
+        }
+      }
+    } catch (err) {
+      console.warn("[LOGIN WITH GOOGLE] Error buscando ficha precargada:", err);
+    }
+  }
+
+  const documentNumber =
+    preloadedData?.documentNumber ||
+    preloadedData?.cedula ||
+    preloadedData?.documento ||
+    preloadedData?.contactProfile?.documentNumber ||
+    null;
+  const documentType =
+    preloadedData?.documentType ||
+    preloadedData?.contactProfile?.documentType ||
+    "CC";
+  const phone =
+    preloadedData?.phone ||
+    preloadedData?.telefono ||
+    preloadedData?.celular ||
+    preloadedData?.contactProfile?.phone ||
+    null;
+  const clientName =
+    preloadedData?.displayName ||
+    preloadedData?.clientName ||
+    preloadedData?.contactProfile?.clientName ||
+    user.displayName ||
+    "";
+
   await setDoc(
     userRef,
     {
       uid: user.uid,
-      email: user.email?.toLowerCase(),
-      displayName: user.displayName || "",
+      email: email,
+      displayName: clientName,
       photoURL: user.photoURL || "",
-      role: "client",
+      role: preloadedData?.role || "client",
+      isAdmin: preloadedData?.isAdmin || false,
+      ...(documentNumber && {
+        documentNumber,
+        cedula: documentNumber,
+        documento: documentNumber,
+      }),
+      ...(documentType && { documentType }),
+      ...(phone && {
+        phone,
+        telefono: phone,
+        celular: phone,
+      }),
+      contactProfile: {
+        ...(preloadedData?.contactProfile || {}),
+        documentType: documentType,
+        ...(documentNumber && { documentNumber }),
+        ...(phone && { phone }),
+        clientName: clientName,
+        email: email,
+        updatedAt: serverTimestamp(),
+      },
       updatedAt: serverTimestamp(),
     },
     { merge: true }
   );
+
+  // Si había un documento temporal previo (creado por el admin), transferir sus casos y citas al nuevo user.uid
+  if (preloadedDocId && preloadedDocId !== user.uid) {
+    try {
+      const casesQ = query(collection(db, "credit_cases"), where("userId", "==", preloadedDocId));
+      const casesSnap = await getDocs(casesQ);
+      for (const cDoc of casesSnap.docs) {
+        await updateDoc(cDoc.ref, { userId: user.uid, updatedAt: serverTimestamp() });
+      }
+
+      const apptQ = query(collection(db, "appointments"), where("userId", "==", preloadedDocId));
+      const apptSnap = await getDocs(apptQ);
+      for (const aDoc of apptSnap.docs) {
+        await updateDoc(aDoc.ref, { userId: user.uid, updatedAt: serverTimestamp() });
+      }
+
+      // Eliminar el documento temporal duplicado para que no quede duplicado en next-admin
+      await deleteDoc(doc(db, "users", preloadedDocId));
+    } catch (e) {
+      console.warn("[LOGIN WITH GOOGLE] Error migrando casos/citas:", e);
+    }
+  }
+
+  // Vincular también cualquier caso o cita que coincida con este email
+  if (email) {
+    try {
+      const casesByEmailQ = query(collection(db, "credit_cases"), where("email", "==", email));
+      const casesByEmailSnap = await getDocs(casesByEmailQ);
+      for (const cDoc of casesByEmailSnap.docs) {
+        if (!cDoc.data().userId || cDoc.data().userId !== user.uid) {
+          await updateDoc(cDoc.ref, { userId: user.uid, updatedAt: serverTimestamp() });
+        }
+      }
+    } catch (e) {
+      console.warn("[LOGIN WITH GOOGLE] Error vinculando por email:", e);
+    }
+  }
 
   return user;
 }
@@ -107,15 +213,84 @@ export async function registerClient(email: string, pass: string, fullName: stri
     await updateProfile(cred.user, { displayName: fullName });
   }
 
+  const cleanEmail = email.trim().toLowerCase();
+
+  // Buscar si existía una ficha precargada por el administrador con este correo
+  let preloadedData: any = null;
+  let preloadedDocId: string | null = null;
+  try {
+    const q = query(collection(db, "users"), where("email", "==", cleanEmail));
+    const snap = await getDocs(q);
+    for (const d of snap.docs) {
+      if (d.id !== cred.user.uid) {
+        preloadedData = d.data();
+        preloadedDocId = d.id;
+        break;
+      }
+    }
+  } catch (err) {
+    console.warn("[REGISTER CLIENT] Error buscando ficha precargada:", err);
+  }
+
+  const documentNumber =
+    preloadedData?.documentNumber ||
+    preloadedData?.cedula ||
+    preloadedData?.documento ||
+    preloadedData?.contactProfile?.documentNumber ||
+    null;
+  const documentType =
+    preloadedData?.documentType ||
+    preloadedData?.contactProfile?.documentType ||
+    "CC";
+  const userPhone =
+    phone ||
+    preloadedData?.phone ||
+    preloadedData?.telefono ||
+    preloadedData?.celular ||
+    null;
+  const clientName =
+    fullName ||
+    preloadedData?.displayName ||
+    preloadedData?.clientName ||
+    "";
+
   const userRef = doc(db, "users", cred.user.uid);
   await setDoc(userRef, {
     uid: cred.user.uid,
-    email: email.trim().toLowerCase(),
-    displayName: fullName,
-    phone: phone,
-    role: "client",
+    email: cleanEmail,
+    displayName: clientName,
+    phone: userPhone,
+    role: preloadedData?.role || "client",
+    ...(documentNumber && {
+      documentNumber,
+      cedula: documentNumber,
+      documento: documentNumber,
+    }),
+    ...(documentType && { documentType }),
+    contactProfile: {
+      ...(preloadedData?.contactProfile || {}),
+      documentType: documentType,
+      ...(documentNumber && { documentNumber }),
+      ...(userPhone && { phone: userPhone }),
+      clientName: clientName,
+      email: cleanEmail,
+      updatedAt: serverTimestamp(),
+    },
     createdAt: serverTimestamp(),
   }, { merge: true });
+
+  if (preloadedDocId && preloadedDocId !== cred.user.uid) {
+    try {
+      const casesQ = query(collection(db, "credit_cases"), where("userId", "==", preloadedDocId));
+      const casesSnap = await getDocs(casesQ);
+      for (const cDoc of casesSnap.docs) {
+        await updateDoc(cDoc.ref, { userId: cred.user.uid, updatedAt: serverTimestamp() });
+      }
+      await deleteDoc(doc(db, "users", preloadedDocId));
+    } catch (e) {
+      console.warn("[REGISTER CLIENT] Error migrando casos:", e);
+    }
+  }
 
   return cred.user;
 }
