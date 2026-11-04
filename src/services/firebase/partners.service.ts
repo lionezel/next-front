@@ -1,9 +1,6 @@
 import {
   collection,
   getDocs,
-  query,
-  where,
-  orderBy,
   onSnapshot,
   doc,
   setDoc,
@@ -11,47 +8,50 @@ import {
   serverTimestamp,
   Unsubscribe,
 } from "firebase/firestore";
-import { db, isFirebaseConfigured } from "@/src/lib/firebase";
+import { db } from "@/src/firebase/config";
 import { Partner } from "@/src/types/firebase";
-import { partners as fallbackPartners } from "@/src/features/home/services/partners-data";
 
 const COLLECTION_NAME = "aliados";
 
-const defaultPartners: Partner[] = fallbackPartners.map((p, index) => ({
-  id: p.id,
-  name: p.name,
-  logoUrl: `/logos/${p.id}.png`,
-  active: true,
-  order: index,
-}));
+export const fallbackPartners: Partner[] = [
+  { id: "p1", name: "Bancolombia", logoUrl: "", description: "Crédito & Financiación Bancaria", website: "https://bancolombia.com", category: "credito", active: true, order: 1 },
+  { id: "p2", name: "Banco de Bogotá", logoUrl: "", description: "Líneas de Crédito Institucional", website: "https://bancodebogota.com", category: "credito", active: true, order: 2 },
+  { id: "p3", name: "Corficolombiana", logoUrl: "", description: "Fondos & Mercado de Capitales", website: "https://corficolombiana.com", category: "inversiones", active: true, order: 3 },
+  { id: "p4", name: "Credicorp Capital", logoUrl: "", description: "Portafolios Globales de Rentabilidad", website: "https://credicorpcapital.com", category: "inversiones", active: true, order: 4 },
+  { id: "p5", name: "Sura Seguros", logoUrl: "", description: "Protección Integral de Salud y Vida", website: "https://sura.com", category: "seguros", active: true, order: 5 },
+  { id: "p6", name: "Seguros Bolívar", logoUrl: "", description: "Pólizas Vehiculares y Patrimoniales", website: "https://segurosbolivar.com", category: "seguros", active: true, order: 6 },
+  { id: "p7", name: "Smart Fit Club", logoUrl: "", description: "Centros de Acondicionamiento y Bienestar", website: "https://smartfit.com.co", category: "fit", active: true, order: 7 },
+  { id: "p8", name: "Bodytech Fitness", logoUrl: "", description: "Deporte, Salud y Nutrición Certificada", website: "https://bodytech.com.co", category: "fit", active: true, order: 8 },
+];
 
 /**
- * Obtener listado de aliados activos
+ * Obtener listado de aliados activos de Firestore
  */
 export async function getPartners(): Promise<Partner[]> {
-  if (!isFirebaseConfigured() || !db) {
-    return defaultPartners;
+  if (!db) {
+    return fallbackPartners;
   }
 
   try {
-    const q = query(
-      collection(db, COLLECTION_NAME),
-      where("active", "==", true)
-    );
-    const snapshot = await getDocs(q);
+    const colRef = collection(db, COLLECTION_NAME);
+    const snapshot = await getDocs(colRef);
 
     if (snapshot.empty) {
-      return defaultPartners;
+      return fallbackPartners;
     }
 
-    const data = snapshot.docs.map((docSnap) => ({
-      id: docSnap.id,
-      ...(docSnap.data() as Omit<Partner, "id">),
-    }));
-    return data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const data: Partner[] = snapshot.docs
+      .map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<Partner, "id">),
+      }))
+      .filter((item) => item.active !== false)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    return data.length > 0 ? data : fallbackPartners;
   } catch (error) {
     console.error("Error fetching partners from Firestore:", error);
-    return defaultPartners;
+    return fallbackPartners;
   }
 }
 
@@ -61,39 +61,39 @@ export async function getPartners(): Promise<Partner[]> {
 export function subscribePartners(
   onUpdate: (partners: Partner[]) => void
 ): Unsubscribe | (() => void) {
-  if (!isFirebaseConfigured() || !db) {
-    onUpdate(defaultPartners);
+  if (!db) {
+    onUpdate(fallbackPartners);
     return () => {};
   }
 
   try {
-    const q = query(
-      collection(db, COLLECTION_NAME),
-      where("active", "==", true)
-    );
+    const colRef = collection(db, COLLECTION_NAME);
 
     return onSnapshot(
-      q,
+      colRef,
       (snapshot) => {
         if (snapshot.empty) {
-          onUpdate(defaultPartners);
+          onUpdate(fallbackPartners);
         } else {
-          const data = snapshot.docs.map((docSnap) => ({
-            id: docSnap.id,
-            ...(docSnap.data() as Omit<Partner, "id">),
-          }));
-          data.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-          onUpdate(data);
+          const data: Partner[] = snapshot.docs
+            .map((docSnap) => ({
+              id: docSnap.id,
+              ...(docSnap.data() as Omit<Partner, "id">),
+            }))
+            .filter((item) => item.active !== false)
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+          onUpdate(data.length > 0 ? data : fallbackPartners);
         }
       },
       (error) => {
         console.error("Error subscribing to partners:", error);
-        onUpdate(defaultPartners);
+        onUpdate(fallbackPartners);
       }
     );
   } catch (error) {
     console.error("Error setting up partners subscription:", error);
-    onUpdate(defaultPartners);
+    onUpdate(fallbackPartners);
     return () => {};
   }
 }

@@ -1,9 +1,12 @@
+export type PartnerCategory = "credito" | "inversiones" | "seguros" | "fit" | "general";
+
 export interface Partner {
   id: string;
   name: string;
   logoUrl: string; // URL in Firebase Storage or local path /logos/id.png
   description?: string;
   website?: string;
+  category?: PartnerCategory;
   order?: number;
   active: boolean;
   createdAt?: string | number | any;

@@ -1,18 +1,28 @@
-
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCZUa9fJidnkS_0cs-BoKKfXOTSquy6thw",
-    authDomain: "store-d17ce.firebaseapp.com",
-    projectId: "store-d17ce",
-    storageBucket: "store-d17ce.appspot.com",
-    messagingSenderId: "421462810786",
-    appId: "1:421462810786:web:c807a6b2ab734358f477fb",
-    measurementId: "G-9M6J740X2D"
+export const firebaseConfig = {
+    apiKey: "AIzaSyAUqqFAS9cKK0Cp3celFc8tTxPnn9PiutE",
+    authDomain: "next-ffca0.firebaseapp.com",
+    projectId: "next-ffca0",
+    storageBucket: "next-ffca0.firebasestorage.app",
+    messagingSenderId: "780721368727",
+    appId: "1:780721368727:web:ee41bcbd14d740de0843d2",
+    measurementId: "G-R6X2EMV9DX"
 };
 
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase safely for SSR
+export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-const analytics = getAnalytics(app);
+export const auth = getAuth(app);
+export const storage = getStorage(app);
+
+export const initAnalytics = async () => {
+    if (typeof window !== "undefined" && await isSupported()) {
+        return getAnalytics(app);
+    }
+    return null;
+};

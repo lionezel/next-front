@@ -112,7 +112,7 @@ export default function ProyectsListView() {
                     unoptimized={project.heroImage.startsWith("http")}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  
+
                   <div className="absolute bottom-4 left-6 right-6 flex items-center justify-between text-white">
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#1B3A6B] text-[#0F1D36] uppercase tracking-wider">
                       {project.stats.statusLabel}

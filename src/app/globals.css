@@ -1,69 +1,199 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  
-  /* Distripako Brand Palette */
-  --color-primary: #0F1D36;
-  --color-primary-light: #1E3A5F;
-  --color-primary-dark: #091222;
-  
-  --color-secondary: #1B3A6B;
-  --color-secondary-light: #2557A7;
-  --color-secondary-dark: #142D55;
-  
-  --color-tertiary: #1E3A5F;
-  --color-accent: #2563EB;
-  --color-accent-blue: #1B3A6B;
-
-  --color-surface-subtle: #F8FAFC;
+  --color-background: #F8FAFC;
+  --color-surface: #FFFFFF;
   --color-surface-card: #FFFFFF;
-  --color-border-subtle: #E2E8F0;
+  --color-foreground: #0F172A;
+  
+  /* Hub & Corporate - Sober & Refined */
+  --color-brand-sky: #0284C7;
+  --color-brand-sky-light: #38BDF8;
+  --color-brand-cyan: #0EA5E9;
+  --color-brand-cyan-light: #7DD3FC;
+  --color-brand-ice: #F0F9FF;
+  
+  /* Vertical Colors - Refined for Light Theme */
+  --color-credito-primary: #059669;
+  --color-credito-accent: #10B981;
+  
+  --color-inversiones-primary: #4F46E5;
+  --color-inversiones-accent: #6366F1;
+  
+  --color-seguros-primary: #0284C7;
+  --color-seguros-accent: #0EA5E9;
+  
+  --color-fit-primary: #EA580C;
+  --color-fit-accent: #F97316;
 
   --font-sans: var(--font-roboto), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-  --primary-rgb: 15 29 54;
-  --secondary-rgb: 27 58 107;
-
-  --animate-marquee: marquee 30s linear infinite;
-
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-100% - 3rem));
-    }
-  }
 }
 
 @layer base {
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: #F8FAFC;
+    color: #0F172A;
     font-family: var(--font-sans);
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: #E0F2FE;
+    color: #0369A1;
   }
 }
 
 @layer utilities {
-  .mask-image-linear-edges {
-    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  }
-  
-  .glass-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  .glass-light {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(226, 232, 240, 0.8);
   }
 
-  .glass-dark {
-    background: rgba(15, 29, 54, 0.92);
+  .glass-cyan {
+    background: rgba(240, 249, 255, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(27, 58, 107, 0.2);
+    border: 1px solid rgba(186, 230, 253, 0.6);
   }
+
+  .glass-card-light {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  }
+
+  .glass-card-hover {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .glass-card-hover:hover {
+    transform: translateY(-4px);
+    border-color: #7DD3FC;
+    box-shadow: 0 20px 35px -5px rgba(2, 132, 199, 0.1);
+  }
+
+  .gradient-text-hub {
+    background: linear-gradient(135deg, #0F172A 15%, #0284C7 55%, #06B6D4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-sky {
+    background: linear-gradient(135deg, #0369A1 0%, #0EA5E9 50%, #38BDF8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-credito {
+    background: linear-gradient(135deg, #065F46 0%, #059669 60%, #10B981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-inversiones {
+    background: linear-gradient(135deg, #3730A3 0%, #4F46E5 60%, #6366F1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-seguros {
+    background: linear-gradient(135deg, #075985 0%, #0284C7 60%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-fit {
+    background: linear-gradient(135deg, #9A3412 0%, #EA580C 60%, #F97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .fade-mask-x {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-16px) rotate(2deg);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(14px) rotate(-2deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 7s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 8s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s infinite;
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
