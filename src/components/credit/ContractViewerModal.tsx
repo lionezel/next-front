@@ -17,10 +17,13 @@ import {
   Calendar,
   AlertCircle,
   Download,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 import { CreditCase, CreditContractData } from "@/src/types/credit";
 import { saveCreditContractSignature } from "@/src/services/firebase/creditCasesService";
-import { auth } from "@/src/firebase/config";
+import { auth, db } from "@/src/firebase/config";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import {
   getUserContactProfile,
   saveUserContactProfile,
@@ -42,9 +45,11 @@ export default function ContractViewerModal({
   readOnly = false,
 }: ContractViewerModalProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [signingMode, setSigningMode] = useState<"canvas" | "electronic">("canvas");
+  const [signingMode, setSigningMode] = useState<"canvas" | "upload" | "electronic">("canvas");
+  const [uploadedSignatureUrl, setUploadedSignatureUrl] = useState<string>("");
   const [typedSignature, setTypedSignature] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -145,7 +150,7 @@ export default function ContractViewerModal({
   const month = creditCase.contract?.signedDateMonth || monthNames[today.getMonth()];
   const year = creditCase.contract?.signedDateYear || "2026";
 
-  // Canvas drawing handlers
+  // Canvas drawing handlers with scaling & touch support
   useEffect(() => {
     if (!isOpen || isAlreadySigned || readOnly) return;
     const canvas = canvasRef.current;
@@ -159,16 +164,31 @@ export default function ContractViewerModal({
     ctx.lineJoin = "round";
   }, [isOpen, isAlreadySigned, readOnly]);
 
+  const getCanvasCoordinates = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>,
+    canvas: HTMLCanvasElement
+  ) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = "touches" in e ? (e.touches[0] ? e.touches[0].clientX : 0) : e.clientX;
+    const clientY = "touches" in e ? (e.touches[0] ? e.touches[0].clientY : 0) : e.clientY;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
+    };
+  };
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if ("touches" in e && e.cancelable) {
+      e.preventDefault();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = "touches" in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = "touches" in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
-
+    const { x, y } = getCanvasCoordinates(e, canvas);
     ctx.beginPath();
     ctx.moveTo(x, y);
     setIsDrawing(true);
@@ -177,15 +197,15 @@ export default function ContractViewerModal({
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
+    if ("touches" in e && e.cancelable) {
+      e.preventDefault();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = "touches" in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = "touches" in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
-
+    const { x, y } = getCanvasCoordinates(e, canvas);
     ctx.lineTo(x, y);
     ctx.stroke();
   };
@@ -203,6 +223,28 @@ export default function ContractViewerModal({
     setHasDrawn(false);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor selecciona un archivo de imagen válido (PNG, JPG, JPEG).");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("La imagen no debe superar los 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setUploadedSignatureUrl(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSignContract = async () => {
     if (!creditCase.id) return;
     let signatureUrl = "";
@@ -214,6 +256,12 @@ export default function ContractViewerModal({
       }
       const canvas = canvasRef.current;
       if (canvas) signatureUrl = canvas.toDataURL("image/png");
+    } else if (signingMode === "upload") {
+      if (!uploadedSignatureUrl) {
+        alert("Por favor selecciona o sube una imagen con tu firma antes de confirmar.");
+        return;
+      }
+      signatureUrl = uploadedSignatureUrl;
     } else {
       if (!typedSignature.trim()) {
         alert("Por favor escribe tu nombre completo para formalizar la firma.");
@@ -270,7 +318,20 @@ export default function ContractViewerModal({
       });
 
       // Synchronize updated user profile data into Firestore (root fields + contactProfile)
-      const targetUid = creditCase.userId || auth?.currentUser?.uid;
+      // so in future credit requests these details are automatically remembered!
+      let targetUid = creditCase.userId || auth?.currentUser?.uid;
+      if (!targetUid && finalEmail) {
+        try {
+          const userQuery = query(collection(db, "users"), where("email", "==", finalEmail), limit(1));
+          const snap = await getDocs(userQuery);
+          if (!snap.empty) {
+            targetUid = snap.docs[0].id;
+          }
+        } catch (e) {
+          console.warn("Could not find user by email for profile sync:", e);
+        }
+      }
+
       if (targetUid) {
         await saveUserContactProfile(targetUid, {
           documentType: "CC",
@@ -292,6 +353,7 @@ export default function ContractViewerModal({
       }, 3000);
     } catch (err) {
       console.error("Error signing contract:", err);
+      alert("Ocurrió un error al registrar la firma. Intenta nuevamente.");
       alert("Ocurrió un error al registrar la firma. Intenta nuevamente.");
     } finally {
       setIsSaving(false);
@@ -598,6 +660,17 @@ export default function ContractViewerModal({
                   </button>
                   <button
                     type="button"
+                    onClick={() => setSigningMode("upload")}
+                    className={`px-3 py-1 rounded-md transition-colors ${
+                      signingMode === "upload"
+                        ? "bg-white text-slate-900 shadow-xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Subir Firma
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setSigningMode("electronic")}
                     className={`px-3 py-1 rounded-md transition-colors ${
                       signingMode === "electronic"
@@ -610,12 +683,12 @@ export default function ContractViewerModal({
                 </div>
               </div>
 
-              {/* Company & Client editable metadata to complete contract (Auto-completed) */}
+              {/* Company & Client editable metadata to complete contract (Auto-completed & Saved for future credits) */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold px-1">
-                  <span>⚡ Datos autocompletados desde tu perfil (puedes verificar o editar si es necesario):</span>
+                <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-500 font-semibold px-1 gap-1">
+                  <span>⚡ Datos del cliente y empresa (se guardarán automáticamente en tu perfil para futuros créditos):</span>
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    Auto-Fill Activo
+                    Auto-Guardado en Perfil Activo
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-white rounded-xl border border-slate-200 text-xs">
@@ -705,14 +778,14 @@ export default function ContractViewerModal({
               {signingMode === "canvas" ? (
                 <div className="space-y-2">
                   <p className="text-xs text-slate-500">
-                    Dibuja tu firma a continuación con el cursor o tu dedo en pantalla táctil:
+                    Dibuja tu firma a continuación con el cursor del ratón o con tu dedo si estás desde el móvil:
                   </p>
                   <div className="relative border-2 border-dashed border-slate-300 rounded-xl bg-white overflow-hidden touch-none h-36">
                     <canvas
                       ref={canvasRef}
                       width={650}
                       height={144}
-                      className="w-full h-full cursor-crosshair"
+                      className="w-full h-full cursor-crosshair touch-none"
                       onMouseDown={startDrawing}
                       onMouseMove={draw}
                       onMouseUp={stopDrawing}
@@ -723,7 +796,7 @@ export default function ContractViewerModal({
                     />
                     {!hasDrawn && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-xs text-slate-400 font-sans">
-                        ✍️ Traza tu firma aquí
+                        ✍️ Traza tu firma aquí (Mouse o Pantalla Táctil)
                       </div>
                     )}
                   </div>
@@ -734,6 +807,65 @@ export default function ContractViewerModal({
                   >
                     <RotateCcw className="w-3 h-3" /> Limpiar y volver a firmar
                   </button>
+                </div>
+              ) : signingMode === "upload" ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500">
+                    Sube una foto o imagen de tu firma sobre fondo blanco (formato PNG o JPG):
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  {uploadedSignatureUrl ? (
+                    <div className="p-4 bg-white rounded-xl border-2 border-slate-200 flex flex-col items-center justify-center gap-3">
+                      <div className="max-h-28 w-full flex items-center justify-center bg-slate-50 rounded-lg p-2 border border-slate-100">
+                        <img
+                          src={uploadedSignatureUrl}
+                          alt="Firma subida"
+                          className="max-h-24 max-w-full object-contain"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Cambiar Imagen</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUploadedSignatureUrl("")}
+                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-xs font-semibold text-rose-700 flex items-center gap-1.5 transition-colors"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl bg-white p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors text-center group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-blue-50 group-hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors">
+                        <Upload className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">
+                          Haz clic para seleccionar la imagen de tu firma
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Formatos PNG, JPG o foto nítida de celular (máx. 5MB)
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">

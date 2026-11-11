@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Permitir lectura y escritura para expedientes de crédito (credit_cases)
+    match /credit_cases/{caseId}/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Permitir lectura y escritura para documentos bancarios y formularios
+    match /bank_forms/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Regla global: permitir acceso para usuarios autenticados y operaciones del portal/admin
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}

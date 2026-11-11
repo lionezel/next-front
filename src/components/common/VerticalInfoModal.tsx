@@ -19,13 +19,32 @@ import {
   Sparkles,
   CheckCircle2,
   ChevronRight,
+  HeartPulse,
+  Car,
+  FileCheck,
 } from "lucide-react";
 import { VerticalKey } from "@/src/types/common";
+import {
+  Finance3DVault,
+  Insurance3DShield,
+  Investment3DGrowth,
+  Health3DHeart,
+  Car3DAuto,
+  Contract3DSeal,
+  Lightning3DExpress,
+} from "@/src/components/common/Icons3D";
+
+export type ServiceModalKey =
+  | VerticalKey
+  | "salud_vida"
+  | "poliza_autos"
+  | "cumplimiento"
+  | "viabilidad_24h";
 
 interface VerticalInfoModalProps {
-  verticalKey: VerticalKey | null;
+  verticalKey: ServiceModalKey | string | null;
   onClose: () => void;
-  onBookAppointment?: (verticalKey: VerticalKey) => void;
+  onBookAppointment?: (verticalKey: any) => void;
 }
 
 interface VerticalData {
@@ -33,6 +52,7 @@ interface VerticalData {
   subtitle: string;
   badge: string;
   icon: any;
+  icon3D?: React.ComponentType<{ width?: number | string; height?: number | string; className?: string }>;
   accentColor: string;
   iconBg: string;
   badgeBg: string;
@@ -61,18 +81,19 @@ interface VerticalData {
   }[];
 }
 
-const VERTICALS_INFO: Record<VerticalKey, VerticalData> = {
+const VERTICALS_INFO: Record<string, VerticalData> = {
   credito: {
     title: "Crédito & Financiación",
     subtitle: "Soluciones de liquidez ágil y transparente con acompañamiento financiero especializado",
     badge: "Desembolso en 24h",
     icon: Coins,
-    accentColor: "text-emerald-700",
-    iconBg: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
-    badgeBg: "bg-emerald-50 text-emerald-800 border-emerald-200",
-    headerGradient: "from-emerald-50/70 via-teal-50/20 to-white",
-    topAccent: "from-emerald-500 via-teal-500 to-emerald-600",
-    glowColor: "rgba(16, 185, 129, 0.12)",
+    icon3D: Finance3DVault,
+    accentColor: "text-sky-700",
+    iconBg: "bg-sky-50 text-sky-700 border-sky-200/80",
+    badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+    headerGradient: "from-sky-50/70 via-cyan-50/20 to-white",
+    topAccent: "from-sky-500 via-sky-600 to-blue-600",
+    glowColor: "rgba(2, 132, 199, 0.15)",
     overview: {
       description:
         "Diseñamos líneas de crédito con tasas competitivas y plazos flexibles. Aprobación 100% digital, sin comisiones imprevistas ni letras pequeñas.",
@@ -156,12 +177,13 @@ const VERTICALS_INFO: Record<VerticalKey, VerticalData> = {
     subtitle: "Portafolios diversificados de alta rentabilidad con custodia segura de capital",
     badge: "Hasta 17.8% E.A.",
     icon: TrendingUp,
-    accentColor: "text-indigo-700",
-    iconBg: "bg-indigo-50 text-indigo-700 border-indigo-200/80",
-    badgeBg: "bg-indigo-50 text-indigo-800 border-indigo-200",
-    headerGradient: "from-indigo-50/70 via-violet-50/20 to-white",
-    topAccent: "from-indigo-500 via-violet-500 to-indigo-600",
-    glowColor: "rgba(99, 102, 241, 0.12)",
+    icon3D: Investment3DGrowth,
+    accentColor: "text-sky-700",
+    iconBg: "bg-sky-50 text-sky-700 border-sky-200/80",
+    badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+    headerGradient: "from-sky-50/70 via-indigo-50/20 to-white",
+    topAccent: "from-sky-500 via-blue-500 to-indigo-600",
+    glowColor: "rgba(2, 132, 199, 0.15)",
     overview: {
       description:
         "Estrategias patrimoniales enfocadas en maximizar tu rentabilidad con bajo riesgo. Invierte en instrumentos respaldados con seguimiento en tiempo real.",
@@ -242,45 +264,51 @@ const VERTICALS_INFO: Record<VerticalKey, VerticalData> = {
   },
   seguros: {
     title: "Seguros & Coberturas 360°",
-    subtitle: "Protección integral para tu salud, tu familia, tus vehículos y tu patrimonio",
-    badge: "Cobertura 24/7",
+    subtitle: "Protección integral para tu salud, familia, vehículos y empresa. Comparamos +35 aseguradoras líderes",
+    badge: "Asesoría Gratuita",
     icon: ShieldCheck,
+    icon3D: Insurance3DShield,
     accentColor: "text-sky-700",
     iconBg: "bg-sky-50 text-sky-700 border-sky-200/80",
     badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
     headerGradient: "from-sky-50/70 via-blue-50/20 to-white",
     topAccent: "from-sky-500 via-blue-500 to-sky-600",
-    glowColor: "rgba(14, 165, 233, 0.12)",
+    glowColor: "rgba(14, 165, 233, 0.15)",
     overview: {
       description:
-        "Tranquilidad total para los imprevistos de la vida. Te conectamos con las mejores aseguradoras con pólizas integrales y asistencia nacional inmediata.",
+        "Tranquilidad y respaldo absoluto ante cualquier imprevisto. Te conectamos con las mejores 35 compañías del país (Sura, Bolívar, Allianz, AXA, Mapfre, Seguros del Estado, Zurich, MetLife), defendiendo tus intereses y acompañándote en caso de reclamaciones.",
       keyPoints: [
-        "Pólizas de salud con acceso directo a especialistas sin trámites engorrosos",
-        "Seguros de autos con asistencia en carretera y carro taller 24/7",
-        "Pólizas de vida con respaldo familiar e indemnización ágil",
-        "Coberturas transparentes sin letra pequeña ni sorpresas de deducibles",
+        "Comparamos simultáneamente más de 35 aseguradoras para darte la mejor relación cobertura-precio",
+        "Acompañamiento prioritario en siniestros: no te dejamos solo ante las aseguradoras",
+        "Pólizas de salud con acceso directo a especialistas VIP y clínicas de alta complejidad",
+        "Tarifas preferenciales por convenio institucional hasta 30% más económicas",
       ],
     },
     solutions: [
       {
         title: "Seguro de Salud & Medicina Prepagada",
-        desc: "Acceso a las mejores clínicas del país y atención médica domiciliaria.",
+        desc: "Acceso directo a especialistas, clínicas VIP y urgencias médicas domiciliarias sin copagos sorpresa.",
         highlight: "Planes familiares e individuales",
       },
       {
-        title: "Póliza de Vida & Futuro Familiar",
-        desc: "Protección económica integral para los tuyos ante cualquier eventualidad.",
-        highlight: "Cobertura por invalidez y fallecimiento",
+        title: "Póliza de Vida & Ahorro Patrimonial",
+        desc: "Protección financiera para tu familia con opción de fondos de ahorro garantizado con interés compuesto.",
+        highlight: "Inembargable y deducible de renta",
       },
       {
         title: "Seguro Todo Riesgo Vehículos",
-        desc: "Pérdida total, daños a terceros, grúa y asistencia legal en carretera.",
-        highlight: "Tarifas preferenciales por convenio",
+        desc: "Pérdida total y parcial, vehículo de reemplazo, asistencia en carretera y grúa ilimitada 24/7.",
+        highlight: "Hasta 30% OFF por convenio",
+      },
+      {
+        title: "Seguros Empresariales & Colectivos",
+        desc: "Responsabilidad Civil, D&O, Todo Riesgo Daño Material y pólizas colectivas de salud para empleados.",
+        highlight: "Continuidad del negocio blindada",
       },
       {
         title: "Protección Hogar & Bienes",
-        desc: "Respaldo contra incendios, inundaciones, terremotos y hurtos.",
-        highlight: "Asistencias para cerrajería y plomería",
+        desc: "Respaldo contra incendios, inundaciones, terremotos, hurtos y daños de electrodomésticos.",
+        highlight: "Desde $35.000 COP/mes",
       },
     ],
     benefits: [
@@ -416,6 +444,362 @@ const VERTICALS_INFO: Record<VerticalKey, VerticalData> = {
       },
     ],
   },
+  salud_vida: {
+    title: "Salud & Vida 360°",
+    subtitle: "Medicina prepagada, pólizas de salud VIP y respaldo integral para ti y tu familia",
+    badge: "Acceso Prioritario VIP",
+    icon: HeartPulse,
+    icon3D: Health3DHeart,
+    accentColor: "text-sky-700",
+    iconBg: "bg-sky-50 text-sky-700 border-sky-200/80",
+    badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+    headerGradient: "from-sky-50/70 via-rose-50/20 to-white",
+    topAccent: "from-sky-500 via-rose-400 to-sky-600",
+    glowColor: "rgba(2, 132, 199, 0.15)",
+    overview: {
+      description:
+        "Cuida lo más valioso: la salud y el bienestar de quienes amas. Accede a las mejores redes clínicas del país con citas directas sin pasar por médico general, hospitalización en habitación individual y cobertura en el exterior.",
+      keyPoints: [
+        "Acceso directo a especialistas médicos sin autorizaciones complejas",
+        "Habitación individual y atención prioritaria en las mejores clínicas",
+        "Cobertura de maternidad, terapias y medicamentos de alta complejidad",
+        "Tarifas especiales para grupos familiares y colectivos empresariales",
+      ],
+    },
+    solutions: [
+      {
+        title: "Póliza de Salud Integral",
+        desc: "Cobertura hospitalaria y ambulatoria completa al 100% en las mejores instituciones.",
+        highlight: "Sin filas ni autorizaciones",
+      },
+      {
+        title: "Medicina Prepagada Flexible",
+        desc: "Planes ajustados a tu presupuesto con libre elección de especialistas y centros médicos.",
+        highlight: "Red médica nacional e internacional",
+      },
+      {
+        title: "Seguro de Vida & Invalidez",
+        desc: "Protección del futuro económico de tus beneficiarios ante cualquier eventualidad imprevista.",
+        highlight: "Indemnización directa inembargable",
+      },
+      {
+        title: "Asistencia Médica Domiciliaria",
+        desc: "Médico general y pediatra en casa 24/7 y orientación telefónica continua.",
+        highlight: "Atención ágil en minutos",
+      },
+    ],
+    benefits: [
+      {
+        title: "Trámite 100% Acompañado",
+        desc: "Gestionamos tus autorizaciones y reembolsos directamente.",
+        icon: ShieldCheck,
+      },
+      {
+        title: "Cobertura Internacional",
+        desc: "Asistencia médica de emergencia en tus viajes al exterior.",
+        icon: Award,
+      },
+      {
+        title: "Atención Inmediata",
+        desc: "Líneas de urgencia prioritarias disponibles las 24 horas.",
+        icon: Clock,
+      },
+    ],
+    requirements: [
+      "Documento de identidad de cada miembro a afiliar.",
+      "Diligenciamiento de la declaración de asegurabilidad digital.",
+      "Afiliación activa al sistema general de salud (EPS).",
+    ],
+    steps: [
+      {
+        step: "01",
+        title: "Evaluación Médica",
+        desc: "Revisamos tu grupo familiar y necesidades clínicas particulares.",
+      },
+      {
+        step: "02",
+        title: "Cuadro Comparativo",
+        desc: "Comparamos tarifas y coberturas entre Sura, Allianz, Colmédica y Bolívar.",
+      },
+      {
+        step: "03",
+        title: "Emisión & Carnetización",
+        desc: "Activación inmediata de tus carnés digitales en tu celular.",
+      },
+      {
+        step: "04",
+        title: "Respaldo Continuo",
+        desc: "Asignación de asesor personal para citas y trámites.",
+      },
+    ],
+  },
+  poliza_autos: {
+    title: "Póliza Todo Riesgo Autos",
+    subtitle: "Protección total para tu vehículo con asistencia ilimitada y los deducibles más bajos",
+    badge: "Ahorra hasta 35%",
+    icon: Car,
+    icon3D: Car3DAuto,
+    accentColor: "text-sky-700",
+    iconBg: "bg-sky-50 text-sky-700 border-sky-200/80",
+    badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+    headerGradient: "from-sky-50/70 via-cyan-50/20 to-white",
+    topAccent: "from-sky-500 via-sky-600 to-cyan-500",
+    glowColor: "rgba(2, 132, 199, 0.15)",
+    overview: {
+      description:
+        "Conduce con total tranquilidad. Tu auto está protegido contra pérdida total, hurto, choques, daños a terceros y eventos naturales. Incluye grúa sin límite de kilómetros y carro sustituto.",
+      keyPoints: [
+        "Responsabilidad Civil Extracontractual ampliada hasta $4.000 millones",
+        "Amparo total por pérdida parcial o total por daños y hurto",
+        "Vehículo de reemplazo mientras el tuyo está en taller",
+        "Asistencia jurídica en el sitio del siniestro en todo el país",
+      ],
+    },
+    solutions: [
+      {
+        title: "Todo Riesgo Premium",
+        desc: "Cero deducible en pérdidas totales, taller de concesionario y conductor elegido ilimitado.",
+        highlight: "La cobertura más completa",
+      },
+      {
+        title: "Todo Riesgo Estándar",
+        desc: "Excelente balance cobertura/precio para vehículos familiares de uso particular.",
+        highlight: "Deducible módico fijo",
+      },
+      {
+        title: "Póliza de Responsabilidad Civil Pura",
+        desc: "Respaldo jurídico y financiero si causas daños a otros vehículos o personas.",
+        highlight: "Económica y obligatoria para blindarte",
+      },
+      {
+        title: "Flotas & Vehículos Comerciales",
+        desc: "Tarifas especiales para camionetas, utilitarios y flotas empresariales de trabajo.",
+        highlight: "Tarifa corporativa por volumen",
+      },
+    ],
+    benefits: [
+      {
+        title: "Grúa & Asistencia 24/7",
+        desc: "Remolque, cerrajería vial, paso de corriente y cambio de llanta en minutos.",
+        icon: Clock,
+      },
+      {
+        title: "Carro de Reemplazo",
+        desc: "No te quedes a pie: recibe un vehículo sustituto durante reparaciones.",
+        icon: Car,
+      },
+      {
+        title: "Defensa Legal Incluida",
+        desc: "Abogados especializados te representan ante fiscalía o tránsito.",
+        icon: ShieldCheck,
+      },
+    ],
+    requirements: [
+      "Tarjeta de propiedad del vehículo o factura de compra.",
+      "Cédula del propietario o tomador.",
+      "Inspección física o virtual por app según el modelo del auto.",
+    ],
+    steps: [
+      {
+        step: "01",
+        title: "Ingreso de Placa",
+        desc: "Con solo la placa y modelo cotizamos en +35 aseguradoras simultáneamente.",
+      },
+      {
+        step: "02",
+        title: "Selección de Opción",
+        desc: "Eliges la propuesta con mejor deducible y precio para ti.",
+      },
+      {
+        step: "03",
+        title: "Inspección Rápida",
+        desc: "Inspección en taller aliado, a domicilio o 100% digital por fotos.",
+      },
+      {
+        step: "04",
+        title: "Emisión Inmediata",
+        desc: "Tu carro queda asegurado desde el primer minuto con carné digital.",
+      },
+    ],
+  },
+  cumplimiento: {
+    title: "Cumplimiento & Licitaciones",
+    subtitle: "Garantías y pólizas fiduciarias para contratos con el Estado, privadas y obra civil",
+    badge: "Emisión en 24h",
+    icon: FileCheck,
+    icon3D: Contract3DSeal,
+    accentColor: "text-sky-700",
+    iconBg: "bg-sky-50 text-sky-700 border-sky-200/80",
+    badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+    headerGradient: "from-sky-50/70 via-amber-50/20 to-white",
+    topAccent: "from-sky-500 via-amber-400 to-sky-600",
+    glowColor: "rgba(2, 132, 199, 0.15)",
+    overview: {
+      description:
+        "Respaldo técnico y financiero para que tu empresa gane y ejecute contratos con tranquilidad. Emitimos pólizas de seriedad de la oferta, buen manejo del anticipo, cumplimiento del contrato, salarios y prestaciones sociales, y estabilidad de obra.",
+      keyPoints: [
+        "Líneas de cupo ágiles pre-aprobadas para licitantes frecuentes",
+        "Emisión garantizada en menos de 24 horas para cierres de licitación",
+        "Validación fiduciaria y fianza con aseguradoras avaladas por el SECOP",
+        "Acompañamiento por abogados especialistas en contratación estatal",
+      ],
+    },
+    solutions: [
+      {
+        title: "Seriedad de la Oferta",
+        desc: "Garantiza tu propuesta en licitaciones públicas o privadas desde la presentación.",
+        highlight: "Emisión express el mismo día",
+      },
+      {
+        title: "Cumplimiento de Contrato & Calidad",
+        desc: "Ampara la correcta ejecución de las obligaciones contractuales acordadas.",
+        highlight: "Aceptadas por el 100% de entidades",
+      },
+      {
+        title: "Buen Manejo de Anticipo",
+        desc: "Garantiza la correcta inversión de los fondos recibidos para el arranque de obra.",
+        highlight: "Protección integral del flujo de caja",
+      },
+      {
+        title: "Salarios & Prestaciones Sociales",
+        desc: "Cubre a los trabajadores vinculados a la ejecución del contrato.",
+        highlight: "Cumplimiento laboral blindado",
+      },
+    ],
+    benefits: [
+      {
+        title: "Aprobación Rápida de Cupos",
+        desc: "Estudio de estados financieros en tiempo récord para que no pierdas licitaciones.",
+        icon: Zap,
+      },
+      {
+        title: "Aceptación Nacional",
+        desc: "Pólizas con respaldo de las principales aseguradoras de fianza de Colombia.",
+        icon: Award,
+      },
+      {
+        title: "Asesoría Contractual",
+        desc: "Revisión preventiva de los pliegos y condiciones por expertos legales.",
+        icon: ShieldCheck,
+      },
+    ],
+    requirements: [
+      "RUT y Cámara de Comercio reciente de la empresa contratista.",
+      "Estados financieros de los dos últimos años con notas de contador.",
+      "Pliego de condiciones o borrador/minuta del contrato a suscribir.",
+    ],
+    steps: [
+      {
+        step: "01",
+        title: "Envío del Pliego o Minuta",
+        desc: "Nos compartes los requerimientos del contratante o SECOP.",
+      },
+      {
+        step: "02",
+        title: "Estudio Financiero",
+        desc: "Apertura o uso de cupo fiduciario con la aseguradora aliada.",
+      },
+      {
+        step: "03",
+        title: "Emisión de la Póliza",
+        desc: "Generación de la póliza con firma digital y constancia de pago.",
+      },
+      {
+        step: "04",
+        title: "Cargue al SECOP o Entrega",
+        desc: "Entrega del documento listo para legalizar y arrancar el contrato.",
+      },
+    ],
+  },
+  viabilidad_24h: {
+    title: "Viabilidad Express 24h",
+    subtitle: "Diagnóstico financiero y pre-aprobación ágil sin afectar tu puntaje en centrales de riesgo",
+    badge: "Diagnóstico Sin Costo",
+    icon: Zap,
+    icon3D: Lightning3DExpress,
+    accentColor: "text-sky-700",
+    iconBg: "bg-sky-50 text-sky-700 border-sky-200/80",
+    badgeBg: "bg-sky-50 text-sky-800 border-sky-200",
+    headerGradient: "from-sky-50/70 via-yellow-50/20 to-white",
+    topAccent: "from-sky-500 via-yellow-400 to-sky-600",
+    glowColor: "rgba(2, 132, 199, 0.15)",
+    overview: {
+      description:
+        "¿No sabes cuánto te pueden prestar o qué banco te ofrece la tasa más baja? Con nuestro sistema inteligente evaluamos tu perfil crediticio en más de 35 bancos y cooperativas al instante, identificando la mejor opción sin desgastes ni rechazos.",
+      keyPoints: [
+        "Diagnóstico financiero 100% gratuito sin costo de consulta",
+        "Consulta preventiva sin huella negativa en centrales de riesgo (Datacrédito / TransUnion)",
+        "Pre-aprobación formal en menos de 24 horas con montos y cuotas reales",
+        "Ruta clara para mejorar tu capacidad de endeudamiento y saneamiento financiero",
+      ],
+    },
+    solutions: [
+      {
+        title: "Pre-Aprobación Multibanco",
+        desc: "Simulación simultánea en 35 entidades financieras con un solo formulario.",
+        highlight: "Compara tasas en una sola pantalla",
+      },
+      {
+        title: "Diagnóstico de Capacidad de Pago",
+        desc: "Análisis exacto de cuánto puedes solicitar según tus ingresos y gastos fijos.",
+        highlight: "Evita rechazos bancarios",
+      },
+      {
+        title: "Estrategia de Consolidación",
+        desc: "Unificación de deudas para reducir tu cuota mensual hasta en un 40%.",
+        highlight: "Alivia tu flujo de caja",
+      },
+      {
+        title: "Asesoría Especializada 1 a 1",
+        desc: "Un especialista analiza tu caso y te guía en la documentación necesaria.",
+        highlight: "Acompañamiento hasta el desembolso",
+      },
+    ],
+    benefits: [
+      {
+        title: "Respuesta en Menos de 24h",
+        desc: "Conoce tu viabilidad real de aprobación antes de radicar documentos.",
+        icon: Zap,
+      },
+      {
+        title: "Cero Costos Ocultos",
+        desc: "El diagnóstico y la asesoría inicial son 100% gratuitos.",
+        icon: Award,
+      },
+      {
+        title: "Sin Afectar Centrales",
+        desc: "Consulta preventiva controlada que protege tu score crediticio.",
+        icon: ShieldCheck,
+      },
+    ],
+    requirements: [
+      "Cédula de ciudadanía del solicitante.",
+      "Monto estimado de crédito requerido y plazo deseado.",
+      "Ingresos mensuales aproximados (empleado, independiente o pensionado).",
+    ],
+    steps: [
+      {
+        step: "01",
+        title: "Solicitud Express",
+        desc: "Diligencias el formulario rápido o reservas tu asesoría en tiempo real.",
+      },
+      {
+        step: "02",
+        title: "Diagnóstico del Perfil",
+        desc: "Corremos el simulador multibanco con tus parámetros.",
+      },
+      {
+        step: "03",
+        title: "Presentación de Opciones",
+        desc: "Te mostramos las 3 mejores ofertas bancarias con sus tasas.",
+      },
+      {
+        step: "04",
+        title: "Radicación & Desembolso",
+        desc: "Avanzamos con la entidad elegida para el desembolso ágil.",
+      },
+    ],
+  },
 };
 
 export default function VerticalInfoModal({
@@ -430,6 +814,7 @@ export default function VerticalInfoModal({
   if (!data) return null;
 
   const Icon = data.icon;
+  const Icon3D = data.icon3D;
 
   const handleActionBook = () => {
     onClose();
@@ -442,7 +827,7 @@ export default function VerticalInfoModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-5 md:p-6 overflow-y-auto">
         {/* Animated Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -453,40 +838,41 @@ export default function VerticalInfoModal({
           className="fixed inset-0 bg-slate-950/60 backdrop-blur-md"
         />
 
-        {/* Spacious, Elegant & Highly Animated Dialog Sheet */}
+        {/* Spacious, Elegant Floating Dialog (Separated on Mobile & PC) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 30 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 20 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ type: "spring", stiffness: 320, damping: 28 }}
-          className="relative w-full max-w-2xl lg:max-w-3xl bg-white rounded-t-[32px] sm:rounded-3xl shadow-2xl overflow-hidden z-10 mt-auto sm:my-auto flex flex-col max-h-[88vh] border border-slate-200/90"
+          className="relative w-full max-w-2xl lg:max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden z-10 my-auto flex flex-col max-h-[88vh] border border-slate-200/90 mx-auto"
           style={{
             boxShadow: `0 25px 60px -15px ${data.glowColor}, 0 10px 30px -10px rgba(0,0,0,0.1)`,
           }}
         >
-          {/* Mobile Drag Indicator */}
-          <div className="w-12 h-1.5 rounded-full bg-slate-300 mx-auto mt-3 mb-1 sm:hidden shrink-0" />
-
           {/* Top Gradient Accent Bar */}
           <div className={`h-1.5 w-full bg-gradient-to-r ${data.topAccent} shrink-0`} />
 
           {/* Elegant Airy Header */}
-          <div className={`p-5 sm:p-7 bg-gradient-to-b ${data.headerGradient} border-b border-slate-100 shrink-0 relative overflow-hidden`}>
+          <div className={`p-4 sm:p-7 bg-gradient-to-b ${data.headerGradient} border-b border-slate-100 shrink-0 relative overflow-hidden`}>
             {/* Ambient Background Glow */}
             <div
               className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-60"
               style={{ backgroundColor: data.glowColor }}
             />
 
-            <div className="flex items-start justify-between gap-4 relative z-10">
-              <div className="flex items-start gap-3.5 sm:gap-4 min-w-0">
+            <div className="flex items-start justify-between gap-3 sm:gap-4 relative z-10">
+              <div className="flex items-start gap-3 sm:gap-4 min-w-0">
                 <motion.div
-                  initial={{ rotate: -10, scale: 0.8 }}
+                  initial={{ rotate: -8, scale: 0.85 }}
                   animate={{ rotate: 0, scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 border shadow-sm bg-white ${data.iconBg}`}
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shrink-0 border border-sky-100 shadow-sm bg-gradient-to-b from-white to-sky-50/60 p-1"
                 >
-                  <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                  {Icon3D ? (
+                    <Icon3D width={46} height={46} className="drop-shadow-sm" />
+                  ) : (
+                    <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-sky-600" />
+                  )}
                 </motion.div>
 
                 <div className="min-w-0">

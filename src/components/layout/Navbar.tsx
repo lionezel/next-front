@@ -256,66 +256,62 @@ export default function Navbar() {
       </header>
 
       {/* ============================================================== */}
-      {/* SOBER & CLEAN BOTTOM NAVIGATION BAR ON MOBILE */}
+      {/* SOBER & CLEAN BOTTOM NAVIGATION BAR ON MOBILE (MIS CITAS & MI PORTAL CON AVATAR) */}
       {/* ============================================================== */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/98 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 py-1.5 safe-area-bottom">
-        <div className="flex items-center justify-around max-w-md mx-auto">
-          {/* 1. Inicio */}
-          <Link
-            href="/"
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
-              pathname === "/"
-                ? "text-slate-950 font-bold scale-105"
-                : "text-slate-400 hover:text-slate-700 font-medium"
-            }`}
-          >
-            <div className={`p-1 rounded-lg ${pathname === "/" ? "bg-slate-100" : ""}`}>
-              <Home className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] mt-0.5 tracking-tight">Inicio</span>
-          </Link>
-
-          {/* 2. Soluciones */}
-          <button
-            type="button"
-            onClick={() => handleScrollToSection("pilares")}
-            className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 hover:text-slate-700 font-medium transition-all active:scale-95"
-          >
-            <div className="p-1 rounded-lg">
-              <Layers className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] mt-0.5 tracking-tight">Soluciones</span>
-          </button>
-
-          {/* 3. Agendar Cita */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/98 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-4 py-2 safe-area-bottom">
+        <div className="flex items-center justify-around max-w-sm mx-auto">
+          {/* 1. Mis Citas */}
           <Link
             href="/citas"
             onClick={handleScrollToCitas}
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
+            className={`flex flex-col items-center justify-center py-1 px-5 rounded-2xl transition-all ${
               pathname === "/citas"
-                ? "text-slate-950 font-bold scale-105"
-                : "text-slate-400 hover:text-slate-700 font-medium"
+                ? "text-sky-600 font-bold scale-105"
+                : "text-slate-500 hover:text-slate-800 font-medium"
             }`}
           >
-            <div className={`p-1 rounded-lg ${pathname === "/citas" ? "bg-slate-100" : ""}`}>
-              <Calendar className="w-5 h-5" />
+            <div className={`p-1.5 rounded-xl transition-colors ${pathname === "/citas" ? "bg-sky-50 text-sky-600" : ""}`}>
+              <Calendar className="w-5 h-5 text-sky-500" />
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight">Citas</span>
+            <span className="text-xs mt-0.5 tracking-tight font-bold">Mis Citas</span>
           </Link>
 
-          {/* 4. Mi Portal */}
+          {/* 2. Mi Portal con Avatar Real si está con sesión iniciada */}
           <Link
             href={currentUser ? "/portal" : "/portal/login"}
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
+            className={`flex flex-col items-center justify-center py-1 px-5 rounded-2xl transition-all ${
               pathname.startsWith("/portal")
-                ? "text-slate-950 font-bold scale-105"
-                : "text-slate-400 hover:text-slate-700 font-medium"
+                ? "text-sky-600 font-bold scale-105"
+                : "text-slate-500 hover:text-slate-800 font-medium"
             }`}
           >
-            <div className={`p-1 rounded-lg ${pathname.startsWith("/portal") ? "bg-slate-100" : ""}`}>
-              <User className="w-5 h-5" />
+            <div className={`p-1 rounded-xl flex items-center justify-center transition-colors ${pathname.startsWith("/portal") ? "bg-sky-50" : ""}`}>
+              {currentUser ? (
+                <div className="relative">
+                  {currentUser.photoURL ? (
+                    <img
+                      src={currentUser.photoURL}
+                      alt={currentUser.displayName || "Perfil"}
+                      className="w-6 h-6 rounded-full object-cover ring-2 ring-sky-500 shadow-xs"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center text-[11px] font-black shadow-xs">
+                      {currentUser.displayName
+                        ? currentUser.displayName.charAt(0).toUpperCase()
+                        : currentUser.email?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                  )}
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full ring-1 ring-white" />
+                </div>
+              ) : (
+                <User className="w-5 h-5 text-slate-600" />
+              )}
             </div>
-            <span className="text-[10px] mt-0.5 tracking-tight">Mi Portal</span>
+            <span className="text-xs mt-0.5 tracking-tight font-bold">
+              {currentUser
+                ? (currentUser.displayName?.split(" ")[0] || "Mi Portal")
+                : "Mi Portal"}
+            </span>
           </Link>
         </div>
       </nav>

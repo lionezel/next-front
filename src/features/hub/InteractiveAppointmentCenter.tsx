@@ -45,10 +45,10 @@ const SPECIALTIES = [
     description: "Tasas preferenciales y libre inversión",
     duration: "30 min",
     icon: Coins,
-    color: "emerald",
-    activeClass: "border-emerald-600 bg-emerald-50/70 text-emerald-950 ring-1 ring-emerald-600",
-    iconColor: "text-emerald-700 bg-emerald-100/80",
-    badge: "Desde 1.2% M.V.",
+    color: "sky",
+    activeClass: "border-sky-500 bg-sky-50/70 text-sky-950 ring-1 ring-sky-500",
+    iconColor: "text-sky-600 bg-sky-100/80",
+    badge: "Desde 1.15% M.V.",
   },
   {
     id: "inversiones",
@@ -514,7 +514,7 @@ export default function InteractiveAppointmentCenter() {
                       s === step
                         ? "w-7 bg-slate-900"
                         : s < step
-                        ? "w-3 bg-emerald-600 cursor-pointer"
+                        ? "w-3 bg-sky-500 cursor-pointer"
                         : "w-3 bg-slate-200"
                     }`}
                     aria-label={`Ir al paso ${s}`}

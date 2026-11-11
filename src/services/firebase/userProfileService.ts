@@ -45,16 +45,20 @@ export async function saveUserContactProfile(
         clientName: cleanName,
       }),
       ...(profile.email && { email: profile.email.trim().toLowerCase() }),
-      ...(profile.city && { city: profile.city.trim() }),
-      ...(profile.address && { address: profile.address.trim() }),
-      ...(profile.companyName && { companyName: profile.companyName.trim() }),
-      ...(profile.companyNit && { companyNit: profile.companyNit.trim() }),
+      ...(profile.city && { city: profile.city.trim(), ciudad: profile.city.trim() }),
+      ...(profile.address && { address: profile.address.trim(), direccion: profile.address.trim(), direccionResidencial: profile.address.trim() }),
+      ...(profile.companyName && { companyName: profile.companyName.trim(), razonSocial: profile.companyName.trim(), empresa: profile.companyName.trim() }),
+      ...(profile.companyNit && { companyNit: profile.companyNit.trim(), nit: profile.companyNit.trim() }),
       // Keep contactProfile snapshot for easy access
       contactProfile: {
         ...profile,
         ...(cleanDoc && { documentNumber: cleanDoc }),
         ...(cleanPhone && { phone: cleanPhone }),
         ...(cleanName && { clientName: cleanName }),
+        ...(profile.companyName && { companyName: profile.companyName.trim(), razonSocial: profile.companyName.trim() }),
+        ...(profile.companyNit && { companyNit: profile.companyNit.trim(), nit: profile.companyNit.trim() }),
+        ...(profile.address && { address: profile.address.trim(), direccion: profile.address.trim() }),
+        ...(profile.city && { city: profile.city.trim() }),
         updatedAt: serverTimestamp(),
       },
       updatedAt: serverTimestamp(),
@@ -142,11 +146,13 @@ export async function getUserContactProfile(
   let address =
     data.address ||
     data.direccion ||
+    data.direccionResidencial ||
     data.contactProfile?.address ||
     "";
 
   let companyName =
     data.companyName ||
+    data.razonSocial ||
     data.empresa ||
     data.contactProfile?.companyName ||
     "";
@@ -219,7 +225,19 @@ export async function getUserContactProfile(
           if (!clientName) {
             clientName = caseData.clientName || caseData.contract?.repLegalName || "";
           }
-          if (documentNumber && phone) break;
+          if (!companyName) {
+            companyName = caseData.companyName || caseData.contract?.companyName || caseData.razonSocial || "";
+          }
+          if (!companyNit) {
+            companyNit = caseData.companyNit || caseData.contract?.companyNit || caseData.nit || "";
+          }
+          if (!address) {
+            address = caseData.address || caseData.contract?.address || caseData.direccion || "";
+          }
+          if (!city) {
+            city = caseData.city || caseData.contract?.city || caseData.ciudad || "";
+          }
+          if (documentNumber && phone && companyName) break;
         }
       }
     } catch (e) {
@@ -228,7 +246,7 @@ export async function getUserContactProfile(
   }
 
   // If missing fields were retrieved from fallbacks, persist them to user's root document
-  if (uid && (documentNumber || phone)) {
+  if (uid && (documentNumber || phone || companyName || address)) {
     try {
       const updatesToPersist: any = {};
       if (documentNumber && !data.documentNumber) {
@@ -242,6 +260,26 @@ export async function getUserContactProfile(
       if (clientName && !data.clientName) {
         updatesToPersist.clientName = clientName;
         updatesToPersist.displayName = clientName;
+      }
+      if (companyName && !data.companyName) {
+        updatesToPersist.companyName = companyName;
+        updatesToPersist.razonSocial = companyName;
+      }
+      if (companyNit && !data.companyNit) {
+        updatesToPersist.companyNit = companyNit;
+        updatesToPersist.nit = companyNit;
+      }
+      if (address && !data.address) {
+        updatesToPersist.address = address;
+        updatesToPersist.direccion = address;
+      }
+      if (city && !data.city) {
+        updatesToPersist.city = city;
+        updatesToPersist.ciudad = city;
+      }
+      if (Object.keys(updatesToPersist).length > 0) {
+        const userRef = doc(db, USERS_COLLECTION, uid);
+        await setDoc(userRef, updatesToPersist, { merge: true });
       }
       if (Object.keys(updatesToPersist).length > 0) {
         await setDoc(doc(db, USERS_COLLECTION, uid), updatesToPersist, { merge: true });

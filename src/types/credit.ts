@@ -95,7 +95,7 @@ export interface CreditContractData {
   // Execution & Signature state
   signed?: boolean;
   signatureDataUrl?: string;
-  signatureType?: "canvas" | "electronic";
+  signatureType?: "canvas" | "electronic" | "upload";
   signedAt?: any;
   signedDateDay?: string;
   signedDateMonth?: string;

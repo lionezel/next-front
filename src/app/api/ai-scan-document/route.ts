@@ -89,29 +89,45 @@ Devuelve ÚNICAMENTE un objeto JSON válido con este formato:
           }
         }
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
-        const geminiRes = await fetch(geminiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts }],
-            generationConfig: {
-              temperature: 0.1,
-              responseMimeType: "application/json",
-            },
-          }),
-        });
+        // Intentar modelos compatibles de Google Gemini con timeout de respaldo
+        const geminiModels = ["gemini-3.8-flash", "gemini-2.5-flash", "gemini-flash-latest"];
+        let geminiSuccess = false;
 
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-          const parsed = JSON.parse(rawText);
-          return NextResponse.json({ success: true, provider: "google_gemini", data: parsed });
-        } else {
-          console.warn("Gemini API falló, reintentando con fallback...", await geminiRes.text());
+        for (const model of geminiModels) {
+          try {
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+            const geminiRes = await fetch(geminiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              signal: controller.signal,
+              body: JSON.stringify({
+                contents: [{ parts }],
+                generationConfig: {
+                  temperature: 0.1,
+                  responseMimeType: "application/json",
+                },
+              }),
+            });
+            clearTimeout(timeoutId);
+
+            if (geminiRes.ok) {
+              const geminiData = await geminiRes.json();
+              const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+              const parsed = JSON.parse(rawText);
+              geminiSuccess = true;
+              return NextResponse.json({ success: true, provider: `google_gemini_${model}`, data: parsed });
+            } else {
+              console.warn(`Gemini (${model}) status ${geminiRes.status}:`, await geminiRes.text());
+            }
+          } catch (mErr) {
+            console.warn(`Error llamando a Gemini (${model}):`, mErr);
+          }
         }
       } catch (geminiErr) {
-        console.warn("Error en Gemini API, intentando con OpenAI:", geminiErr);
+        console.warn("Error general en Gemini API, intentando con OpenAI:", geminiErr);
       }
     }
 

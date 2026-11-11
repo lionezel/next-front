@@ -549,6 +549,13 @@ export async function saveCreditContractSignature(
     "contract.signedDateDay": day,
     "contract.signedDateMonth": month,
     "contract.signedDateYear": year,
+    ...(contractUpdate.companyName && { companyName: contractUpdate.companyName, razonSocial: contractUpdate.companyName }),
+    ...(contractUpdate.companyNit && { companyNit: contractUpdate.companyNit, nit: contractUpdate.companyNit }),
+    ...(contractUpdate.address && { address: contractUpdate.address, direccion: contractUpdate.address }),
+    ...(contractUpdate.city && { city: contractUpdate.city }),
+    ...(contractUpdate.repLegalDoc && { documentNumber: contractUpdate.repLegalDoc }),
+    ...(contractUpdate.phone && { phone: contractUpdate.phone }),
+    ...(contractUpdate.repLegalName && { clientName: contractUpdate.repLegalName }),
     ...Object.entries(contractUpdate).reduce((acc, [key, val]) => {
       if (val !== undefined) acc[`contract.${key}`] = val;
       return acc;

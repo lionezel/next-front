@@ -12,10 +12,10 @@ import {
 
 export default function EcosystemTrust() {
   const stats = [
-    { value: "+15,000", label: "Usuarios y Clientes Satisfechos", icon: Users },
-    { value: "$42,000M+", label: "Capital Financiado e Invertido", icon: Award },
-    { value: "99.4%", label: "Tasa de Satisfacción y Soporte", icon: ShieldCheck },
-    { value: "24h", label: "Tiempo Máximo de Respuesta Digital", icon: Zap },
+    { value: "+15,000", label: "Clientes y Familias Respaldadas", icon: Users },
+    { value: "+35", label: "Aseguradoras y Bancos Aliados", icon: ShieldCheck },
+    { value: "$42,000M+", label: "Capital Gestionado y Financiado", icon: Award },
+    { value: "24h", label: "Tiempo de Respuesta y Desembolso", icon: Zap },
   ];
 
   const pillars = [

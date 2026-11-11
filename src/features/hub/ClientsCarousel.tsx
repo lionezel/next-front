@@ -13,6 +13,12 @@ function PartnerWordmark({ name }: { name: string }) {
     "Credicorp Capital": { font: "font-bold tracking-tight", color: "text-slate-800" },
     "Sura Seguros": { font: "font-black tracking-tighter text-base", color: "text-slate-800" },
     "Seguros Bolívar": { font: "font-extrabold tracking-normal", color: "text-slate-800" },
+    "Allianz Seguros": { font: "font-black tracking-normal", color: "text-slate-800" },
+    "AXA Colpatria": { font: "font-black tracking-tight", color: "text-slate-800" },
+    "Mapfre Seguros": { font: "font-extrabold tracking-wide", color: "text-slate-800" },
+    "Seguros del Estado": { font: "font-bold tracking-tight", color: "text-slate-800" },
+    "Zurich Seguros": { font: "font-black tracking-tighter", color: "text-slate-800" },
+    MetLife: { font: "font-black tracking-tight", color: "text-slate-800" },
     "Smart Fit Club": { font: "font-black tracking-tight uppercase", color: "text-slate-800" },
     "Bodytech Fitness": { font: "font-black tracking-widest uppercase", color: "text-slate-800" },
   };
@@ -59,8 +65,8 @@ export default function ClientsCarousel({ category, title, subtitle }: ClientsCa
     <section className="py-6 sm:py-8 bg-white border-b border-slate-200/80 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Subtle, quiet heading */}
-        <p className="text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 sm:mb-6">
-          Respaldado por las principales entidades del sector
+        <p className="text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 mb-4 sm:mb-6">
+          Respaldado por más de 35 compañías aseguradoras y entidades financieras líderes
         </p>
 
         {/* Infinite Logo Marquee Strip */}
