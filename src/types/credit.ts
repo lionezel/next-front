@@ -59,6 +59,14 @@ export type CreditCaseStatus =
 export type CreditDocumentStatus = "pendiente" | "en_revision" | "aprobado" | "rechazado";
 export type CreditDocumentCategory = "empresa" | "avalista" | "pago" | "otros";
 
+export interface CreditDocumentFile {
+  id: string;
+  name: string;
+  url: string;
+  uploadedAt?: string;
+  size?: number;
+}
+
 export interface CreditDocumentItem {
   id: string; // e.g. "empresa_cedula_rep_legal", "avalista_rut"
   title: string;
@@ -66,9 +74,10 @@ export interface CreditDocumentItem {
   category?: CreditDocumentCategory;
   required: boolean;
   status: CreditDocumentStatus;
-  fileUrl?: string; // Firebase Storage download URL
+  fileUrl?: string; // Firebase Storage download URL (principal o primer archivo para retrocompatibilidad)
   fileDataUrl?: string; // Base64 data URL fallback for instant CORS-proof access
   fileName?: string;
+  files?: CreditDocumentFile[]; // 🔥 Soporte para múltiples archivos (ej. 3 últimos extractos)
   rejectionReason?: string;
   uploadedAt?: any;
   reviewedAt?: any;

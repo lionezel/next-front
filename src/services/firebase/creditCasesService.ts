@@ -30,7 +30,7 @@ import {
 } from "firebase/storage";
 import { auth, db, storage } from "@/src/firebase/config";
 import { saveFormFileToIndexedDB } from "../fileStore";
-import { CreditCase, CreditDocumentItem, CreditContractData, CreditStudyPayment, CreditCaseStatus } from "@/src/types/credit";
+import { CreditCase, CreditDocumentItem, CreditDocumentFile, CreditContractData, CreditStudyPayment, CreditCaseStatus } from "@/src/types/credit";
 
 const COLLECTION_NAME = "credit_cases";
 
@@ -362,6 +362,36 @@ export function subscribeUserCreditCase(
  * - Tipos primitivos válidos (string, boolean)
  */
 export function sanitizeDocumentItem(docItem: any): CreditDocumentItem {
+  // Parsear archivos múltiples o normalizar fileUrl único a lista de archivos
+  let files: CreditDocumentFile[] = [];
+  if (Array.isArray(docItem?.files) && docItem.files.length > 0) {
+    files = docItem.files
+      .filter((f: any) => Boolean(f?.url || f?.fileUrl))
+      .map((f: any, idx: number) => ({
+        id: String(f?.id || `f_${Date.now()}_${idx}`),
+        name: String(f?.name || f?.fileName || `Archivo ${idx + 1}`),
+        url: String(f?.url || f?.fileUrl || ""),
+        uploadedAt: f?.uploadedAt
+          ? (typeof f.uploadedAt === "string" ? f.uploadedAt : (f.uploadedAt?.toDate?.()?.toISOString?.() || String(f.uploadedAt)))
+          : new Date().toISOString(),
+        size: typeof f?.size === "number" ? f.size : 0,
+      }));
+  } else if (docItem?.fileUrl) {
+    files = [
+      {
+        id: `f_legacy_${docItem?.id || Date.now()}`,
+        name: String(docItem?.fileName || "Archivo adjunto"),
+        url: String(docItem.fileUrl),
+        uploadedAt: docItem?.uploadedAt
+          ? (typeof docItem.uploadedAt === "string" ? docItem.uploadedAt : (docItem.uploadedAt?.toDate?.()?.toISOString?.() || String(docItem.uploadedAt)))
+          : new Date().toISOString(),
+        size: 0,
+      },
+    ];
+  }
+
+  const primaryFile = files.length > 0 ? files[files.length - 1] : null;
+
   const clean: Record<string, any> = {
     id: String(docItem?.id || `doc_${Date.now()}`),
     title: String(docItem?.title || "Documento"),
@@ -369,14 +399,17 @@ export function sanitizeDocumentItem(docItem: any): CreditDocumentItem {
     status: ["pendiente", "en_revision", "aprobado", "rechazado"].includes(docItem?.status)
       ? docItem.status
       : "pendiente",
-    fileUrl: String(docItem?.fileUrl || ""),
-    fileName: String(docItem?.fileName || ""),
+    fileUrl: primaryFile ? primaryFile.url : String(docItem?.fileUrl || ""),
+    fileName: files.length > 1
+      ? `${files.length} archivos adjuntos`
+      : (primaryFile ? primaryFile.name : String(docItem?.fileName || "")),
+    files,
     rejectionReason: String(docItem?.rejectionReason || ""),
     uploadedAt: docItem?.uploadedAt
       ? (typeof docItem.uploadedAt === "string"
           ? docItem.uploadedAt
           : (docItem.uploadedAt?.toDate?.()?.toISOString?.() || String(docItem.uploadedAt)))
-      : "",
+      : (primaryFile ? primaryFile.uploadedAt : ""),
     reviewedAt: docItem?.reviewedAt
       ? (typeof docItem.reviewedAt === "string"
           ? docItem.reviewedAt
@@ -390,7 +423,7 @@ export function sanitizeDocumentItem(docItem: any): CreditDocumentItem {
 }
 
 /**
- * Subir un documento a Firebase Storage y actualizar el expediente de crédito
+ * Subir un documento a Firebase Storage y actualizar el expediente de crédito (agrega a lista de archivos)
  */
 export async function uploadCreditDocumentFile(
   creditCaseId: string,
@@ -399,56 +432,92 @@ export async function uploadCreditDocumentFile(
   currentDocuments: CreditDocumentItem[],
   onProgress?: (progress: number) => void
 ): Promise<string> {
+  return (await uploadMultipleCreditDocumentFiles(
+    creditCaseId,
+    documentId,
+    [file],
+    currentDocuments,
+    onProgress
+  ))[0];
+}
+
+/**
+ * Subir uno o múltiples documentos a la vez a Firebase Storage y añadirlos a la lista de archivos
+ */
+export async function uploadMultipleCreditDocumentFiles(
+  creditCaseId: string,
+  documentId: string,
+  filesToUpload: File[],
+  currentDocuments: CreditDocumentItem[],
+  onProgress?: (progress: number) => void
+): Promise<string[]> {
   if (!storage || !db) {
     throw new Error("Firebase Storage o Firestore no inicializados");
   }
 
-  // 1. Subir archivo a Storage
-  const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const storagePath = `creditos/${creditCaseId}/${documentId}_${Date.now()}_${sanitizedName}`;
-  const storageRef = ref(storage, storagePath);
+  const uploadedUrls: string[] = [];
+  const newFiles: CreditDocumentFile[] = [];
 
-  const uploadTask = uploadBytesResumable(storageRef, file);
+  for (let i = 0; i < filesToUpload.length; i++) {
+    const file = filesToUpload[i];
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const storagePath = `creditos/${creditCaseId}/${documentId}_${Date.now()}_${i}_${sanitizedName}`;
+    const storageRef = ref(storage, storagePath);
 
-  const downloadUrl = await new Promise<string>((resolve, reject) => {
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        if (onProgress) onProgress(progress);
-      },
-      (error) => {
-        console.error("Error uploading file to Storage:", error);
-        reject(error);
-      },
-      async () => {
-        try {
-          const url = await getDownloadURL(uploadTask.snapshot.ref);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    const downloadUrl = await new Promise<string>((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const itemProgress = (snapshot.bytesTransferred / snapshot.totalBytes);
+          const totalProgress = Math.round(((i + itemProgress) / filesToUpload.length) * 100);
+          if (onProgress) onProgress(totalProgress);
+        },
+        (error) => {
+          console.error("Error uploading file to Storage:", error);
+          reject(error);
+        },
+        async () => {
           try {
-            saveFormFileToIndexedDB(url, file);
-            saveFormFileToIndexedDB(storagePath, file);
-            saveFormFileToIndexedDB(file.name, file);
-            saveFormFileToIndexedDB(documentId, file);
-          } catch (e) {
-            console.warn("Error guardando en caché IndexedDB:", e);
+            const url = await getDownloadURL(uploadTask.snapshot.ref);
+            try {
+              saveFormFileToIndexedDB(url, file);
+              saveFormFileToIndexedDB(storagePath, file);
+              saveFormFileToIndexedDB(file.name, file);
+              saveFormFileToIndexedDB(documentId, file);
+            } catch (e) {
+              console.warn("Error guardando en caché IndexedDB:", e);
+            }
+            resolve(url);
+          } catch (urlErr) {
+            reject(urlErr);
           }
-          resolve(url);
-        } catch (urlErr) {
-          reject(urlErr);
         }
-      }
-    );
-  });
+      );
+    });
 
-  // 2. Actualizar el documento en la lista de documentos del expediente con sanitización completa
+    uploadedUrls.push(downloadUrl);
+    newFiles.push({
+      id: `file_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 6)}`,
+      name: file.name,
+      url: downloadUrl,
+      uploadedAt: new Date().toISOString(),
+      size: file.size,
+    });
+  }
+
+  // Actualizar el documento en la lista con los nuevos archivos anexados
   const updatedDocuments = (currentDocuments || []).map((docItem) => {
     if (docItem.id === documentId) {
+      const sanitizedCurrent = sanitizeDocumentItem(docItem);
+      const combinedFiles = [...(sanitizedCurrent.files || []), ...newFiles];
+
       return sanitizeDocumentItem({
         ...docItem,
-        fileUrl: downloadUrl,
-        fileName: file.name,
+        files: combinedFiles,
+        fileUrl: combinedFiles[combinedFiles.length - 1]?.url || "",
+        fileName: combinedFiles.length > 1 ? `${combinedFiles.length} archivos adjuntos` : combinedFiles[0]?.name,
         status: "en_revision",
         rejectionReason: "",
         uploadedAt: new Date().toISOString(),
@@ -457,7 +526,7 @@ export async function uploadCreditDocumentFile(
     return sanitizeDocumentItem(docItem);
   });
 
-  // 3. Si todos los requeridos están en revisión o aprobados, pasar el estado general a en_revision
+  // Re-evaluar estado general
   const allRequiredSent = updatedDocuments
     .filter((d) => d.required)
     .every((d) => d.status === "en_revision" || d.status === "aprobado");
@@ -469,49 +538,76 @@ export async function uploadCreditDocumentFile(
     updatedAt: serverTimestamp(),
   });
 
-  return downloadUrl;
+  return uploadedUrls;
 }
 
 /**
- * Eliminar/remover un documento subido de un expediente de crédito
+ * Eliminar un archivo específico o todos los archivos de un documento en un expediente
  */
 export async function deleteCreditDocumentFile(
   creditCaseId: string,
   documentId: string,
-  currentDocuments: CreditDocumentItem[]
+  currentDocuments: CreditDocumentItem[],
+  fileId?: string
 ): Promise<void> {
   if (!db) {
     throw new Error("Firestore no inicializado");
   }
 
   const targetDoc = (currentDocuments || []).find((d) => d.id === documentId);
+  if (!targetDoc) return;
 
-  // 1. Intentar eliminar de Firebase Storage si existe fileUrl
-  if (targetDoc?.fileUrl && storage) {
-    try {
-      const storageRef = ref(storage, targetDoc.fileUrl);
-      await deleteObject(storageRef);
-    } catch (error) {
-      console.warn("No se pudo eliminar el archivo de Storage:", error);
+  const sanitizedTarget = sanitizeDocumentItem(targetDoc);
+  const files = sanitizedTarget.files || [];
+
+  // Si se especificó un fileId, eliminar ese archivo específico
+  let updatedFiles: CreditDocumentFile[] = [];
+  if (fileId) {
+    const fileToDelete = files.find((f) => f.id === fileId);
+    if (fileToDelete?.url && storage) {
+      try {
+        const storageRef = ref(storage, fileToDelete.url);
+        await deleteObject(storageRef);
+      } catch (error) {
+        console.warn("No se pudo eliminar el archivo de Storage:", error);
+      }
     }
+    updatedFiles = files.filter((f) => f.id !== fileId);
+  } else {
+    // Si no se especificó fileId, eliminar todos los archivos del documento
+    if (storage) {
+      for (const f of files) {
+        if (f.url) {
+          try {
+            await deleteObject(ref(storage, f.url));
+          } catch (e) {
+            console.warn("Error eliminando archivo:", e);
+          }
+        }
+      }
+    }
+    updatedFiles = [];
   }
 
-  // 2. Limpiar la información del documento en Firestore con sanitización completa
+  const hasRemainingFiles = updatedFiles.length > 0;
+
   const updatedDocuments = (currentDocuments || []).map((docItem) => {
     if (docItem.id === documentId) {
       return sanitizeDocumentItem({
         ...docItem,
-        fileUrl: "",
-        fileName: "",
-        status: "pendiente",
-        rejectionReason: "",
-        uploadedAt: "",
+        files: updatedFiles,
+        fileUrl: hasRemainingFiles ? updatedFiles[updatedFiles.length - 1].url : "",
+        fileName: hasRemainingFiles
+          ? (updatedFiles.length > 1 ? `${updatedFiles.length} archivos adjuntos` : updatedFiles[0].name)
+          : "",
+        status: hasRemainingFiles ? docItem.status : "pendiente",
+        rejectionReason: hasRemainingFiles ? docItem.rejectionReason : "",
+        uploadedAt: hasRemainingFiles ? docItem.uploadedAt : "",
       });
     }
     return sanitizeDocumentItem(docItem);
   });
 
-  // 3. Re-evaluar estado general del expediente si algún documento requerido queda pendiente
   const hasPendingRequired = updatedDocuments
     .filter((d) => d.required)
     .some((d) => d.status === "pendiente");

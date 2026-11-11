@@ -44,6 +44,7 @@ import {
   logoutClient,
   subscribeUserCreditCase,
   uploadCreditDocumentFile,
+  uploadMultipleCreditDocumentFiles,
   deleteCreditDocumentFile,
   uploadStudyPaymentReceipt,
   updateCreditCaseStatus,
@@ -253,8 +254,10 @@ function PortalContent() {
     setTimeout(() => setCopiedCoupon(false), 2500);
   };
 
-  const handleFileUpload = async (documentId: string, file: File) => {
-    if (!creditCase?.id) return;
+  const handleFileUpload = async (documentId: string, filesList: FileList | File[]) => {
+    if (!creditCase?.id || !filesList || filesList.length === 0) return;
+
+    const filesArray = Array.from(filesList);
 
     setUploadState((prev) => ({
       ...prev,
@@ -262,10 +265,10 @@ function PortalContent() {
     }));
 
     try {
-      await uploadCreditDocumentFile(
+      await uploadMultipleCreditDocumentFiles(
         creditCase.id,
         documentId,
-        file,
+        filesArray,
         creditCase.documents,
         (progress) => {
           setUploadState((prev) => ({
@@ -285,12 +288,12 @@ function PortalContent() {
     }
   };
 
-  const handleDeleteFile = async (documentId: string) => {
+  const handleDeleteFile = async (documentId: string, fileId?: string) => {
     if (!creditCase?.id) return;
-    if (!confirm("¿Estás seguro de que deseas eliminar este documento adjunto?")) return;
+    if (!confirm("¿Estás seguro de que deseas eliminar este archivo adjunto?")) return;
 
     try {
-      await deleteCreditDocumentFile(creditCase.id, documentId, creditCase.documents);
+      await deleteCreditDocumentFile(creditCase.id, documentId, creditCase.documents, fileId);
     } catch (err) {
       console.error("Error deleting document:", err);
       alert("Error al eliminar el documento. Intenta nuevamente.");
@@ -784,7 +787,10 @@ function PortalContent() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {creditCase.documents.map((docItem) => {
                       const state = uploadState[docItem.id] || { uploading: false, progress: 0 };
-                      const isUploaded = Boolean(docItem.fileUrl);
+                      const fileList = (Array.isArray(docItem.files) && docItem.files.length > 0)
+                        ? docItem.files
+                        : (docItem.fileUrl ? [{ id: "legacy", name: docItem.fileName || "Archivo adjuntado", url: docItem.fileUrl }] : []);
+                      const isUploaded = fileList.length > 0;
                       const isApproved = docItem.status === "aprobado";
 
                       return (
@@ -834,7 +840,7 @@ function PortalContent() {
                                 ) : isUploaded ? (
                                   <>
                                     <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
-                                    <span>Subido con Éxito</span>
+                                    <span>{fileList.length > 1 ? `${fileList.length} Archivos` : "Subido"}</span>
                                   </>
                                 ) : docItem.status === "rechazado" ? (
                                   <span>Rechazado</span>
@@ -844,32 +850,39 @@ function PortalContent() {
                               </span>
                             </div>
 
-                            {docItem.fileUrl && (
-                              <div className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-emerald-200/80 text-xs text-slate-700 mb-2.5 shadow-2xs">
-                                <div className="flex items-center gap-1.5 min-w-0">
-                                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3] shrink-0" />
-                                  <span className="truncate max-w-[150px] font-semibold text-[11px] text-slate-800">
-                                    {docItem.fileName || "Archivo adjuntado"}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1.5 ml-2 shrink-0">
-                                  <a
-                                    href={docItem.fileUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-slate-700 hover:text-slate-900 font-bold text-xs px-2 py-0.5 rounded-lg hover:bg-slate-100 transition-colors"
+                            {fileList.length > 0 && (
+                              <div className="space-y-1.5 mb-2.5">
+                                {fileList.map((file, idx) => (
+                                  <div
+                                    key={file.id || idx}
+                                    className="flex items-center justify-between p-2 rounded-xl bg-white border border-emerald-200/80 text-xs text-slate-700 shadow-2xs"
                                   >
-                                    Ver
-                                  </a>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteFile(docItem.id)}
-                                    className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors"
-                                    title="Eliminar archivo"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3] shrink-0" />
+                                      <span className="truncate max-w-[140px] font-semibold text-[11px] text-slate-800" title={file.name}>
+                                        {file.name || `Archivo #${idx + 1}`}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1 ml-2 shrink-0">
+                                      <a
+                                        href={file.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-slate-700 hover:text-slate-900 font-bold text-xs px-2 py-0.5 rounded-lg hover:bg-slate-100 transition-colors"
+                                      >
+                                        Ver
+                                      </a>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteFile(docItem.id, file.id)}
+                                        className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors"
+                                        title="Eliminar este archivo"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>
@@ -878,7 +891,7 @@ function PortalContent() {
                             {state.uploading ? (
                               <div className="space-y-1">
                                 <div className="flex justify-between text-[10px] text-slate-600 font-bold">
-                                  <span>Subiendo documento...</span>
+                                  <span>Subiendo documento(s)...</span>
                                   <span>{state.progress}%</span>
                                 </div>
                                 <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
@@ -891,18 +904,20 @@ function PortalContent() {
                             ) : (
                               <label className={`cursor-pointer inline-flex items-center gap-1.5 py-1.5 px-3 rounded-xl border text-xs font-bold transition-all shadow-2xs ${
                                 isUploaded
-                                  ? "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
+                                  ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300"
                                   : "bg-slate-900 hover:bg-slate-800 text-white border-transparent"
                               }`}>
                                 <Upload className="w-3 h-3" />
-                                <span>{docItem.fileUrl ? "Reemplazar Archivo" : "Adjuntar Documento"}</span>
+                                <span>{isUploaded ? "+ Adjuntar Otro Archivo" : "Adjuntar Documento(s)"}</span>
                                 <input
                                   type="file"
+                                  multiple
                                   accept=".pdf,image/png,image/jpeg,image/jpg"
                                   className="hidden"
                                   onChange={(e) => {
-                                    if (e.target.files && e.target.files[0]) {
-                                      handleFileUpload(docItem.id, e.target.files[0]);
+                                    if (e.target.files && e.target.files.length > 0) {
+                                      handleFileUpload(docItem.id, e.target.files);
+                                      e.target.value = "";
                                     }
                                   }}
                                 />
