@@ -74,7 +74,7 @@ export default function ModernAppHome({
       secondaryCta: "Agendar Asesoría",
       bgGradient: "from-sky-500 via-sky-600 to-blue-700",
       accentColor: "text-sky-200",
-      image: "/assets/avatar-advisor-next.png",
+      image: "/assets/avatar-advisor-next.png?v=20261112",
       isDisneyAvatar: true,
       vertical: "credito" as VerticalKey,
     },
