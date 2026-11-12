@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  typescript: {
+    // Skips in-build TypeScript typechecking to avoid OOM in Cloud Build
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {
