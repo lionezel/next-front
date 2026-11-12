@@ -74,7 +74,7 @@ export default function ModernAppHome({
       secondaryCta: "Agendar Asesoría",
       bgGradient: "from-sky-500 via-sky-600 to-blue-700",
       accentColor: "text-sky-200",
-      image: "/assets/avatar-advisor-3d-transparent.png",
+      image: "/assets/avatar-advisor-next.png",
       isDisneyAvatar: true,
       vertical: "credito" as VerticalKey,
     },
@@ -222,10 +222,44 @@ export default function ModernAppHome({
         .anim-float-3 { animation: nextFloat3 8s ease-in-out infinite; }
         .anim-pulse-glow { animation: nextGlowPulse 5s ease-in-out infinite; }
         @keyframes nextAvatarFloat {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-7px) scale(1.02); }
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg) scale(1);
+            filter: drop-shadow(0 16px 28px rgba(2, 132, 199, 0.45));
+          }
+          33% {
+            transform: translateY(-9px) rotate(-1deg) scale(1.018);
+            filter: drop-shadow(0 24px 38px rgba(56, 189, 248, 0.55));
+          }
+          66% {
+            transform: translateY(-14px) rotate(1.2deg) scale(1.028);
+            filter: drop-shadow(0 30px 45px rgba(2, 132, 199, 0.65));
+          }
         }
-        .anim-avatar { animation: nextAvatarFloat 4s ease-in-out infinite; }
+        @keyframes nextAvatarAura {
+          0%, 100% {
+            opacity: 0.35;
+            transform: scale(0.95);
+          }
+          50% {
+            opacity: 0.7;
+            transform: scale(1.15);
+          }
+        }
+        @keyframes nextBadgeBounce {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-4px); }
+        }
+        .anim-avatar {
+          animation: nextAvatarFloat 5s ease-in-out infinite;
+          will-change: transform, filter;
+        }
+        .anim-avatar-aura {
+          animation: nextAvatarAura 4s ease-in-out infinite;
+          will-change: transform, opacity;
+        }
+        .anim-badge-float {
+          animation: nextBadgeBounce 3.5s ease-in-out infinite;
+        }
       `}</style>
 
       {/* 1. TOP HEADER APP-BAR: Location + Status + Notification + Profile */}
@@ -349,15 +383,15 @@ export default function ModernAppHome({
               <BarChart3 className="w-16 h-16" />
             </div>
 
-            {/* 7. Floating Dollar / Disney Avatar Badge on Mobile */}
+            {/* 7. Floating Dollar / Advisor Avatar Badge on Mobile */}
             {(currentSlide as any).isDisneyAvatar ? (
               <div className="absolute top-3.5 right-4 md:hidden anim-avatar z-20 flex items-center gap-1.5 p-1 pr-2.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-md">
                 <img
                   src={currentSlide.image}
-                  alt="Asesor 3D"
-                  className="w-8 h-8 rounded-full object-cover object-top ring-1 ring-white/60"
+                  alt="Asesora 3D"
+                  className="w-8 h-8 rounded-full object-cover object-top ring-1 ring-white/60 bg-sky-900/30"
                 />
-                <span className="text-[10px] font-bold text-white">Asesor VIP 24h</span>
+                <span className="text-[10px] font-bold text-white">Asesora VIP 24h</span>
               </div>
             ) : (
               <div className="absolute top-3 right-4 sm:hidden anim-float-1 opacity-80 flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-[10px] font-bold text-white">
@@ -415,19 +449,19 @@ export default function ModernAppHome({
               {(currentSlide as any).isDisneyAvatar ? (
                 <div className="relative flex flex-col items-center">
                   {/* Subtle Glowing Aura */}
-                  <div className="absolute inset-0 -top-6 w-64 h-64 rounded-full bg-cyan-300/35 blur-2xl pointer-events-none" />
+                  <div className="absolute inset-0 -top-6 w-64 h-64 rounded-full bg-cyan-300/35 blur-2xl pointer-events-none anim-avatar-aura" />
 
-                  {/* 3D Disney/Pixar Advisor Avatar with Floating Motion */}
+                  {/* 3D Advisor Avatar with Floating Motion */}
                   <img
                     src={currentSlide.image}
-                    alt="Asesor Financiero NEXT 3D"
-                    className="w-64 lg:w-72 h-auto object-contain anim-avatar drop-shadow-[0_20px_35px_rgba(2,132,199,0.5)] select-none pointer-events-none relative z-10 -mb-6 sm:-mb-8"
+                    alt="Asesora NEXT 3D"
+                    className="w-64 lg:w-72 h-auto object-contain anim-avatar select-none pointer-events-none relative z-10 -mb-6 sm:-mb-8 transition-transform duration-500"
                   />
 
                   {/* Trust Pill Badge */}
-                  <div className="absolute bottom-1 left-0 right-0 z-20 text-[10px] text-white font-bold bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <div className="absolute bottom-1 left-0 right-0 z-20 text-[10px] text-white font-bold bg-slate-900/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-xl flex items-center justify-center gap-1.5 whitespace-nowrap anim-badge-float">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Asesor VIP • Aprobación 24h</span>
+                    <span>Asesora VIP • Aprobación 24h</span>
                   </div>
                 </div>
               ) : (
