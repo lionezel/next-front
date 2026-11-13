@@ -41,10 +41,6 @@ import {
   Finance3DVault,
   Insurance3DShield,
   Investment3DGrowth,
-  Health3DHeart,
-  Car3DAuto,
-  Contract3DSeal,
-  Lightning3DExpress,
 } from "@/src/components/common/Icons3D";
 
 interface ModernAppHomeProps {
@@ -499,7 +495,7 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 4. SERVICIOS PRINCIPALES (BENTO BOX LAYOUT WITH 3D VISUALS - MATCHING USER REFERENCE) */}
+      {/* 4. SERVICIOS PRINCIPALES: FINANZAS, SEGUROS E INVERSIONES */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -507,7 +503,7 @@ export default function ModernAppHome({
               Servicios Principales
             </h2>
             <p className="text-xs text-slate-500">
-              Soluciones integrales de crédito, protección patrimonial e inversiones
+              Soluciones integrales de finanzas, protección patrimonial e inversiones
             </p>
           </div>
           <button
@@ -519,151 +515,102 @@ export default function ModernAppHome({
           </button>
         </div>
 
-        {/* ================= BENTO GRID TOP ROW ================= */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 mb-3 sm:mb-4">
-          {/* Card 1: Left Large Hero Bento (Crédito Empresarial con 3D Glossy Element) */}
+        {/* ================= 3 MAIN SERVICE CARDS ================= */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          {/* Card 1: Finanzas */}
           <button
             type="button"
             onClick={() => handleServiceClick("credito")}
-            className="md:col-span-7 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/5 transition-all text-left flex flex-col justify-between relative overflow-hidden group cursor-pointer min-h-[220px] sm:min-h-[260px]"
+            className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10 transition-all text-left flex flex-col justify-between relative overflow-hidden group cursor-pointer min-h-[250px] sm:min-h-[280px]"
           >
-            <div className="space-y-1.5 z-10 max-w-[75%]">
+            <div className="space-y-2 z-10">
               <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
                 Aprobación en 24h
               </span>
-              <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight group-hover:text-sky-600 transition-colors">
-                Crédito Empresarial
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-sky-600 transition-colors">
+                Finanzas
               </h3>
-              <p className="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
-                Liquidez inmediata, capital de trabajo y factoring con más de 35 bancos.
+              <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                Crédito empresarial, liquidez inmediata, capital de trabajo y estructuración financiera con más de 35 bancos y cooperativas.
               </p>
             </div>
 
-            {/* 3D Financial Vault / Caja Fuerte Bancaria */}
-            <div className="self-end mt-2 z-10 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3">
-              <Finance3DVault />
+            <div className="flex items-end justify-between mt-5 z-10">
+              <span className="text-xs font-bold text-sky-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Ver soluciones</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+              <div className="transition-transform duration-500 group-hover:scale-105 group-hover:rotate-2">
+                <Finance3DVault width={120} height={95} />
+              </div>
             </div>
 
             {/* Ambient Backlight */}
-            <div className="absolute right-0 bottom-0 w-48 h-48 rounded-full bg-sky-100/40 blur-3xl pointer-events-none" />
+            <div className="absolute right-0 bottom-0 w-44 h-44 rounded-full bg-sky-100/40 blur-3xl pointer-events-none" />
           </button>
 
-          {/* Right Column: 2 Stacked Horizontal Bento Cards */}
-          <div className="md:col-span-5 flex flex-col gap-3 sm:gap-4">
-            {/* Card 2: Seguros Todo Riesgo (with 3D Protection Shield) */}
-            <button
-              type="button"
-              onClick={() => handleServiceClick("seguros")}
-              className="flex-1 bg-white rounded-3xl p-5 border border-slate-200/80 hover:border-sky-300 hover:shadow-lg transition-all text-left flex items-center justify-between gap-3 relative overflow-hidden group cursor-pointer"
-            >
-              <div className="space-y-1 z-10 max-w-[62%]">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-100">
-                  Ahorra hasta 35%
-                </span>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
-                  Seguros Todo Riesgo
-                </h3>
-                <p className="text-[11px] text-slate-400 font-medium">
-                  Autos, salud, vida y empresas
-                </p>
-              </div>
-
-              {/* 3D Shield Protection Visual */}
-              <div className="shrink-0 transition-transform duration-500 group-hover:scale-110">
-                <Insurance3DShield />
-              </div>
-            </button>
-
-            {/* Card 3: Inversiones (with 3D Growth Chart & Yield Arrow) */}
-            <button
-              type="button"
-              onClick={() => handleServiceClick("inversiones")}
-              className="flex-1 bg-white rounded-3xl p-5 border border-slate-200/80 hover:border-sky-300 hover:shadow-lg transition-all text-left flex items-center justify-between gap-3 relative overflow-hidden group cursor-pointer"
-            >
-              <div className="space-y-1 z-10 max-w-[62%]">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
-                  Hasta 17.8% E.A.
-                </span>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
-                  Inversiones
-                </h3>
-                <p className="text-[11px] text-slate-400 font-medium">
-                  Rendimiento fiduciario seguro
-                </p>
-              </div>
-
-              {/* 3D Growth Chart Visual */}
-              <div className="shrink-0 transition-transform duration-500 group-hover:scale-110">
-                <Investment3DGrowth />
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* ================= BENTO GRID BOTTOM ROW: 4 SQUIRCLE CATEGORIES ================= */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {/* Item 1: Salud & Vida (3D Heart with Pulse) */}
+          {/* Card 2: Seguros */}
           <button
             type="button"
-            onClick={() => handleServiceClick("salud_vida")}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
+            onClick={() => handleServiceClick("seguros")}
+            className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 hover:border-teal-300 hover:shadow-xl hover:shadow-teal-500/10 transition-all text-left flex flex-col justify-between relative overflow-hidden group cursor-pointer min-h-[250px] sm:min-h-[280px]"
           >
-            <div className="w-full aspect-4/3 rounded-3xl bg-white border border-slate-200/80 group-hover:border-sky-300 group-hover:shadow-md transition-all flex items-center justify-center p-3 relative overflow-hidden">
-              <div className="transition-transform duration-500 group-hover:scale-115">
-                <Health3DHeart />
+            <div className="space-y-2 z-10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-100">
+                Ahorra hasta 35%
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-teal-600 transition-colors">
+                Seguros
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                Protección integral para autos, salud, vida, pólizas empresariales y blindaje patrimonial con cobertura total.
+              </p>
+            </div>
+
+            <div className="flex items-end justify-between mt-5 z-10">
+              <span className="text-xs font-bold text-teal-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Ver coberturas</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+              <div className="transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-2">
+                <Insurance3DShield width={105} height={95} />
               </div>
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition-colors tracking-tight text-center">
-              Salud & Vida
-            </span>
+
+            {/* Ambient Backlight */}
+            <div className="absolute right-0 bottom-0 w-44 h-44 rounded-full bg-teal-100/35 blur-3xl pointer-events-none" />
           </button>
 
-          {/* Item 2: Póliza Autos (3D Car in NEXT Cyan) */}
+          {/* Card 3: Inversiones */}
           <button
             type="button"
-            onClick={() => handleServiceClick("poliza_autos")}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
+            onClick={() => handleServiceClick("inversiones")}
+            className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 transition-all text-left flex flex-col justify-between relative overflow-hidden group cursor-pointer min-h-[250px] sm:min-h-[280px]"
           >
-            <div className="w-full aspect-4/3 rounded-3xl bg-white border border-slate-200/80 group-hover:border-sky-300 group-hover:shadow-md transition-all flex items-center justify-center p-3 relative overflow-hidden">
-              <div className="transition-transform duration-500 group-hover:scale-115">
-                <Car3DAuto />
-              </div>
+            <div className="space-y-2 z-10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
+                Hasta 17.8% E.A.
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
+                Inversiones
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                Portafolios de alta rentabilidad, rendimiento fiduciario respaldado y estrategias de crecimiento de capital.
+              </p>
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition-colors tracking-tight text-center">
-              Póliza Autos
-            </span>
-          </button>
 
-          {/* Item 3: Cumplimiento (3D Legal Contract & Gold Fiduciario Seal) */}
-          <button
-            type="button"
-            onClick={() => handleServiceClick("cumplimiento")}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-          >
-            <div className="w-full aspect-4/3 rounded-3xl bg-white border border-slate-200/80 group-hover:border-sky-300 group-hover:shadow-md transition-all flex items-center justify-center p-3 relative overflow-hidden">
-              <div className="transition-transform duration-500 group-hover:scale-115">
-                <Contract3DSeal />
+            <div className="flex items-end justify-between mt-5 z-10">
+              <span className="text-xs font-bold text-indigo-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Ver portafolios</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+              <div className="transition-transform duration-500 group-hover:scale-105 group-hover:rotate-2">
+                <Investment3DGrowth width={105} height={95} />
               </div>
             </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition-colors tracking-tight text-center">
-              Cumplimiento
-            </span>
-          </button>
 
-          {/* Item 4: Viabilidad Ágil (3D Lightning of Express Approval) */}
-          <button
-            type="button"
-            onClick={() => handleServiceClick("viabilidad_24h")}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-          >
-            <div className="w-full aspect-4/3 rounded-3xl bg-white border border-slate-200/80 group-hover:border-sky-300 group-hover:shadow-md transition-all flex items-center justify-center p-3 relative overflow-hidden">
-              <div className="transition-transform duration-500 group-hover:scale-115">
-                <Lightning3DExpress />
-              </div>
-            </div>
-            <span className="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition-colors tracking-tight text-center">
-              Viabilidad 24h
-            </span>
+            {/* Ambient Backlight */}
+            <div className="absolute right-0 bottom-0 w-44 h-44 rounded-full bg-indigo-100/35 blur-3xl pointer-events-none" />
           </button>
         </div>
       </div>
