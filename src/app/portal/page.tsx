@@ -784,8 +784,15 @@ function PortalContent() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {creditCase.documents.map((docItem) => {
+                  {(() => {
+                    const isEmpresaDoc = (d: any) => d.category === "empresa" || d.id?.startsWith("empresa_");
+                    const isRepLegalDoc = (d: any) => d.category === "avalista" || d.category === "rep_legal" || d.id?.startsWith("avalista_");
+
+                    const empresaDocs = creditCase.documents.filter(isEmpresaDoc);
+                    const repLegalDocs = creditCase.documents.filter(isRepLegalDoc);
+                    const otherDocs = creditCase.documents.filter((d) => !isEmpresaDoc(d) && !isRepLegalDoc(d));
+
+                    const renderDocCard = (docItem: any) => {
                       const state = uploadState[docItem.id] || { uploading: false, progress: 0 };
                       const fileList = (Array.isArray(docItem.files) && docItem.files.length > 0)
                         ? docItem.files
@@ -926,8 +933,57 @@ function PortalContent() {
                           </div>
                         </div>
                       );
-                    })}
-                  </div>
+                    };
+
+                    return (
+                      <div className="space-y-6">
+                        {empresaDocs.length > 0 && (
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between px-1">
+                              <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                                🏢 Documentos De la Empresa ({empresaDocs.length})
+                              </span>
+                              <span className="text-[11px] font-bold text-slate-500">
+                                {empresaDocs.filter((d) => d.status === "aprobado" || (d.files && d.files.length > 0) || d.fileUrl).length} de {empresaDocs.length} cargados
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {empresaDocs.map(renderDocCard)}
+                            </div>
+                          </div>
+                        )}
+
+                        {repLegalDocs.length > 0 && (
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between px-1">
+                              <span className="text-xs font-black uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                                👤 Avalista Socio (&gt;50%) y Representante Legal ({repLegalDocs.length})
+                              </span>
+                              <span className="text-[11px] font-bold text-emerald-700">
+                                {repLegalDocs.filter((d) => d.status === "aprobado" || (d.files && d.files.length > 0) || d.fileUrl).length} de {repLegalDocs.length} cargados
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {repLegalDocs.map(renderDocCard)}
+                            </div>
+                          </div>
+                        )}
+
+                        {otherDocs.length > 0 && (
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between px-1">
+                              <span className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                📁 Otros Documentos ({otherDocs.length})
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {otherDocs.map(renderDocCard)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Botón de Empezar Proceso de Revisión (visible cuando todos los documentos requeridos están subidos) */}
                   {totalRequired > 0 && uploadedRequired >= totalRequired && (creditCase.status === "estudio_inicial" || creditCase.status === "documentos_solicitados") && (
