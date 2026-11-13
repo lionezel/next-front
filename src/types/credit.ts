@@ -57,7 +57,55 @@ export type CreditCaseStatus =
   | "rechazado";
 
 export type CreditDocumentStatus = "pendiente" | "en_revision" | "aprobado" | "rechazado";
-export type CreditDocumentCategory = "empresa" | "avalista" | "pago" | "otros";
+export type CreditDocumentCategory = "empresa" | "avalista" | "rep_legal" | "pago" | "otros";
+
+export const resolveDocumentCategory = (d: { id?: string; title?: string; description?: string; category?: string }): "empresa" | "rep_legal" => {
+  if (d.category === "empresa") return "empresa";
+  if (d.category === "rep_legal" || d.category === "avalista") return "rep_legal";
+  if (d.id?.startsWith("empresa_")) return "empresa";
+  if (d.id?.startsWith("avalista_") || d.id?.startsWith("rep_")) return "rep_legal";
+
+  const lower = `${d.id || ""} ${d.title || ""} ${d.description || ""}`.toLowerCase();
+
+  if (
+    lower.includes("avalista") ||
+    lower.includes("del socio") ||
+    lower.includes("socio con participacion") ||
+    lower.includes("socio con participación") ||
+    lower.includes("superior al 50%") ||
+    lower.includes("anexos a la declaración de renta") ||
+    lower.includes("anexos avalista") ||
+    lower.includes("sey 2026") ||
+    lower.includes("en caso de que el banco los solicite")
+  ) {
+    return "rep_legal";
+  }
+
+  if (
+    lower.includes("del representante legal") ||
+    lower.includes("camara") ||
+    lower.includes("cámara") ||
+    lower.includes("de la empresa") ||
+    lower.includes("trimestre de la empresa") ||
+    lower.includes("iva 2026") ||
+    lower.includes("composicion accionaria") ||
+    lower.includes("composición accionaria") ||
+    lower.includes("contador") ||
+    lower.includes("estatutos") ||
+    lower.includes("revisor fiscal") ||
+    lower.includes("beneficiario final") ||
+    lower.includes("rut actualizado") ||
+    lower.includes("corte septiembre 2026")
+  ) {
+    return "empresa";
+  }
+
+  if (lower.includes("socio") || lower.includes("personal")) {
+    return "rep_legal";
+  }
+
+  return "empresa";
+};
 
 export interface CreditDocumentFile {
   id: string;

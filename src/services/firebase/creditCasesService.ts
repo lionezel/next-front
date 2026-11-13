@@ -30,7 +30,7 @@ import {
 } from "firebase/storage";
 import { auth, db, storage } from "@/src/firebase/config";
 import { saveFormFileToIndexedDB } from "../fileStore";
-import { CreditCase, CreditDocumentItem, CreditDocumentFile, CreditContractData, CreditStudyPayment, CreditCaseStatus } from "@/src/types/credit";
+import { CreditCase, CreditDocumentItem, CreditDocumentFile, CreditContractData, CreditStudyPayment, CreditCaseStatus, resolveDocumentCategory } from "@/src/types/credit";
 
 const COLLECTION_NAME = "credit_cases";
 
@@ -416,7 +416,7 @@ export function sanitizeDocumentItem(docItem: any): CreditDocumentItem {
           : (docItem.reviewedAt?.toDate?.()?.toISOString?.() || String(docItem.reviewedAt)))
       : "",
     description: String(docItem?.description || ""),
-    category: (["empresa", "avalista", "pago", "otros"].includes(docItem?.category) ? docItem.category : "otros"),
+    category: (["empresa", "avalista", "rep_legal", "pago", "otros"].includes(docItem?.category) ? docItem.category : resolveDocumentCategory(docItem)),
   };
 
   return clean as CreditDocumentItem;

@@ -49,7 +49,7 @@ import {
   uploadStudyPaymentReceipt,
   updateCreditCaseStatus,
 } from "@/src/services/firebase/creditCasesService";
-import { CreditCase, CreditCaseStatus } from "@/src/types/credit";
+import { CreditCase, CreditCaseStatus, resolveDocumentCategory } from "@/src/types/credit";
 import { ECOSYSTEM_INFO } from "@/src/config/verticals";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/src/firebase/config";
@@ -785,8 +785,8 @@ function PortalContent() {
                   </div>
 
                   {(() => {
-                    const isEmpresaDoc = (d: any) => d.category === "empresa" || d.id?.startsWith("empresa_");
-                    const isRepLegalDoc = (d: any) => d.category === "avalista" || d.category === "rep_legal" || d.id?.startsWith("avalista_");
+                    const isEmpresaDoc = (d: any) => resolveDocumentCategory(d) === "empresa";
+                    const isRepLegalDoc = (d: any) => resolveDocumentCategory(d) === "rep_legal";
 
                     const empresaDocs = creditCase.documents.filter(isEmpresaDoc);
                     const repLegalDocs = creditCase.documents.filter(isRepLegalDoc);
