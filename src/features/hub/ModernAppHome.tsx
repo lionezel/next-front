@@ -63,14 +63,14 @@ export default function ModernAppHome({
 
   const slides = [
     {
-      badge: "Crédito Empresarial & Personal",
-      title: "¿Necesitas liquidez inmediata?",
-      highlight: "Te aprobamos y desembolsamos en 24h.",
+      badge: "Planificación & Blindaje Patrimonial",
+      title: "Somos expertos en planificación financiera,",
+      highlight: "blindaje y protección de tu patrimonio.",
       subfeatures: [
-        "Estudio ágil con más de 35 bancos y cooperativas",
-        "0% cobros ocultos • Asesoría 100% gratuita",
+        "Estrategias a la medida en liquidez, inversión y optimización",
+        "Blindaje legal integral, respaldo patrimonial y asesoría personalizada",
       ],
-      primaryCta: "Solicitar Crédito",
+      primaryCta: "Conocer Soluciones",
       secondaryCta: "Agendar Asesoría",
       bgGradient: "from-sky-500 via-sky-600 to-blue-700",
       accentColor: "text-sky-200",
@@ -352,8 +352,8 @@ export default function ModernAppHome({
           <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
             {/* 1. Floating Coins / Dinero (Top Center) */}
             <div className="absolute top-4 left-1/2 -translate-x-1/2 anim-float-1 opacity-80 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 shadow-lg text-sky-100 text-[11px] font-bold">
-              <Coins className="w-3.5 h-3.5 text-yellow-300" />
-              <span>Desembolso 24h</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-cyan-200" />
+              <span>Blindaje Patrimonial</span>
             </div>
 
             {/* 2. Floating Growth Graph (Top Right Behind Image) */}
@@ -391,7 +391,7 @@ export default function ModernAppHome({
                   alt="Asesora 3D"
                   className="w-8 h-8 rounded-full object-cover object-top ring-1 ring-white/60 bg-sky-900/30"
                 />
-                <span className="text-[10px] font-bold text-white">Asesora VIP 24h</span>
+                <span className="text-[10px] font-bold text-white">Asesora Patrimonial</span>
               </div>
             ) : (
               <div className="absolute top-3 right-4 sm:hidden anim-float-1 opacity-80 flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-[10px] font-bold text-white">
@@ -461,7 +461,7 @@ export default function ModernAppHome({
                   {/* Trust Pill Badge */}
                   <div className="absolute bottom-1 left-0 right-0 z-20 text-[10px] text-white font-bold bg-slate-900/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-xl flex items-center justify-center gap-1.5 whitespace-nowrap anim-badge-float">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Asesora VIP • Aprobación 24h</span>
+                    <span>Asesora VIP • Blindaje Patrimonial</span>
                   </div>
                 </div>
               ) : (
