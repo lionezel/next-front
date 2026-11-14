@@ -1,0 +1,11 @@
+# NEXT-FRONT: AI Assistant Rules
+
+Before answering or modifying any code in this repository, ALWAYS read and adhere strictly to `PROJECT_MEMORY.md` in the project root.
+
+Key Directives:
+1. Brand & Positioning: NEXT Connection Group 360° ("Somos expertos en planificación financiera, blindaje y protección de tu patrimonio").
+2. Core 3 Services: Keep strictly the triad "Finanzas", "Seguros", "Inversiones" on the homepage (`ModernAppHome.tsx`).
+3. Clean, corporate design: Avoid color saturation, unnecessary stat counters, or bloated bento boxes.
+4. Verify all changes using `npm run build` with Turbopack before committing.
+5. Push to both `origin` (GitHub) and `azure` (Azure DevOps) remotes.
+6. Language: Always communicate with the user and write client-facing UI copy in Spanish.
