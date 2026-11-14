@@ -525,13 +525,13 @@ export default function ModernAppHome({
           >
             <div className="space-y-2 z-10">
               <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
-                Aprobación en 24h
+                Tasas competitivas del mercado
               </span>
               <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-sky-600 transition-colors">
                 Finanzas
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                Crédito empresarial, liquidez inmediata, capital de trabajo y estructuración financiera con más de 35 bancos y cooperativas.
+                Créditos para personas naturales y jurídicas con las mejores tasas: compra de cartera, capital de trabajo, cupos rotativos, créditos de vehículo, hipotecarios, confirming y factoring.
               </p>
             </div>
 
@@ -557,13 +557,13 @@ export default function ModernAppHome({
           >
             <div className="space-y-2 z-10">
               <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-100">
-                Ahorra hasta 35%
+                Ahorro hasta un 50% en pólizas actuales
               </span>
               <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-teal-600 transition-colors">
                 Seguros
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                Protección integral para autos, salud, vida, pólizas empresariales y blindaje patrimonial con cobertura total.
+                Nos especializamos en pólizas de salud, jubilación, educativas, pólizas de socios, pólizas de vehículos y blindaje empresarial integral.
               </p>
             </div>
 
@@ -589,7 +589,7 @@ export default function ModernAppHome({
           >
             <div className="space-y-2 z-10">
               <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
-                Hasta 17.8% E.A.
+                Rentabilidades anuales según el fondo
               </span>
               <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
                 Inversiones
