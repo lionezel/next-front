@@ -9,32 +9,19 @@ import {
   Search,
   Zap,
   Calendar,
-  Building2,
-  Car,
-  HeartPulse,
-  TrendingUp,
-  Home,
-  FileCheck,
-  ShieldCheck,
-  MoreHorizontal,
   ChevronRight,
-  Star,
-  CheckCircle2,
-  Clock,
-  Shield,
+  ShieldCheck,
   Percent,
+  Clock,
   Compass,
   ArrowRight,
   User,
   Sparkles,
-  Coins,
-  DollarSign,
-  CreditCard,
-  BarChart3,
-  Umbrella,
-  Activity,
-  PieChart,
-  Landmark,
+  CheckCircle2,
+  FileText,
+  Layers,
+  Banknote,
+  Award,
 } from "lucide-react";
 import { VerticalKey } from "@/src/types/common";
 import {
@@ -55,7 +42,6 @@ export default function ModernAppHome({
   const { user } = useAuth();
   const [activeSlide, setActiveSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"bookings" | "portal">("bookings");
 
   const slides = [
     {
@@ -63,8 +49,8 @@ export default function ModernAppHome({
       title: "Somos expertos en planificación financiera,",
       highlight: "blindaje y protección de tu patrimonio.",
       subfeatures: [
-        "Estrategias a la medida en liquidez, inversión y optimización",
-        "Blindaje legal integral, respaldo patrimonial y asesoría personalizada",
+        "Acceso estratégico a capital de trabajo, liquidez y factoring con +35 entidades",
+        "Acompañamiento especializado, diagnóstico ágil y 0% pagos anticipados",
       ],
       primaryCta: "Conocer Soluciones",
       secondaryCta: "Agendar Asesoría",
@@ -76,13 +62,13 @@ export default function ModernAppHome({
     },
     {
       badge: "Seguros 360° Todo Riesgo",
-      title: "¿Protección para tu auto o familia?",
-      highlight: "Cotiza con 35 aseguradoras aliadas.",
+      title: "¿Protección para tu auto, empresa o familia?",
+      highlight: "Ahorra hasta un 50% con 35 aseguradoras.",
       subfeatures: [
-        "Ahorra hasta un 35% en tu póliza todo riesgo",
-        "Atención médica prioritaria y asistencia 24/7",
+        "Pólizas de salud, socios, vida, autos y cumplimiento empresarial",
+        "Atención médica preferencial y asistencia 24/7 sin fricciones",
       ],
-      primaryCta: "Cotizar Seguro",
+      primaryCta: "Cotizar Póliza",
       secondaryCta: "Hablar con Asesor",
       bgGradient: "from-sky-600 via-blue-600 to-indigo-700",
       accentColor: "text-cyan-200",
@@ -91,11 +77,11 @@ export default function ModernAppHome({
     },
     {
       badge: "Inversiones de Alto Rendimiento",
-      title: "Haz crecer tu patrimonio seguro.",
-      highlight: "Rentabilidad fija hasta 17.8% E.A.",
+      title: "Haz crecer tus excedentes con seguridad.",
+      highlight: "Rentabilidades anuales según el fondo.",
       subfeatures: [
-        "Custodia y respaldo legal vigilado",
-        "Abono periódico de utilidades a tu cuenta",
+        "Custodia fiduciaria vigilada y respaldo legal garantizado",
+        "Abono periódico de rendimientos y diversificación inteligente",
       ],
       primaryCta: "Simular Inversión",
       secondaryCta: "Agendar Cita VIP",
@@ -107,70 +93,6 @@ export default function ModernAppHome({
   ];
 
   const currentSlide = slides[activeSlide];
-
-  // 8 Grid Services (4x2 exact layout from reference) in NEXT Light Blue theme
-  const servicesGrid = [
-    {
-      id: "cred_empresa",
-      label: "Crédito Empresa",
-      subtitle: "Capital de trabajo",
-      icon: Building2,
-      badge: "24h",
-      vertical: "credito" as VerticalKey,
-    },
-    {
-      id: "seg_autos",
-      label: "Póliza Autos",
-      subtitle: "Todo riesgo",
-      icon: Car,
-      badge: "-35%",
-      vertical: "seguros" as VerticalKey,
-    },
-    {
-      id: "seg_salud",
-      label: "Salud & Vida",
-      subtitle: "Individual y colectivo",
-      icon: HeartPulse,
-      badge: "VIP",
-      vertical: "seguros" as VerticalKey,
-    },
-    {
-      id: "inversiones",
-      label: "Inversiones",
-      subtitle: "Hasta 17.8% E.A.",
-      icon: TrendingUp,
-      badge: "Rentable",
-      vertical: "inversiones" as VerticalKey,
-    },
-    {
-      id: "cred_libre",
-      label: "Libre Inversión",
-      subtitle: "Persona natural",
-      icon: Home,
-      vertical: "credito" as VerticalKey,
-    },
-    {
-      id: "pol_cumplimiento",
-      label: "Cumplimiento",
-      subtitle: "Licitaciones y contratos",
-      icon: FileCheck,
-      vertical: "seguros" as VerticalKey,
-    },
-    {
-      id: "viabilidad_express",
-      label: "Viabilidad Ágil",
-      subtitle: "Diagnóstico sin costo",
-      icon: Zap,
-      vertical: "credito" as VerticalKey,
-    },
-    {
-      id: "todos_servicios",
-      label: "Más Soluciones",
-      subtitle: "Portafolio 360°",
-      icon: MoreHorizontal,
-      vertical: "credito" as VerticalKey,
-    },
-  ];
 
   const handleServiceClick = (vertical: any) => {
     if (onSelectVertical) {
@@ -194,29 +116,9 @@ export default function ModernAppHome({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-12 font-sans text-slate-800">
-      {/* Dynamic Keyframe Animations for Floating Finance & Insurance Elements */}
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-16 font-sans text-slate-800">
+      {/* Keyframe Animations */}
       <style>{`
-        @keyframes nextFloat1 {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-12px) rotate(4deg); }
-        }
-        @keyframes nextFloat2 {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(14px) rotate(-5deg); }
-        }
-        @keyframes nextFloat3 {
-          0%, 100% { transform: translate(0px, 0px) scale(1); }
-          50% { transform: translate(-8px, -10px) scale(1.05); }
-        }
-        @keyframes nextGlowPulse {
-          0%, 100% { opacity: 0.2; transform: scale(1); }
-          50% { opacity: 0.38; transform: scale(1.15); }
-        }
-        .anim-float-1 { animation: nextFloat1 6s ease-in-out infinite; }
-        .anim-float-2 { animation: nextFloat2 7s ease-in-out infinite; }
-        .anim-float-3 { animation: nextFloat3 8s ease-in-out infinite; }
-        .anim-pulse-glow { animation: nextGlowPulse 5s ease-in-out infinite; }
         @keyframes nextAvatarFloat {
           0%, 100% {
             transform: translateY(0px) rotate(0deg) scale(1);
@@ -258,9 +160,9 @@ export default function ModernAppHome({
         }
       `}</style>
 
-      {/* 1. TOP HEADER APP-BAR: Location + Status + Notification + Profile */}
+      {/* 1. TOP HEADER APP-BAR: Minimalista & Elegante */}
       <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-200 flex items-center justify-center shrink-0 shadow-2xs">
             <MapPin className="w-4 h-4 text-sky-500" />
           </div>
@@ -286,7 +188,7 @@ export default function ModernAppHome({
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-sky-500 ring-2 ring-white" />
           </Link>
 
-          {/* User Portal Pill with Avatar if logged in */}
+          {/* User Portal Pill */}
           {user ? (
             <Link
               href="/portal"
@@ -321,7 +223,7 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 2. PILL SEARCH BAR (Search for credit, insurance, or investment) */}
+      {/* 2. BARRA DE BÚSQUEDA RÁPIDA (Limpia y cómoda) */}
       <div className="relative mb-6">
         <div className="relative flex items-center">
           <Search className="w-4 h-4 text-sky-500 absolute left-4 pointer-events-none" />
@@ -329,76 +231,23 @@ export default function ModernAppHome({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar crédito empresarial, seguros de autos, inversiones..."
-            className="w-full h-12 pl-11 pr-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:border-sky-300 focus:border-sky-500 focus:ring-3 focus:ring-sky-100 focus:outline-none text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 transition-all"
+            placeholder="Buscar crédito empresarial, factoring, pólizas de seguros o inversiones..."
+            className="w-full h-11 pl-11 pr-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:border-sky-300 focus:border-sky-500 focus:ring-3 focus:ring-sky-100 focus:outline-none text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 transition-all"
           />
         </div>
       </div>
 
-      {/* 3. HERO BANNER CARD (Luminous NEXT Light Blue Gradient with Animated Floating Finance & Insurance Icons) */}
+      {/* 3. HERO BANNER: Músculo Financiero, Limpio & Sin Ruido Visual */}
       <div className="mb-8">
         <div
           className={`relative rounded-3xl overflow-hidden bg-gradient-to-br ${currentSlide.bgGradient} text-white shadow-xl shadow-sky-900/15 p-6 sm:p-8 transition-all duration-500 border border-sky-400/30`}
         >
-          {/* Animated Background Glowing Orbs */}
-          <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-sky-300/25 blur-3xl anim-pulse-glow pointer-events-none" />
-          <div className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-blue-400/20 blur-3xl anim-pulse-glow pointer-events-none" />
-
-          {/* ================= ANIMATED FLOATING FINANCE, INSURANCE & INVESTMENT BADGES ================= */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
-            {/* 1. Floating Coins / Dinero (Top Center) */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 anim-float-1 opacity-80 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 shadow-lg text-sky-100 text-[11px] font-bold">
-              <ShieldCheck className="w-3.5 h-3.5 text-cyan-200" />
-              <span>Blindaje Patrimonial</span>
-            </div>
-
-            {/* 2. Floating Growth Graph (Top Right Behind Image) */}
-            <div className="absolute top-6 right-8 anim-float-2 opacity-75 hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white text-[11px] font-semibold">
-              <TrendingUp className="w-4 h-4 text-emerald-300" />
-              <span>+17.8% E.A.</span>
-            </div>
-
-            {/* 3. Floating Shield / Seguro 360 (Bottom Left) */}
-            <div className="absolute bottom-5 left-8 anim-float-3 opacity-80 hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white text-[11px] font-semibold">
-              <ShieldCheck className="w-4 h-4 text-cyan-300" />
-              <span>Póliza Todo Riesgo</span>
-            </div>
-
-            {/* 4. Floating Credit Card Icon (Center Left background watermark) */}
-            <div className="absolute top-1/3 left-4 anim-float-2 opacity-20 text-white hidden xl:block">
-              <CreditCard className="w-16 h-16" />
-            </div>
-
-            {/* 5. Floating Umbrella / Vida & Salud (Bottom Center background watermark) */}
-            <div className="absolute bottom-3 right-1/3 anim-float-1 opacity-25 text-white hidden lg:block">
-              <Umbrella className="w-12 h-12" />
-            </div>
-
-            {/* 6. Floating BarChart / Inversiones (Right background watermark) */}
-            <div className="absolute top-1/2 right-4 anim-float-3 opacity-20 text-white hidden md:block">
-              <BarChart3 className="w-16 h-16" />
-            </div>
-
-            {/* 7. Floating Dollar / Advisor Avatar Badge on Mobile */}
-            {(currentSlide as any).isDisneyAvatar ? (
-              <div className="absolute top-3.5 right-4 md:hidden anim-avatar z-20 flex items-center gap-1.5 p-1 pr-2.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-md">
-                <img
-                  src={currentSlide.image}
-                  alt="Asesora 3D"
-                  className="w-8 h-8 rounded-full object-cover object-top ring-1 ring-white/60 bg-sky-900/30"
-                />
-                <span className="text-[10px] font-bold text-white">Asesora Patrimonial</span>
-              </div>
-            ) : (
-              <div className="absolute top-3 right-4 sm:hidden anim-float-1 opacity-80 flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-[10px] font-bold text-white">
-                <DollarSign className="w-3 h-3 text-yellow-300" />
-                <span>0% Cobros Ocultos</span>
-              </div>
-            )}
-          </div>
+          {/* Subtle Ambient Glow */}
+          <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-sky-300/20 blur-3xl pointer-events-none" />
+          <div className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-blue-400/15 blur-3xl pointer-events-none" />
 
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-7 space-y-3">
+            <div className="md:col-span-7 space-y-3.5">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/25 shadow-xs">
                 <Sparkles className="w-3 h-3 text-cyan-200" />
                 {currentSlide.badge}
@@ -420,8 +269,8 @@ export default function ModernAppHome({
                 ))}
               </div>
 
-              {/* Dual Action Buttons (Reference style: White solid + Frosted Outline) */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-3">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-2">
                 <button
                   onClick={() => handleServiceClick(currentSlide.vertical)}
                   className="h-10 px-5 rounded-full bg-white hover:bg-sky-50 text-sky-950 text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-sky-950/20 transition-transform active:scale-95 cursor-pointer"
@@ -440,14 +289,12 @@ export default function ModernAppHome({
               </div>
             </div>
 
-            {/* Right Side Visual Image: 3D Disney Avatar or Photo Card */}
+            {/* Right Side Visual Image: Avatar 3D Asesora */}
             <div className="md:col-span-5 hidden md:flex justify-end items-end relative min-h-[220px]">
               {(currentSlide as any).isDisneyAvatar ? (
                 <div className="relative flex flex-col items-center">
-                  {/* Subtle Glowing Aura */}
                   <div className="absolute inset-0 -top-6 w-64 h-64 rounded-full bg-cyan-300/35 blur-2xl pointer-events-none anim-avatar-aura" />
 
-                  {/* 3D Advisor Avatar with Floating Motion */}
                   <img
                     src={currentSlide.image}
                     alt="Asesora NEXT 3D"
@@ -469,8 +316,8 @@ export default function ModernAppHome({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-sky-950/60 via-transparent to-transparent" />
                   <div className="absolute bottom-2.5 left-2.5 right-2.5 text-[10px] text-white font-semibold bg-sky-950/50 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1.5">
-                    <Activity className="w-3 h-3 text-cyan-300" />
-                    <span>Asesoría y trámite 100% digital</span>
+                    <Award className="w-3 h-3 text-cyan-300" />
+                    <span>Acompañamiento 100% digital</span>
                   </div>
                 </div>
               )}
@@ -495,7 +342,44 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 4. SERVICIOS PRINCIPALES: FINANZAS, SEGUROS E INVERSIONES */}
+      {/* 4. FRANJA DE CONFIANZA & MÚSCULO FINANCIERO (Inspirado en Bancóldex y Lulo Bank) */}
+      <div className="mb-8 p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
+          <div className="flex flex-col items-center gap-1 p-2">
+            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-sky-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-900">0% Cobros Anticipados</span>
+            <span className="text-[10px] text-slate-400">Estudio y asesoría sin costo previo</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 p-2 pt-3 md:pt-2">
+            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
+              <Compass className="w-4 h-4 text-sky-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-900">+35 Entidades Aliadas</span>
+            <span className="text-[10px] text-slate-400">Bancos, cooperativas y aseguradoras</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 p-2 pt-3 md:pt-2">
+            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-sky-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-900">Viabilidad en 24h</span>
+            <span className="text-[10px] text-slate-400">Diagnóstico financiero express</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 p-2 pt-3 md:pt-2">
+            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
+              <Percent className="w-4 h-4 text-sky-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-900">Tasas Preferenciales</span>
+            <span className="text-[10px] text-slate-400">Convenios y garantías institucionales</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. SERVICIOS PRINCIPALES: FINANZAS, SEGUROS E INVERSIONES (3 Tarjetas Simétricas & Limpias) */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -515,7 +399,7 @@ export default function ModernAppHome({
           </button>
         </div>
 
-        {/* ================= 3 MAIN SERVICE CARDS ================= */}
+        {/* 3 Balanced Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {/* Card 1: Finanzas */}
           <button
@@ -615,39 +499,69 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 6. TRUST & GUARANTEE STRIP (4 verified pill badges in NEXT Light Blue) */}
-      <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-          <div className="flex flex-col items-center gap-1 p-2">
-            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-sky-500" />
-            </div>
-            <span className="text-xs font-bold text-slate-900">0% Costo Asesoría</span>
-            <span className="text-[10px] text-slate-400">Sin pagos anticipados</span>
+      {/* 6. CÓMO FUNCIONA: 3 PASOS ÁGILES & TRANSPARENTES (Inspirado en Sempli e Iris) */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 text-white relative overflow-hidden">
+        {/* Subtle background glow */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="max-w-xl mb-6">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-800">
+              Proceso 100% Digital
+            </span>
+            <h3 className="text-lg sm:text-xl font-black text-white tracking-tight mt-2">
+              ¿Cómo acceder a tus soluciones en NEXT?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              Sin filas, sin costos ocultos y con la agilidad que requiere tu negocio o patrimonio.
+            </p>
           </div>
 
-          <div className="flex flex-col items-center gap-1 p-2">
-            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
-              <Percent className="w-4 h-4 text-sky-500" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Step 1 */}
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs mb-3 border border-sky-500/30">
+                  01
+                </div>
+                <h4 className="text-sm font-bold text-white mb-1">
+                  Solicitud Express
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Completa tu solicitud en 2 minutos con datos básicos, sin trámites notariales ni papeleos iniciales.
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-bold text-slate-900">Tasas Transparentes</span>
-            <span className="text-[10px] text-slate-400">Convenios preferenciales</span>
-          </div>
 
-          <div className="flex flex-col items-center gap-1 p-2">
-            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
-              <Clock className="w-4 h-4 text-sky-500" />
+            {/* Step 2 */}
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs mb-3 border border-sky-500/30">
+                  02
+                </div>
+                <h4 className="text-sm font-bold text-white mb-1">
+                  Diagnóstico Multientidad
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Comparamos tu perfil en más de 35 bancos y aseguradoras para presentarte la mejor tasa o cobertura del mercado.
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-bold text-slate-900">Respuesta en 24h</span>
-            <span className="text-[10px] text-slate-400">Estudio y viabilidad ágil</span>
-          </div>
 
-          <div className="flex flex-col items-center gap-1 p-2">
-            <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
-              <Compass className="w-4 h-4 text-sky-500" />
+            {/* Step 3 */}
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs mb-3 border border-emerald-500/30">
+                  03
+                </div>
+                <h4 className="text-sm font-bold text-white mb-1">
+                  Aprobación & Desembolso
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Aprobación en tiempo récord con desembolso directo a tu cuenta bancaria o emisión inmediata de tu póliza.
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-bold text-slate-900">+35 Aliados Oficiales</span>
-            <span className="text-[10px] text-slate-400">Bancos y aseguradoras</span>
           </div>
         </div>
       </div>
