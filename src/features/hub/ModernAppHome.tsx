@@ -24,8 +24,7 @@ import {
   Award,
 } from "lucide-react";
 import { VerticalKey } from "@/src/types/common";
-import ScrollShowcaseSection from "./ScrollShowcaseSection";
-import DisbursementScrollJourney from "./DisbursementScrollJourney";
+import LuloStyleScrollExperience from "./LuloStyleScrollExperience";
 
 interface ModernAppHomeProps {
   onSelectVertical?: (vertical: VerticalKey | any) => void;
@@ -113,7 +112,7 @@ export default function ModernAppHome({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-16 font-sans text-slate-800">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-0 font-sans text-slate-800">
       {/* Keyframe Animations */}
       <style>{`
         @keyframes nextAvatarFloat {
@@ -376,78 +375,8 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 5. VIAJE INTERACTIVO DE DESEMBOLSO SCROLL-DRIVEN (Tarjeta -> Datáfono -> Acreditación Bancaria) */}
-      <DisbursementScrollJourney onSelectVertical={handleServiceClick} />
-
-      {/* 6. ECOSISTEMA SCROLLYTELLING INTERACTIVO (Finanzas, Seguros, Inversiones) */}
-      <ScrollShowcaseSection onSelectVertical={handleServiceClick} />
-
-      {/* 6. CÓMO FUNCIONA: 3 PASOS ÁGILES & TRANSPARENTES (Inspirado en Sempli e Iris) */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 text-white relative overflow-hidden">
-        {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10">
-          <div className="max-w-xl mb-6">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-800">
-              Proceso 100% Digital
-            </span>
-            <h3 className="text-lg sm:text-xl font-black text-white tracking-tight mt-2">
-              ¿Cómo acceder a tus soluciones en NEXT?
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Sin filas, sin costos ocultos y con la agilidad que requiere tu negocio o patrimonio.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Step 1 */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs mb-3 border border-sky-500/30">
-                  01
-                </div>
-                <h4 className="text-sm font-bold text-white mb-1">
-                  Solicitud Express
-                </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Completa tu solicitud en 2 minutos con datos básicos, sin trámites notariales ni papeleos iniciales.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs mb-3 border border-sky-500/30">
-                  02
-                </div>
-                <h4 className="text-sm font-bold text-white mb-1">
-                  Diagnóstico Multientidad
-                </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Comparamos tu perfil en más de 35 bancos y aseguradoras para presentarte la mejor tasa o cobertura del mercado.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs mb-3 border border-emerald-500/30">
-                  03
-                </div>
-                <h4 className="text-sm font-bold text-white mb-1">
-                  Aprobación & Desembolso
-                </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Aprobación en tiempo récord con desembolso directo a tu cuenta bancaria o emisión inmediata de tu póliza.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* 5. EXPERIENCIA FULL-BLEED SCROLLYTELLING ESTILO LULO BANK (iPhone viajero 50/50 + 4 Tarjetas 3D en cascada + Órbita Ecosistema) */}
+      <LuloStyleScrollExperience onSelectVertical={handleServiceClick} />
     </div>
   );
 }
