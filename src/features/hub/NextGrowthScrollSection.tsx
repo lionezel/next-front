@@ -333,55 +333,36 @@ export default function NextGrowthScrollSection({
             </AnimatePresence>
           </div>
 
-          {/* RIGHT COLUMN (7 Cols): High-Definition Animated 3D Stage */}
-          <div className="lg:col-span-7 relative h-[330px] sm:h-[440px] lg:h-[530px] w-full rounded-3xl bg-gradient-to-br from-white via-[#F0F9FF] to-[#DBEAFE]/70 border border-sky-200/90 shadow-[0_25px_60px_rgba(2,132,199,0.12)] overflow-hidden">
-            {/* Soft Ambient Lighting Glows */}
-            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-sky-300/25 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-cyan-300/20 blur-3xl pointer-events-none" />
-
-            {/* High-Definition Animated 3D WebGL Canvas */}
+          {/* RIGHT COLUMN (7 Cols): Clean Pure-White Isometric Vector Infographic Stage */}
+          <div className="lg:col-span-7 relative h-[350px] sm:h-[460px] lg:h-[540px] w-full rounded-3xl bg-white border border-slate-200/90 shadow-[0_20px_50px_rgba(15,36,60,0.07)] overflow-hidden">
+            {/* Animated 2.5D Isometric Vector Infographic */}
             <NextIndustrialGrowth3D
               progress={progress}
               activeScene={activeScene}
               reducedMotion={reducedMotion}
             />
 
-            {/* TOP-LEFT FLOATING CARD: Protagonist Status */}
-            <div className="absolute top-3.5 left-3.5 sm:top-5 sm:left-5 z-20 px-3.5 py-2 rounded-2xl bg-white/90 backdrop-blur-md border border-sky-200/80 shadow-sm flex items-center gap-2.5 pointer-events-none">
-              <div className="w-8 h-8 rounded-xl bg-[#0F243C] text-[#38BDF8] flex items-center justify-center font-black text-xs">
+            {/* TOP-LEFT FLOATING BADGE */}
+            <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 z-20 px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-xs flex items-center gap-2 pointer-events-none">
+              <div className="w-7 h-7 rounded-lg bg-[#0F243C] text-[#38BDF8] flex items-center justify-center font-black text-[11px]">
                 NE➔XT
               </div>
+              <span className="text-xs font-extrabold text-[#0F243C]">
+                Etapa {activeScene + 1}/4 • {currentScene.shortLabel.slice(4)}
+              </span>
+            </div>
+
+            {/* BOTTOM-RIGHT FLOATING METRIC PILL */}
+            <div className="absolute bottom-3.5 right-3.5 sm:bottom-4 sm:right-4 z-20 px-3.5 py-2 rounded-xl bg-[#0F243C]/95 backdrop-blur-md text-white shadow-lg pointer-events-none flex items-center gap-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                  Protagonista en Escena
-                </span>
-                <span className="text-xs font-extrabold text-[#0F243C] block">
-                  Mismo Empresario • Etapa {activeScene + 1}/4
-                </span>
-              </div>
-            </div>
-
-            {/* TOP-RIGHT INTERACTIVE HINT PILL */}
-            <div className="hidden sm:flex absolute top-5 right-5 z-20 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-sky-200/80 text-[11px] font-bold text-[#0284C7] items-center gap-1.5 pointer-events-none shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="w-2 h-2 rounded-full bg-emerald-500 -ml-3.5" />
-              <span>Simulación 3D en Vivo • Mueve el cursor</span>
-            </div>
-
-            {/* BOTTOM-RIGHT FLOATING FINANCIAL CARD: Live Metric */}
-            <div className="absolute bottom-3.5 right-3.5 sm:bottom-5 sm:right-5 z-20 px-4 py-3 rounded-2xl bg-[#0F243C]/95 backdrop-blur-md border border-sky-400/40 text-white shadow-xl pointer-events-none min-w-[195px]">
-              <div className="flex items-center justify-between gap-3 mb-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-sky-300 block">
                   {currentScene.metricTitle}
                 </span>
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-sm font-black text-white font-mono">
+                  {currentScene.metricValue}
+                </span>
               </div>
-              <div className="text-base sm:text-lg font-black text-white font-mono">
-                {currentScene.metricValue}
-              </div>
-              <span className="text-[10px] font-semibold text-emerald-300 block">
-                {currentScene.metricSub}
-              </span>
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
             </div>
           </div>
         </div>
