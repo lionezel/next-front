@@ -3,8 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-export type PixelResolutionMode = "retro" | "hd-pixel" | "voxel-crisp";
-
 export interface NextIndustrialGrowth3DProps {
   /** Normalized scroll progress from 0.0 to 1.0 */
   progress: number;
@@ -12,8 +10,6 @@ export interface NextIndustrialGrowth3DProps {
   activeScene: number;
   /** Reduced motion preference */
   reducedMotion?: boolean;
-  /** Pixelation resolution mode ("retro" = 3.2x pixel, "hd-pixel" = 2.2x pixel, "voxel-crisp" = 1x) */
-  pixelMode?: PixelResolutionMode;
 }
 
 function clamp(v: number, min: number, max: number) {
@@ -29,9 +25,6 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-/**
- * Elastic ease-out for voxel blocks dropping & snapping into place
- */
 function easeOutBack(x: number): number {
   const c1 = 1.70158;
   const c3 = c1 + 1;
@@ -40,98 +33,85 @@ function easeOutBack(x: number): number {
 }
 
 /**
- * Creates a crisp Pixel-Art CanvasTexture (with NearestFilter) for the 3D NEXT Corporate Card
+ * High-Resolution Retina CanvasTexture for the 3D NEXT Corporate Card
  */
-function createPixelArtCardTexture(): THREE.CanvasTexture {
+function createHDNextCardTexture(): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
-  // Low-res pixel-art canvas (128x80) scaled with NearestFilter for authentic pixel-art typography!
-  canvas.width = 128;
-  canvas.height = 80;
+  canvas.width = 1024;
+  canvas.height = 640;
   const ctx = canvas.getContext("2d")!;
-  ctx.imageSmoothingEnabled = false;
 
-  // Deep Navy Background
-  ctx.fillStyle = "#081C45";
-  ctx.fillRect(0, 0, 128, 80);
+  // Smooth Metallic Navy to Sky-Blue Gradient
+  const grad = ctx.createLinearGradient(0, 0, 1024, 640);
+  grad.addColorStop(0, "#07193D");
+  grad.addColorStop(0.5, "#0D3270");
+  grad.addColorStop(1, "#0284C7");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 1024, 640);
 
-  // Stepped Pixel-Art Diagonal Sky-Blue Gradient Bands
-  const bands = [
-    { color: "#0C2D6B", x: 35, w: 30 },
-    { color: "#0369A1", x: 60, w: 28 },
-    { color: "#0284C7", x: 84, w: 26 },
-    { color: "#38BDF8", x: 104, w: 24 },
-  ];
-  bands.forEach((b) => {
-    ctx.fillStyle = b.color;
-    for (let y = 0; y < 80; y += 2) {
-      const shift = Math.floor(y * 0.45);
-      ctx.fillRect(b.x - shift, y, b.w, 2);
-    }
-  });
+  // Diagonal Glossy Light Sweep
+  const sheen = ctx.createLinearGradient(200, 0, 750, 640);
+  sheen.addColorStop(0, "rgba(56, 189, 248, 0.0)");
+  sheen.addColorStop(0.5, "rgba(125, 211, 252, 0.25)");
+  sheen.addColorStop(1, "rgba(56, 189, 248, 0.0)");
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, 1024, 640);
 
-  // Outer Pixel Border (Light Sky Blue)
-  ctx.fillStyle = "#7DD3FC";
-  ctx.fillRect(2, 2, 124, 2);
-  ctx.fillRect(2, 76, 124, 2);
-  ctx.fillRect(2, 2, 2, 76);
-  ctx.fillRect(124, 2, 2, 76);
+  // Subtle Border Frame
+  ctx.strokeStyle = "rgba(125, 211, 252, 0.65)";
+  ctx.lineWidth = 10;
+  ctx.strokeRect(20, 20, 984, 600);
 
-  // Corner Pixel Rivets
+  // Gold EMV Chip
+  ctx.fillStyle = "#FBBF24";
+  ctx.beginPath();
+  ctx.roundRect(90, 220, 135, 100, 20);
+  ctx.fill();
+  ctx.strokeStyle = "#FEF3C7";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(118, 244, 78, 52);
+
+  // NEXT Brand Logo
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(4, 4, 2, 2);
-  ctx.fillRect(122, 4, 2, 2);
-  ctx.fillRect(4, 74, 2, 2);
-  ctx.fillRect(122, 74, 2, 2);
-
-  // Pixel EMV Gold Chip (Left)
-  ctx.fillStyle = "#F59E0B";
-  ctx.fillRect(10, 26, 18, 14);
-  ctx.fillStyle = "#FDE68A";
-  ctx.fillRect(12, 28, 14, 10);
-  ctx.fillStyle = "#B45309";
-  ctx.fillRect(18, 26, 2, 14);
-  ctx.fillRect(10, 32, 18, 2);
-
-  // Pixel-Art "NEXT" Logo Text
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 18px monospace";
-  ctx.fillText("NE", 34, 39);
+  ctx.font = "900 96px system-ui, -apple-system, sans-serif";
+  ctx.fillText("NE", 265, 308);
   ctx.fillStyle = "#38BDF8";
-  ctx.fillText(">", 56, 39);
+  ctx.fillText("➔", 405, 306);
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText("XT", 67, 39);
+  ctx.fillText("XT", 502, 308);
 
-  // Bottom Pixel Label
+  // Card Labels
   ctx.fillStyle = "#BAE6FD";
-  ctx.font = "bold 8px monospace";
-  ctx.fillText("CREDITO EMPRESAS", 10, 58);
+  ctx.font = "700 28px system-ui, -apple-system, sans-serif";
+  ctx.fillText("FINANCIACIÓN EMPRESARIAL", 90, 465);
 
-  // Bottom White Pixel Number Blocks
   ctx.fillStyle = "#FFFFFF";
-  for (let i = 0; i < 4; i++) {
-    ctx.fillRect(10 + i * 16, 64, 12, 3);
-  }
+  ctx.font = "800 38px monospace";
+  ctx.fillText("CUPO ACTIVO • +35 ALIADOS", 90, 535);
 
-  // Pixel Mastercard-style Overlapping Squares/Circles Bottom Right
+  // Overlapping Dual Circles Bottom Right
   ctx.fillStyle = "#38BDF8";
-  ctx.fillRect(96, 56, 12, 12);
+  ctx.beginPath();
+  ctx.arc(830, 505, 50, 0, Math.PI * 2);
+  ctx.fill();
+
   ctx.fillStyle = "#10B981";
-  ctx.fillRect(104, 56, 12, 12);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(104, 56, 4, 12);
+  ctx.globalAlpha = 0.88;
+  ctx.beginPath();
+  ctx.arc(895, 505, 50, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
 
   const texture = new THREE.CanvasTexture(canvas);
-  texture.minFilter = THREE.NearestFilter;
-  texture.magFilter = THREE.NearestFilter;
-  texture.generateMipmaps = false;
+  texture.anisotropy = 4;
   texture.needsUpdate = true;
   return texture;
 }
 
 /**
- * Builds a charming 3D Voxel Character (Entrepreneur or Operator) out of crisp pixel cubes!
+ * Stylized 3D Character with articulated head, torso, and arms for lively animation
  */
-function buildVoxelCharacter(options: {
+function buildAnimatedCharacter(options: {
   suitColor: number;
   shirtColor: number;
   tieColor?: number;
@@ -139,222 +119,177 @@ function buildVoxelCharacter(options: {
   hasGlasses?: boolean;
 }): {
   root: THREE.Group;
+  bodyGroup: THREE.Group;
+  headGroup: THREE.Group;
   rightArm: THREE.Group;
   leftArm: THREE.Group;
-  headGroup: THREE.Group;
 } {
   const root = new THREE.Group();
-  const u = 0.09; // Base voxel unit size
+  const bodyGroup = new THREE.Group();
+  root.add(bodyGroup);
 
   const suitMat = new THREE.MeshStandardMaterial({
     color: options.suitColor,
-    roughness: 0.4,
+    roughness: 0.32,
+    metalness: 0.08,
   });
   const skinMat = new THREE.MeshStandardMaterial({
     color: 0xf1c29d,
-    roughness: 0.5,
+    roughness: 0.42,
   });
   const shirtMat = new THREE.MeshStandardMaterial({
     color: options.shirtColor,
-    roughness: 0.35,
+    roughness: 0.3,
   });
   const darkMat = new THREE.MeshStandardMaterial({
     color: 0x0f172a,
-    roughness: 0.4,
-  });
-  const shoeMat = new THREE.MeshStandardMaterial({
-    color: 0x1e293b,
-    roughness: 0.5,
+    roughness: 0.35,
   });
 
-  // Voxel Shoes & Legs
-  const legGeo = new THREE.BoxGeometry(u * 1.3, u * 3.8, u * 1.4);
-  const shoeGeo = new THREE.BoxGeometry(u * 1.4, u * 0.9, u * 1.9);
-
+  // Legs
+  const legGeo = new THREE.CapsuleGeometry(0.08, 0.32, 8, 14);
   const leftLeg = new THREE.Mesh(legGeo, suitMat);
-  leftLeg.position.set(-u * 0.85, u * 2.3, 0);
+  leftLeg.position.set(-0.09, 0.24, 0);
   leftLeg.castShadow = true;
   root.add(leftLeg);
 
-  const leftShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  leftShoe.position.set(-u * 0.85, u * 0.45, u * 0.25);
-  root.add(leftShoe);
-
   const rightLeg = new THREE.Mesh(legGeo, suitMat);
-  rightLeg.position.set(u * 0.85, u * 2.3, 0);
+  rightLeg.position.set(0.09, 0.24, 0);
   rightLeg.castShadow = true;
   root.add(rightLeg);
 
-  const rightShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  rightShoe.position.set(u * 0.85, u * 0.45, u * 0.25);
-  root.add(rightShoe);
-
-  // Voxel Torso (Blazer)
-  const torsoGeo = new THREE.BoxGeometry(u * 3.4, u * 4.4, u * 2.0);
-  const torso = new THREE.Mesh(torsoGeo, suitMat);
-  torso.position.set(0, u * 6.2, 0);
+  // Torso inside bodyGroup (allows subtle breathing & torso twist)
+  const torso = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.19, 0.38, 10, 16),
+    suitMat
+  );
+  torso.position.set(0, 0.68, 0);
+  torso.scale.set(1.06, 1, 0.74);
   torso.castShadow = true;
-  root.add(torso);
+  bodyGroup.add(torso);
 
-  // Voxel Shirt Front
-  const shirtGeo = new THREE.BoxGeometry(u * 1.4, u * 3.6, u * 0.3);
-  const shirt = new THREE.Mesh(shirtGeo, shirtMat);
-  shirt.position.set(0, u * 6.4, u * 0.95);
-  root.add(shirt);
+  // Shirt front
+  const shirt = new THREE.Mesh(
+    new THREE.BoxGeometry(0.14, 0.28, 0.14),
+    shirtMat
+  );
+  shirt.position.set(0, 0.76, 0.08);
+  bodyGroup.add(shirt);
 
-  // Voxel Sky-Blue Tie for the Entrepreneur
+  // Sky-Blue Tie for the Entrepreneur
   if (options.tieColor) {
     const tieMat = new THREE.MeshStandardMaterial({
       color: options.tieColor,
       emissive: options.tieColor,
-      emissiveIntensity: 0.28,
-      roughness: 0.25,
+      emissiveIntensity: 0.25,
+      roughness: 0.2,
     });
-    const tieGeo = new THREE.BoxGeometry(u * 0.65, u * 2.8, u * 0.38);
-    const tie = new THREE.Mesh(tieGeo, tieMat);
-    tie.position.set(0, u * 6.2, u * 1.02);
-    root.add(tie);
+    const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.24, 0.04), tieMat);
+    tie.position.set(0, 0.72, 0.15);
+    bodyGroup.add(tie);
   }
 
-  // Voxel Head Group
+  // Articulated Head Group
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, u * 10.4, 0);
-  root.add(headGroup);
+  headGroup.position.set(0, 1.12, 0);
+  bodyGroup.add(headGroup);
 
-  const headCube = new THREE.Mesh(
-    new THREE.BoxGeometry(u * 3.2, u * 3.2, u * 3.0),
+  const headMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.165, 24, 24),
     skinMat
   );
-  headCube.castShadow = true;
-  headGroup.add(headCube);
+  headMesh.castShadow = true;
+  headGroup.add(headMesh);
 
-  // Voxel Eyes
-  const eyeGeo = new THREE.BoxGeometry(u * 0.45, u * 0.55, u * 0.2);
+  // Eyes
+  const eyeGeo = new THREE.SphereGeometry(0.024, 10, 10);
   const leftEye = new THREE.Mesh(eyeGeo, darkMat);
-  leftEye.position.set(-u * 0.7, u * 0.2, u * 1.52);
+  leftEye.position.set(-0.055, 0.02, 0.148);
   headGroup.add(leftEye);
 
   const rightEye = new THREE.Mesh(eyeGeo, darkMat);
-  rightEye.position.set(u * 0.7, u * 0.2, u * 1.52);
+  rightEye.position.set(0.055, 0.02, 0.148);
   headGroup.add(rightEye);
 
-  // Voxel Executive Glasses for the Entrepreneur
   if (options.hasGlasses) {
-    const frameMat = new THREE.MeshStandardMaterial({
+    const glassMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
       emissive: 0x0284c7,
       emissiveIntensity: 0.2,
     });
-    const glassBridge = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 2.6, u * 0.22, u * 0.28),
-      frameMat
+    const glasses = new THREE.Mesh(
+      new THREE.BoxGeometry(0.22, 0.025, 0.03),
+      glassMat
     );
-    glassBridge.position.set(0, u * 0.45, u * 1.58);
-    headGroup.add(glassBridge);
+    glasses.position.set(0, 0.045, 0.155);
+    headGroup.add(glasses);
   }
 
-  // Voxel Hair or Safety Hardhat
+  // Hair or Hardhat
   if (options.hardhatColor) {
     const hatMat = new THREE.MeshStandardMaterial({
       color: options.hardhatColor,
-      roughness: 0.25,
+      roughness: 0.2,
+      metalness: 0.1,
     });
-    const hatMain = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.5, u * 1.2, u * 3.4),
+    const helmet = new THREE.Mesh(
+      new THREE.SphereGeometry(
+        0.18,
+        20,
+        14,
+        0,
+        Math.PI * 2,
+        0,
+        Math.PI * 0.55
+      ),
       hatMat
     );
-    hatMain.position.set(0, u * 1.8, 0);
-    headGroup.add(hatMain);
-
-    const hatVisor = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.5, u * 0.35, u * 0.8),
-      hatMat
-    );
-    hatVisor.position.set(0, u * 1.35, u * 1.8);
-    headGroup.add(hatVisor);
+    helmet.position.set(0, 0.02, 0);
+    headGroup.add(helmet);
   } else {
-    // Layered Voxel Hair for Entrepreneur
-    const hairTop = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.5, u * 1.0, u * 3.3),
+    const hair = new THREE.Mesh(
+      new THREE.SphereGeometry(
+        0.176,
+        20,
+        14,
+        0,
+        Math.PI * 2,
+        0,
+        Math.PI * 0.6
+      ),
       darkMat
     );
-    hairTop.position.set(0, u * 1.8, -u * 0.05);
-    headGroup.add(hairTop);
-
-    const hairBack = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.4, u * 2.4, u * 0.8),
-      darkMat
-    );
-    hairBack.position.set(0, u * 0.6, -u * 1.35);
-    headGroup.add(hairBack);
+    hair.position.set(0, 0.03, -0.015);
+    hair.rotation.x = -0.15;
+    headGroup.add(hair);
   }
 
-  // Voxel Arms
-  const armGeo = new THREE.BoxGeometry(u * 1.1, u * 3.6, u * 1.2);
-  const handGeo = new THREE.BoxGeometry(u * 1.0, u * 0.9, u * 1.0);
+  // Articulated Arms
+  const armGeo = new THREE.CapsuleGeometry(0.058, 0.28, 8, 12);
 
   const leftArm = new THREE.Group();
-  leftArm.position.set(-u * 2.3, u * 8.0, 0);
+  leftArm.position.set(-0.24, 0.85, 0);
   const leftArmMesh = new THREE.Mesh(armGeo, suitMat);
-  leftArmMesh.position.set(0, -u * 1.6, 0);
+  leftArmMesh.position.set(0, -0.14, 0);
   leftArmMesh.castShadow = true;
   leftArm.add(leftArmMesh);
-  const leftHand = new THREE.Mesh(handGeo, skinMat);
-  leftHand.position.set(0, -u * 3.6, 0);
-  leftArm.add(leftHand);
-  root.add(leftArm);
+  bodyGroup.add(leftArm);
 
   const rightArm = new THREE.Group();
-  rightArm.position.set(u * 2.3, u * 8.0, 0);
+  rightArm.position.set(0.24, 0.85, 0);
   const rightArmMesh = new THREE.Mesh(armGeo, suitMat);
-  rightArmMesh.position.set(0, -u * 1.6, 0);
+  rightArmMesh.position.set(0, -0.14, 0);
   rightArmMesh.castShadow = true;
   rightArm.add(rightArmMesh);
-  const rightHand = new THREE.Mesh(handGeo, skinMat);
-  rightHand.position.set(0, -u * 3.6, 0);
-  rightArm.add(rightHand);
-  root.add(rightArm);
+  bodyGroup.add(rightArm);
 
-  return { root, rightArm, leftArm, headGroup };
-}
-
-/**
- * Helper to create a Voxel Tree (Adds charm and scale to the isometric industrial campus)
- */
-function createVoxelTree(
-  trunkMat: THREE.Material,
-  leafMat1: THREE.Material,
-  leafMat2: THREE.Material
-): THREE.Group {
-  const tree = new THREE.Group();
-  const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.55, 0.22), trunkMat);
-  trunk.position.y = 0.275;
-  trunk.castShadow = true;
-  tree.add(trunk);
-
-  const crown1 = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.45, 0.75), leafMat1);
-  crown1.position.y = 0.72;
-  crown1.castShadow = true;
-  tree.add(crown1);
-
-  const crown2 = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.55), leafMat2);
-  crown2.position.y = 1.1;
-  crown2.castShadow = true;
-  tree.add(crown2);
-
-  const crown3 = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.32), leafMat1);
-  crown3.position.y = 1.4;
-  crown3.castShadow = true;
-  tree.add(crown3);
-
-  return tree;
+  return { root, bodyGroup, headGroup, rightArm, leftArm };
 }
 
 export default function NextIndustrialGrowth3D({
   progress,
   activeScene,
   reducedMotion = false,
-  pixelMode = "hd-pixel",
 }: NextIndustrialGrowth3DProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const [webglSupported, setWebglSupported] = useState<boolean>(true);
@@ -365,24 +300,25 @@ export default function NextIndustrialGrowth3D({
   const reducedMotionRef = useRef<boolean>(reducedMotion);
   reducedMotionRef.current = reducedMotion;
 
-  const pixelModeRef = useRef<PixelResolutionMode>(pixelMode);
-  pixelModeRef.current = pixelMode;
-
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
 
+    // 1. High-Definition Anti-Aliased WebGL Renderer (Crisp & Smooth, NOT pixelated!)
     let renderer: THREE.WebGLRenderer;
     try {
+      const isMobile = window.innerWidth < 768;
       renderer = new THREE.WebGLRenderer({
-        antialias: false, // Disabled for crisp pixel-art edges!
+        antialias: true,
         alpha: true,
         powerPreference: "high-performance",
       });
-      renderer.setPixelRatio(1); // Controlled via offscreen pixel-art render target
+      renderer.setPixelRatio(
+        Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2)
+      );
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.BasicShadowMap; // Crisp pixel-art shadows!
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.12;
     } catch {
@@ -391,95 +327,13 @@ export default function NextIndustrialGrowth3D({
     }
 
     container.innerHTML = "";
-    // Force crisp-edges CSS rendering on the WebGL canvas
-    renderer.domElement.style.imageRendering = "pixelated";
     container.appendChild(renderer.domElement);
 
-    // ========================================================================
-    // 1. POST-PROCESSING PIXEL-ART RENDER TARGET & SHADER PASS
-    // ========================================================================
-    const getPixelFactor = (mode: PixelResolutionMode, width: number) => {
-      const mobileAdjust = width < 640 ? 0.85 : 1;
-      if (mode === "retro") return 3.4 * mobileAdjust;
-      if (mode === "hd-pixel") return 2.25 * mobileAdjust;
-      return 1.15;
-    };
-
-    const initFactor = getPixelFactor(pixelModeRef.current, container.clientWidth);
-    const rtWidth = Math.max(
-      160,
-      Math.floor(container.clientWidth / initFactor)
-    );
-    const rtHeight = Math.max(
-      120,
-      Math.floor(container.clientHeight / initFactor)
-    );
-
-    const pixelRenderTarget = new THREE.WebGLRenderTarget(rtWidth, rtHeight, {
-      minFilter: THREE.NearestFilter,
-      magFilter: THREE.NearestFilter,
-      format: THREE.RGBAFormat,
-      generateMipmaps: false,
-    });
-
-    // Full-screen quad scene for crisp Pixel-Art presentation + subtle color pop
-    const postScene = new THREE.Scene();
-    const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const postMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        tDiffuse: { value: pixelRenderTarget.texture },
-        uResolution: { value: new THREE.Vector2(rtWidth, rtHeight) },
-        uPixelGridStrength: { value: 0.045 },
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D tDiffuse;
-        uniform vec2 uResolution;
-        uniform float uPixelGridStrength;
-        varying vec2 vUv;
-
-        void main() {
-          vec4 texel = texture2D(tDiffuse, vUv);
-
-          // Neighbor texel sampling for subtle pixel-art edge crispness
-          vec2 px = 1.0 / uResolution;
-          vec4 n = texture2D(tDiffuse, vUv + vec2(0.0, px.y));
-          vec4 e = texture2D(tDiffuse, vUv + vec2(px.x, 0.0));
-          float edge = length(texel.rgb - n.rgb) + length(texel.rgb - e.rgb);
-
-          // Quantize color levels slightly for authentic HD-2D pixel art feel
-          vec3 col = floor(texel.rgb * 36.0 + 0.5) / 36.0;
-          col = mix(col, col * 0.86, clamp(edge * 0.45, 0.0, 0.25));
-
-          // Ultra-subtle pixel grid bevel
-          vec2 cellUv = fract(vUv * uResolution);
-          float gridLine = step(0.92, max(cellUv.x, cellUv.y));
-          col -= gridLine * uPixelGridStrength * texel.a;
-
-          gl_FragColor = vec4(col, texel.a);
-        }
-      `,
-      transparent: true,
-    });
-    const postQuad = new THREE.Mesh(
-      new THREE.PlaneGeometry(2, 2),
-      postMaterial
-    );
-    postScene.add(postQuad);
-
-    // ========================================================================
-    // 2. TRUE ORTHOGRAPHIC ISOMETRIC CAMERA & SCENE
-    // ========================================================================
+    // 2. Scene & True Isometric-Style Orthographic Camera
     const scene = new THREE.Scene();
 
     const aspect = container.clientWidth / Math.max(1, container.clientHeight);
-    const frustumSize = 11.5;
+    const frustumSize = 11.2;
     const camera = new THREE.OrthographicCamera(
       (-frustumSize * aspect) / 2,
       (frustumSize * aspect) / 2,
@@ -491,33 +345,34 @@ export default function NextIndustrialGrowth3D({
     camera.position.set(14, 11.5, 14);
     camera.lookAt(0, 1.4, 0);
 
-    // Crisp Isometric Studio Lighting
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbae6fd, 1.45);
+    // 3. Rich Studio Lighting
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbae6fd, 1.4);
     hemiLight.position.set(0, 20, 0);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
-    dirLight.position.set(10, 18, 8);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.95);
+    dirLight.position.set(11, 18, 9);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    const d = 10;
+    const shadowSize = window.innerWidth < 768 ? 1024 : 2048;
+    dirLight.shadow.mapSize.width = shadowSize;
+    dirLight.shadow.mapSize.height = shadowSize;
+    const d = 10.5;
     dirLight.shadow.camera.left = -d;
     dirLight.shadow.camera.right = d;
     dirLight.shadow.camera.top = d;
     dirLight.shadow.camera.bottom = -d;
-    dirLight.shadow.bias = -0.001;
+    dirLight.shadow.bias = -0.0005;
     scene.add(dirLight);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.1);
-    rimLight.position.set(-12, 10, -10);
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.05);
+    rimLight.position.set(-12, 9, -10);
     scene.add(rimLight);
 
     const cardPointLight = new THREE.PointLight(0x38bdf8, 0, 14);
     scene.add(cardPointLight);
 
     // ========================================================================
-    // 3. VOXEL PALETTE MATERIALS
+    // 4. MATERIALS & GEOMETRIES REGISTRY
     // ========================================================================
     const materials: THREE.Material[] = [];
     const geometries: THREE.BufferGeometry[] = [];
@@ -531,123 +386,139 @@ export default function NextIndustrialGrowth3D({
     };
 
     const matWhite = mat(
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.25,
+        metalness: 0.05,
+      })
     );
     const matIce = mat(
-      new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.4 })
+      new THREE.MeshStandardMaterial({
+        color: 0xe0f2fe,
+        roughness: 0.32,
+        metalness: 0.05,
+      })
     );
     const matSkyLight = mat(
-      new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({
+        color: 0x7dd3fc,
+        roughness: 0.25,
+        metalness: 0.1,
+      })
     );
-    const matSky = mat(
+    const matSkyGlow = mat(
       new THREE.MeshStandardMaterial({
         color: 0x38bdf8,
         emissive: 0x0284c7,
-        emissiveIntensity: 0.25,
-        roughness: 0.25,
+        emissiveIntensity: 0.35,
+        roughness: 0.2,
       })
     );
     const matRoyal = mat(
-      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        roughness: 0.28,
+        metalness: 0.15,
+      })
     );
     const matNavy = mat(
-      new THREE.MeshStandardMaterial({ color: 0x0f243c, roughness: 0.35 })
+      new THREE.MeshStandardMaterial({
+        color: 0x0f243c,
+        roughness: 0.3,
+        metalness: 0.2,
+      })
     );
     const matSlate = mat(
-      new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.45 })
+      new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        roughness: 0.35,
+        metalness: 0.35,
+      })
     );
     const matRoad = mat(
-      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 })
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.55 })
     );
     const matEmerald = mat(
       new THREE.MeshStandardMaterial({
         color: 0x10b981,
         emissive: 0x059669,
-        emissiveIntensity: 0.3,
-        roughness: 0.3,
+        emissiveIntensity: 0.35,
+        roughness: 0.22,
       })
     );
     const matGold = mat(
       new THREE.MeshStandardMaterial({
         color: 0xfbbf24,
         emissive: 0xd97706,
-        emissiveIntensity: 0.35,
-        roughness: 0.25,
+        emissiveIntensity: 0.3,
+        roughness: 0.22,
+        metalness: 0.3,
       })
     );
-    const matLeaf1 = mat(
-      new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.5 })
-    );
-    const matLeaf2 = mat(
-      new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.5 })
-    );
-    const matTrunk = mat(
-      new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 })
+    const matGlass = mat(
+      new THREE.MeshPhysicalMaterial({
+        color: 0x38bdf8,
+        roughness: 0.1,
+        metalness: 0.1,
+        transmission: 0.4,
+        transparent: true,
+        opacity: 0.86,
+      })
     );
 
     // ========================================================================
-    // 4. LAYERED VOXEL DIORAMA ISLAND BASE
+    // 5. ARCHITECTURAL DIORAMA ISLAND & ANIMATED ROAD
     // ========================================================================
     const worldGroup = new THREE.Group();
     scene.add(worldGroup);
 
-    // Bottom Navy Bedrock Slab
     const bedrock = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(12.4, 0.45, 10.4)),
+      geo(new THREE.BoxGeometry(12.4, 0.4, 10.4)),
       matNavy
     );
-    bedrock.position.set(0, -0.68, 0);
+    bedrock.position.set(0, -0.62, 0);
     worldGroup.add(bedrock);
 
-    // Middle Glowing Sky-Blue Circuit Rim
     const circuitSlab = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(12.1, 0.22, 10.1)),
-      matSky
+      geo(new THREE.BoxGeometry(12.1, 0.18, 10.1)),
+      matSkyGlow
     );
-    circuitSlab.position.set(0, -0.35, 0);
+    circuitSlab.position.set(0, -0.33, 0);
     worldGroup.add(circuitSlab);
 
-    // Top White & Ice Voxel Platform
     const topSlab = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(11.8, 0.26, 9.8)),
+      geo(new THREE.BoxGeometry(11.8, 0.24, 9.8)),
       matWhite
     );
-    topSlab.position.set(0, -0.13, 0);
+    topSlab.position.set(0, -0.12, 0);
     topSlab.receiveShadow = true;
     worldGroup.add(topSlab);
 
-    // Voxel Logistics Road along the Front Edge (+ Dashed Pixel Lane Markings)
+    // Subtle Grid Lines
+    const grid = new THREE.GridHelper(11.4, 22, 0x93c5fd, 0xe2e8f0);
+    grid.position.y = 0.01;
+    worldGroup.add(grid);
+
+    // Front Logistics Avenue
     const roadMesh = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(11.8, 0.04, 1.5)),
+      geo(new THREE.BoxGeometry(11.8, 0.03, 1.45)),
       matRoad
     );
-    roadMesh.position.set(0, 0.02, 3.6);
+    roadMesh.position.set(0, 0.015, 3.6);
     roadMesh.receiveShadow = true;
     worldGroup.add(roadMesh);
 
+    const roadDashes: THREE.Mesh[] = [];
+    const dashGeo = geo(new THREE.BoxGeometry(0.55, 0.04, 0.1));
     for (let i = -5; i <= 5; i++) {
-      const dash = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.55, 0.06, 0.12)),
-        matWhite
-      );
-      dash.position.set(i * 1.0, 0.03, 3.6);
+      const dash = new THREE.Mesh(dashGeo, matSkyLight);
+      dash.position.set(i * 1.05, 0.025, 3.6);
       worldGroup.add(dash);
+      roadDashes.push(dash);
     }
 
-    // Voxel Checkerboard Floor Tiles on Factory Plaza
-    const tileGeo = geo(new THREE.BoxGeometry(0.95, 0.03, 0.95));
-    for (let gx = -5; gx <= 5; gx++) {
-      for (let gz = -4; gz <= 2; gz++) {
-        if ((gx + gz) % 2 === 0) {
-          const tile = new THREE.Mesh(tileGeo, matIce);
-          tile.position.set(gx * 1.0, 0.015, gz * 1.0);
-          tile.receiveShadow = true;
-          worldGroup.add(tile);
-        }
-      }
-    }
-
-    // 4 Voxel Trees framing the Isometric Plaza
+    // Stylized Isometric Trees (Gently swaying in the breeze)
+    const trees: THREE.Group[] = [];
     const treeCoords: [number, number][] = [
       [-5.1, 2.3],
       [-5.1, -3.8],
@@ -655,21 +526,44 @@ export default function NextIndustrialGrowth3D({
       [5.1, -3.8],
     ];
     treeCoords.forEach(([tx, tz]) => {
-      const t = createVoxelTree(matTrunk, matLeaf1, matLeaf2);
-      t.position.set(tx, 0, tz);
-      worldGroup.add(t);
+      const tGroup = new THREE.Group();
+      tGroup.position.set(tx, 0, tz);
+      const trunk = new THREE.Mesh(
+        geo(new THREE.CylinderGeometry(0.08, 0.12, 0.5, 12)),
+        matSlate
+      );
+      trunk.position.y = 0.25;
+      tGroup.add(trunk);
+
+      const foliage1 = new THREE.Mesh(
+        geo(new THREE.SphereGeometry(0.42, 18, 18)),
+        matEmerald
+      );
+      foliage1.position.y = 0.72;
+      foliage1.castShadow = true;
+      tGroup.add(foliage1);
+
+      const foliage2 = new THREE.Mesh(
+        geo(new THREE.SphereGeometry(0.28, 16, 16)),
+        matSkyGlow
+      );
+      foliage2.position.set(0.12, 1.08, 0.08);
+      foliage2.castShadow = true;
+      tGroup.add(foliage2);
+
+      worldGroup.add(tGroup);
+      trees.push(tGroup);
     });
 
     // ========================================================================
-    // 5. SCENE 1 (0% – 25%): INITIAL SMALL MANUFACTURING WORKSHOP
+    // 6. SCENE 1 (0% – 25%): INITIAL WORKSHOP + CONTINUOUSLY ANIMATED MACHINES
     // ========================================================================
     const s1Group = new THREE.Group();
     s1Group.position.set(-2.3, 0, -0.8);
     worldGroup.add(s1Group);
 
-    // Stepped Voxel Back & Side Cutaway Walls
     const s1BackWall = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.6, 2.2, 0.3)),
+      geo(new THREE.BoxGeometry(3.6, 2.2, 0.22)),
       matWhite
     );
     s1BackWall.position.set(0, 1.1, -1.5);
@@ -678,165 +572,168 @@ export default function NextIndustrialGrowth3D({
     s1Group.add(s1BackWall);
 
     const s1SideWall = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.3, 2.2, 3.0)),
+      geo(new THREE.BoxGeometry(0.22, 2.2, 3.0)),
       matWhite
     );
-    s1SideWall.position.set(-1.65, 1.1, -0.15);
+    s1SideWall.position.set(-1.69, 1.1, -0.1);
     s1SideWall.castShadow = true;
     s1SideWall.receiveShadow = true;
     s1Group.add(s1SideWall);
 
-    // Voxel Saw-Tooth Roof Cornice Blocks (Navy & Sky Blue)
-    const s1RoofRim = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.7, 0.35, 0.42)),
+    const s1Fascia = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(3.68, 0.32, 0.3)),
       matNavy
     );
-    s1RoofRim.position.set(0, 2.25, -1.48);
-    s1Group.add(s1RoofRim);
+    s1Fascia.position.set(0, 2.15, -1.48);
+    s1Group.add(s1Fascia);
 
-    const s1SideRim = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.42, 0.35, 3.1)),
-      matNavy
+    // Spinning Rooftop Ventilation Turbine on Initial Workshop
+    const s1Turbine = new THREE.Group();
+    s1Turbine.position.set(-1.1, 2.38, -1.48);
+    const blade1 = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.6, 0.06, 0.14)),
+      matSkyGlow
     );
-    s1SideRim.position.set(-1.65, 2.25, -0.15);
-    s1Group.add(s1SideRim);
+    const blade2 = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.14, 0.06, 0.6)),
+      matSkyGlow
+    );
+    s1Turbine.add(blade1, blade2);
+    s1Group.add(s1Turbine);
 
-    // Glowing Pixel Window Blocks on Initial Workshop Wall
-    for (let w = 0; w < 3; w++) {
-      const win = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.65, 0.65, 0.36)),
-        matSky
-      );
-      win.position.set(-0.95 + w * 0.95, 1.4, -1.5);
-      s1Group.add(win);
-    }
-
-    // Voxel CNC Machine #1 + Spinning Voxel Gear
-    const cncBody = new THREE.Mesh(
+    // CNC Machine + Continuously Spinning Gear & Piston
+    const cncMachine = new THREE.Mesh(
       geo(new THREE.BoxGeometry(0.95, 1.25, 0.95)),
       matSlate
     );
-    cncBody.position.set(-0.9, 0.625, -0.45);
-    cncBody.castShadow = true;
-    s1Group.add(cncBody);
+    cncMachine.position.set(-0.9, 0.625, -0.45);
+    cncMachine.castShadow = true;
+    s1Group.add(cncMachine);
 
-    const cncHeader = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(1.02, 0.25, 1.02)),
-      matRoyal
+    const cncPiston = new THREE.Mesh(
+      geo(new THREE.CylinderGeometry(0.22, 0.22, 0.35, 20)),
+      matSkyGlow
     );
-    cncHeader.position.set(-0.9, 1.32, -0.45);
-    s1Group.add(cncHeader);
+    cncPiston.position.set(-0.9, 1.35, -0.45);
+    s1Group.add(cncPiston);
 
-    // Voxel Gear attached to CNC Machine (Rotates with scroll)
-    const voxelGear = new THREE.Group();
-    voxelGear.position.set(-0.9, 0.75, 0.08);
-    const gearBar1 = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.55, 0.16, 0.12)),
+    const cncGear = new THREE.Group();
+    cncGear.position.set(-0.9, 0.72, 0.06);
+    const g1 = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.55, 0.14, 0.08)),
       matGold
     );
-    const gearBar2 = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.16, 0.55, 0.12)),
+    const g2 = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.14, 0.55, 0.08)),
       matGold
     );
-    voxelGear.add(gearBar1, gearBar2);
-    s1Group.add(voxelGear);
+    cncGear.add(g1, g2);
+    s1Group.add(cncGear);
 
-    // Initial Short Voxel Conveyor Belt
+    // Initial Conveyor Belt + Continuously Flowing Product Packages
     const s1Belt = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.1, 0.4, 0.65)),
+      geo(new THREE.BoxGeometry(2.2, 0.36, 0.62)),
       matNavy
     );
-    s1Belt.position.set(0.55, 0.2, -0.45);
+    s1Belt.position.set(0.55, 0.18, -0.45);
     s1Belt.castShadow = true;
     s1Group.add(s1Belt);
 
-    // Voxel Product Cubes on Initial Belt
-    const prodBoxGeo = geo(new THREE.BoxGeometry(0.38, 0.38, 0.38));
-    const s1Boxes: THREE.Mesh[] = [];
-    for (let i = 0; i < 2; i++) {
-      const b = new THREE.Mesh(prodBoxGeo, matSkyLight);
-      b.position.set(0.0 + i * 0.85, 0.59, -0.45);
-      b.castShadow = true;
-      s1Group.add(b);
-      s1Boxes.push(b);
+    const prodGeo = geo(new THREE.BoxGeometry(0.34, 0.3, 0.34));
+    const s1Packages: THREE.Mesh[] = [];
+    for (let i = 0; i < 3; i++) {
+      const pkg = new THREE.Mesh(prodGeo, matSkyLight);
+      pkg.position.set(0, 0.52, -0.45);
+      pkg.castShadow = true;
+      s1Group.add(pkg);
+      s1Packages.push(pkg);
     }
 
-    // THE VOXEL ENTREPRENEUR PROTAGONIST (Consistent across all 4 scenes!)
-    const entrepreneur = buildVoxelCharacter({
+    // THE ENTREPRENEUR PROTAGONIST (Consistent across all 4 scenes!)
+    const entrepreneur = buildAnimatedCharacter({
       suitColor: 0x0f243c,
       shirtColor: 0xffffff,
       tieColor: 0x38bdf8,
       hasGlasses: true,
     });
-    entrepreneur.root.position.set(-1.3, 0.02, 1.35);
+    entrepreneur.root.position.set(-1.25, 0.02, 1.35);
     entrepreneur.root.rotation.y = Math.PI * 0.2;
     worldGroup.add(entrepreneur.root);
 
     // ========================================================================
-    // 6. SCENE 2 (25% – 50%): 3D PIXEL-ART NEXT CARD & VOXEL COINS CASCADE
+    // 7. SCENE 2 (25% – 50%): 3D NEXT CARD, ORBITING COINS & RISING PARTICLES
     // ========================================================================
-    const s2CardGroup = new THREE.Group();
-    worldGroup.add(s2CardGroup);
+    const s2Group = new THREE.Group();
+    worldGroup.add(s2Group);
 
-    const cardTexture = createPixelArtCardTexture();
-    const cardTopMat = mat(
-      new THREE.MeshStandardMaterial({
+    const cardTexture = createHDNextCardTexture();
+    const cardMat = mat(
+      new THREE.MeshPhysicalMaterial({
         map: cardTexture,
-        roughness: 0.25,
-        metalness: 0.2,
+        roughness: 0.16,
+        metalness: 0.3,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.12,
       })
     );
-    const cardEdgeMat = mat(
-      new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
-        emissive: 0x0284c7,
-        emissiveIntensity: 0.35,
-      })
-    );
-
-    const cardMaterials = [
-      cardEdgeMat,
-      cardEdgeMat,
-      cardTopMat,
-      cardTopMat,
-      cardEdgeMat,
-      cardEdgeMat,
-    ];
     const nextCardMesh = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.5, 0.16, 2.2)),
-      cardMaterials
+      geo(new THREE.BoxGeometry(3.4, 0.1, 2.15)),
+      cardMat
     );
     nextCardMesh.castShadow = true;
-    s2CardGroup.add(nextCardMesh);
+    s2Group.add(nextCardMesh);
 
-    // Orbiting Voxel Coins / Liquidity Blocks around the NEXT Card
-    const voxelCoins: THREE.Mesh[] = [];
-    const coinGeo = geo(new THREE.BoxGeometry(0.32, 0.32, 0.12));
+    // Orbiting 3D Financial Coins & Rising Light Particles
+    const coins: THREE.Mesh[] = [];
+    const coinGeo = geo(new THREE.CylinderGeometry(0.22, 0.22, 0.07, 24));
     for (let c = 0; c < 8; c++) {
       const coin = new THREE.Mesh(
         coinGeo,
         c % 2 === 0 ? matGold : matEmerald
       );
+      coin.rotation.x = Math.PI / 2;
       coin.castShadow = true;
-      s2CardGroup.add(coin);
-      voxelCoins.push(coin);
+      s2Group.add(coin);
+      coins.push(coin);
     }
 
-    // Stepped Voxel Energy Square on the Floor beneath the Card
-    const energySquare = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.8, 0.05, 2.6)),
-      matSky
-    );
-    energySquare.position.set(-0.5, 0.03, -0.5);
-    worldGroup.add(energySquare);
+    // Rising Energy Orbs (Continuous vertical fountain of financial liquidity)
+    const energyOrbs: THREE.Mesh[] = [];
+    const orbGeo = geo(new THREE.SphereGeometry(0.09, 12, 12));
+    for (let o = 0; o < 14; o++) {
+      const orb = new THREE.Mesh(
+        orbGeo,
+        o % 3 === 0 ? matEmerald : matSkyGlow
+      );
+      s2Group.add(orb);
+      energyOrbs.push(orb);
+    }
+
+    // Expanding Pulse Rings on the Factory Floor
+    const pulseRings: { mesh: THREE.Mesh; mat: THREE.MeshBasicMaterial }[] = [];
+    const ringGeo = geo(new THREE.RingGeometry(1.1, 1.28, 48));
+    for (let r = 0; r < 2; r++) {
+      const rMat = mat(
+        new THREE.MeshBasicMaterial({
+          color: 0x38bdf8,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0,
+        })
+      );
+      const rMesh = new THREE.Mesh(ringGeo, rMat);
+      rMesh.rotation.x = -Math.PI / 2;
+      rMesh.position.set(-0.6, 0.03, -0.4);
+      worldGroup.add(rMesh);
+      pulseRings.push({ mesh: rMesh, mat: rMat });
+    }
 
     // ========================================================================
-    // 7. SCENE 3 (50% – 75%): VOXEL BLOCK-BY-BLOCK FACTORY EXPANSION
+    // 8. SCENE 3 (50% – 75%): ANIMATED ROBOTS, FORKLIFT, CONVEYOR & TEAM
     // ========================================================================
     const s3Group = new THREE.Group();
     worldGroup.add(s3Group);
 
-    // We store individual expandable voxel modules so each drops in with staggered scroll timing!
     const s3Modules: {
       obj: THREE.Object3D;
       targetY: number;
@@ -844,115 +741,129 @@ export default function NextIndustrialGrowth3D({
       endP: number;
     }[] = [];
 
-    // Module A: Middle Production Hall Back Wall & Skylight Roof
     const hall2Wall = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(4.6, 2.6, 0.3)),
+      geo(new THREE.BoxGeometry(4.6, 2.6, 0.24)),
       matWhite
     );
     hall2Wall.position.set(1.8, 1.3, -2.3);
     hall2Wall.castShadow = true;
     hall2Wall.receiveShadow = true;
     s3Group.add(hall2Wall);
-    s3Modules.push({ obj: hall2Wall, targetY: 1.3, startP: 0.44, endP: 0.56 });
+    s3Modules.push({ obj: hall2Wall, targetY: 1.3, startP: 0.44, endP: 0.55 });
 
-    const hall2Cornice = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(4.7, 0.38, 0.42)),
+    const hall2Header = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(4.68, 0.36, 0.32)),
       matRoyal
     );
-    hall2Cornice.position.set(1.8, 2.65, -2.28);
-    s3Group.add(hall2Cornice);
+    hall2Header.position.set(1.8, 2.55, -2.28);
+    s3Group.add(hall2Header);
     s3Modules.push({
-      obj: hall2Cornice,
-      targetY: 2.65,
-      startP: 0.47,
-      endP: 0.58,
+      obj: hall2Header,
+      targetY: 2.55,
+      startP: 0.46,
+      endP: 0.57,
     });
 
-    // Module B: Extended Long Voxel Conveyor Line
+    // Extended High-Speed Conveyor Line
     const longBelt = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(4.8, 0.4, 0.7)),
+      geo(new THREE.BoxGeometry(4.8, 0.38, 0.68)),
       matNavy
     );
-    longBelt.position.set(1.6, 0.2, -0.45);
+    longBelt.position.set(1.6, 0.19, -0.45);
     longBelt.castShadow = true;
     s3Group.add(longBelt);
-    s3Modules.push({ obj: longBelt, targetY: 0.2, startP: 0.48, endP: 0.58 });
+    s3Modules.push({ obj: longBelt, targetY: 0.19, startP: 0.47, endP: 0.58 });
 
-    // Module C: 3 Articulated Voxel Robotic Assembly Arms
-    const robotArms: THREE.Group[] = [];
+    // 3 Articulated Robotic Assembly Arms + Welding/Scanner Light Pulses
+    const robots: {
+      turret: THREE.Group;
+      forearm: THREE.Group;
+      spark: THREE.Mesh;
+    }[] = [];
     for (let r = 0; r < 3; r++) {
-      const rGroup = new THREE.Group();
-      rGroup.position.set(0.1 + r * 1.45, 0, -1.35);
+      const rRoot = new THREE.Group();
+      rRoot.position.set(0.1 + r * 1.45, 0, -1.3);
 
-      const baseBlock = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.55, 0.55, 0.55)),
+      const pedestal = new THREE.Mesh(
+        geo(new THREE.CylinderGeometry(0.26, 0.32, 0.5, 20)),
         matSlate
       );
-      baseBlock.position.y = 0.275;
-      baseBlock.castShadow = true;
-      rGroup.add(baseBlock);
+      pedestal.position.y = 0.25;
+      pedestal.castShadow = true;
+      rRoot.add(pedestal);
 
-      const pivot = new THREE.Group();
-      pivot.position.y = 0.55;
-
-      const mast = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.24, 0.95, 0.24)),
-        matSky
+      const turret = new THREE.Group();
+      turret.position.y = 0.5;
+      const shoulder = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(0.22, 0.82, 0.22)),
+        matSkyGlow
       );
-      mast.position.y = 0.45;
-      mast.castShadow = true;
-      pivot.add(mast);
+      shoulder.position.y = 0.4;
+      shoulder.castShadow = true;
+      turret.add(shoulder);
 
+      const forearm = new THREE.Group();
+      forearm.position.set(0, 0.78, 0);
       const boom = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.22, 0.22, 0.75)),
+        geo(new THREE.BoxGeometry(0.18, 0.18, 0.82)),
         matGold
       );
-      boom.position.set(0, 0.85, 0.3);
+      boom.position.set(0, 0, 0.35);
       boom.castShadow = true;
-      pivot.add(boom);
+      forearm.add(boom);
 
-      rGroup.add(pivot);
-      s3Group.add(rGroup);
-      robotArms.push(pivot);
+      // Glowing laser/assembly head at tip of robot arm
+      const spark = new THREE.Mesh(
+        geo(new THREE.SphereGeometry(0.11, 14, 14)),
+        matEmerald
+      );
+      spark.position.set(0, -0.14, 0.72);
+      forearm.add(spark);
+
+      turret.add(forearm);
+      rRoot.add(turret);
+      s3Group.add(rRoot);
+
+      robots.push({ turret, forearm, spark });
       s3Modules.push({
-        obj: rGroup,
+        obj: rRoot,
         targetY: 0,
-        startP: 0.5 + r * 0.04,
-        endP: 0.62 + r * 0.04,
+        startP: 0.49 + r * 0.04,
+        endP: 0.61 + r * 0.04,
       });
     }
 
-    // Module D: Moving Packages on Extended Belt
-    const s3Boxes: THREE.Mesh[] = [];
-    for (let i = 0; i < 4; i++) {
-      const box = new THREE.Mesh(
-        prodBoxGeo,
-        i % 2 === 0 ? matSky : matEmerald
+    // 5 Continuously Flowing Packages on the Extended Conveyor
+    const s3Packages: THREE.Mesh[] = [];
+    for (let i = 0; i < 5; i++) {
+      const pkg = new THREE.Mesh(
+        prodGeo,
+        i % 2 === 0 ? matSkyGlow : matEmerald
       );
-      box.position.set(-0.2 + i * 1.1, 0.59, -0.45);
-      box.castShadow = true;
-      s3Group.add(box);
-      s3Boxes.push(box);
+      pkg.position.set(0, 0.54, -0.45);
+      pkg.castShadow = true;
+      s3Group.add(pkg);
+      s3Packages.push(pkg);
     }
 
-    // Module E: High-Bay Voxel Warehouse Racks (Right Wing)
+    // High-Bay Storage Racks (Right Wing)
     const warehouseGroup = new THREE.Group();
     warehouseGroup.position.set(3.8, 0, 1.0);
     for (let lvl = 0; lvl < 3; lvl++) {
-      const rackShelf = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(1.9, 0.1, 0.95)),
+      const shelf = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(1.9, 0.08, 0.92)),
         matSlate
       );
-      rackShelf.position.y = 0.45 + lvl * 0.68;
-      rackShelf.castShadow = true;
-      warehouseGroup.add(rackShelf);
+      shelf.position.y = 0.45 + lvl * 0.68;
+      shelf.castShadow = true;
+      warehouseGroup.add(shelf);
 
       for (let c = 0; c < 2; c++) {
         const crate = new THREE.Mesh(
-          geo(new THREE.BoxGeometry(0.6, 0.46, 0.6)),
+          geo(new THREE.BoxGeometry(0.58, 0.44, 0.58)),
           lvl === 2 ? matEmerald : lvl === 1 ? matSkyLight : matGold
         );
-        crate.position.set(-0.45 + c * 0.9, 0.73 + lvl * 0.68, 0);
+        crate.position.set(-0.45 + c * 0.9, 0.71 + lvl * 0.68, 0);
         crate.castShadow = true;
         warehouseGroup.add(crate);
       }
@@ -961,18 +872,39 @@ export default function NextIndustrialGrowth3D({
     s3Modules.push({
       obj: warehouseGroup,
       targetY: 0,
-      startP: 0.56,
-      endP: 0.68,
+      startP: 0.55,
+      endP: 0.67,
     });
 
-    // Module F: 3 Voxel Operators in Sky-Blue Hardhats
-    const opPositions: [number, number, number][] = [
-      [0.4, 0.45, Math.PI],
-      [1.85, 0.45, Math.PI * 0.9],
-      [2.6, 1.5, -Math.PI * 0.35],
+    // Autonomous AGV Forklift ("Montacargas") shuttle moving between belt & warehouse!
+    const agvForklift = new THREE.Group();
+    agvForklift.position.set(2.2, 0.04, 1.0);
+    const agvBase = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.75, 0.22, 0.55)),
+      matGold
+    );
+    agvBase.position.y = 0.11;
+    agvBase.castShadow = true;
+    agvForklift.add(agvBase);
+
+    const agvCargo = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.45, 0.36, 0.42)),
+      matSkyGlow
+    );
+    agvCargo.position.y = 0.4;
+    agvCargo.castShadow = true;
+    agvForklift.add(agvCargo);
+    s3Group.add(agvForklift);
+
+    // 3 Animated Operators in Sky-Blue Hardhats
+    const operators: ReturnType<typeof buildAnimatedCharacter>[] = [];
+    const opCoords: [number, number, number][] = [
+      [0.45, 0.42, Math.PI],
+      [1.85, 0.42, Math.PI * 0.92],
+      [2.65, 1.65, -Math.PI * 0.35],
     ];
-    opPositions.forEach(([ox, oz, rot], idx) => {
-      const op = buildVoxelCharacter({
+    opCoords.forEach(([ox, oz, rot], idx) => {
+      const op = buildAnimatedCharacter({
         suitColor: 0x1e293b,
         shirtColor: 0x38bdf8,
         hardhatColor: 0x38bdf8,
@@ -980,16 +912,17 @@ export default function NextIndustrialGrowth3D({
       op.root.position.set(ox, 0.02, oz);
       op.root.rotation.y = rot;
       s3Group.add(op.root);
+      operators.push(op);
       s3Modules.push({
         obj: op.root,
         targetY: 0.02,
-        startP: 0.58 + idx * 0.03,
-        endP: 0.7 + idx * 0.03,
+        startP: 0.57 + idx * 0.03,
+        endP: 0.69 + idx * 0.03,
       });
     });
 
     // ========================================================================
-    // 8. SCENE 4 (75% – 100%): CONSOLIDATED VOXEL SMART INDUSTRY & TOWER
+    // 9. SCENE 4 (75% – 100%): CONSOLIDATED TOWER, MOVING TRUCK & GROWTH BARS
     // ========================================================================
     const s4Group = new THREE.Group();
     worldGroup.add(s4Group);
@@ -1001,129 +934,132 @@ export default function NextIndustrialGrowth3D({
       endP: number;
     }[] = [];
 
-    // Consolidated Voxel Corporate Skyscraper Tower (Rear-Left)
+    // Glass Executive Tower
     const towerGroup = new THREE.Group();
-    towerGroup.position.set(-2.5, 0, -2.9);
+    towerGroup.position.set(-2.5, 0, -2.8);
 
-    const towerBody = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.0, 4.8, 2.2)),
+    const towerCore = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.9, 4.7, 2.2)),
       matNavy
     );
-    towerBody.position.y = 2.4;
-    towerBody.castShadow = true;
-    towerBody.receiveShadow = true;
-    towerGroup.add(towerBody);
+    towerCore.position.y = 2.35;
+    towerCore.castShadow = true;
+    towerCore.receiveShadow = true;
+    towerGroup.add(towerCore);
 
-    // Pixel Grid Windows on Corporate Tower
-    for (let row = 0; row < 5; row++) {
-      for (let col = 0; col < 3; col++) {
-        const winBlock = new THREE.Mesh(
-          geo(new THREE.BoxGeometry(0.62, 0.52, 0.12)),
-          (row + col) % 2 === 0 ? matSky : matSkyLight
-        );
-        winBlock.position.set(-0.8 + col * 0.8, 0.85 + row * 0.82, 1.12);
-        towerGroup.add(winBlock);
-      }
+    const towerGlass = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.7, 4.1, 0.12)),
+      matGlass
+    );
+    towerGlass.position.set(0, 2.35, 1.12);
+    towerGroup.add(towerGlass);
+
+    for (let f = 0; f < 4; f++) {
+      const bar = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(2.74, 0.07, 0.16)),
+        matSkyGlow
+      );
+      bar.position.set(0, 0.95 + f * 0.92, 1.13);
+      towerGroup.add(bar);
     }
 
-    // Rooftop Crown & Solar Array on Tower
-    const towerCrown = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.15, 0.35, 2.35)),
-      matSky
+    // Rotating Rooftop Radar / Beacon on Executive Tower
+    const towerBeacon = new THREE.Group();
+    towerBeacon.position.set(0, 4.85, 0);
+    const beaconDish = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.9, 0.18, 0.22)),
+      matSkyGlow
     );
-    towerCrown.position.y = 4.95;
-    towerGroup.add(towerCrown);
+    towerBeacon.add(beaconDish);
+    towerGroup.add(towerBeacon);
 
     s4Group.add(towerGroup);
-    s4Modules.push({ obj: towerGroup, targetY: 0, startP: 0.72, endP: 0.86 });
+    s4Modules.push({ obj: towerGroup, targetY: 0, startP: 0.72, endP: 0.85 });
 
-    // Executive Command Sky-Balcony (Where Entrepreneur directs the industry in Scene 4)
-    const commandPlatform = new THREE.Group();
-    commandPlatform.position.set(-1.3, 0, 1.55);
-    const podBase = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.1, 0.55, 1.35)),
+    // Executive Command Balcony
+    const balconyGroup = new THREE.Group();
+    balconyGroup.position.set(-1.25, 0, 1.55);
+    const balconyBase = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.1, 0.52, 1.3)),
       matWhite
     );
-    podBase.position.y = 0.275;
-    podBase.castShadow = true;
-    commandPlatform.add(podBase);
+    balconyBase.position.y = 0.26;
+    balconyBase.castShadow = true;
+    balconyGroup.add(balconyBase);
 
-    const podRim = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.18, 0.12, 1.42)),
-      matSky
+    const balconyRim = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.16, 0.1, 1.36)),
+      matSkyGlow
     );
-    podRim.position.y = 0.58;
-    commandPlatform.add(podRim);
+    balconyRim.position.y = 0.55;
+    balconyGroup.add(balconyRim);
 
-    s4Group.add(commandPlatform);
+    s4Group.add(balconyGroup);
     s4Modules.push({
-      obj: commandPlatform,
+      obj: balconyGroup,
       targetY: 0,
       startP: 0.74,
       endP: 0.86,
     });
 
-    // Voxel Logistics Delivery Truck on the Front Road
-    const voxelTruck = new THREE.Group();
-    voxelTruck.position.set(1.5, 0.04, 3.55);
+    // Animated Logistics Delivery Truck on Front Avenue
+    const truckGroup = new THREE.Group();
+    truckGroup.position.set(1.5, 0.03, 3.58);
 
-    const trailerBox = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.2, 1.05, 0.92)),
+    const trailer = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.2, 1.02, 0.9)),
       matWhite
     );
-    trailerBox.position.set(0, 0.65, 0);
-    trailerBox.castShadow = true;
-    voxelTruck.add(trailerBox);
+    trailer.position.set(0, 0.64, 0);
+    trailer.castShadow = true;
+    truckGroup.add(trailer);
 
-    const trailerBand = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.24, 0.22, 0.95)),
-      matSky
+    const trailerStripe = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.24, 0.2, 0.92)),
+      matSkyGlow
     );
-    trailerBand.position.set(0, 0.72, 0);
-    voxelTruck.add(trailerBand);
+    trailerStripe.position.set(0, 0.7, 0);
+    truckGroup.add(trailerStripe);
 
-    const truckCab = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.85, 0.85, 0.88)),
+    const cab = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.82, 0.82, 0.86)),
       matNavy
     );
-    truckCab.position.set(-1.58, 0.55, 0);
-    truckCab.castShadow = true;
-    voxelTruck.add(truckCab);
+    cab.position.set(-1.55, 0.54, 0);
+    cab.castShadow = true;
+    truckGroup.add(cab);
 
-    const truckWindshield = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.12, 0.38, 0.76)),
-      matSkyLight
-    );
-    truckWindshield.position.set(-1.98, 0.68, 0);
-    voxelTruck.add(truckWindshield);
+    s4Group.add(truckGroup);
 
-    // 6 Voxel Wheels
-    const wheelGeo = geo(new THREE.BoxGeometry(0.32, 0.32, 0.98));
-    [-1.55, -0.55, 0.65].forEach((wx) => {
-      const wheel = new THREE.Mesh(wheelGeo, matRoad);
-      wheel.position.set(wx, 0.16, 0);
-      voxelTruck.add(wheel);
-    });
-
-    s4Group.add(voxelTruck);
-
-    // 4 Ascending Voxel Financial Growth Bars (Rear-Right)
+    // 4 Ascending Financial Growth Bars (With Gentle Pulse)
     const growthBars: THREE.Mesh[] = [];
     for (let b = 0; b < 4; b++) {
-      const bh = 1.1 + b * 0.85;
+      const bh = 1.15 + b * 0.82;
       const bar = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.55, bh, 0.55)),
-        b === 3 ? matEmerald : b === 2 ? matSky : matRoyal
+        geo(new THREE.BoxGeometry(0.52, bh, 0.52)),
+        b === 3 ? matEmerald : b === 2 ? matSkyGlow : matRoyal
       );
-      bar.position.set(3.1 + b * 0.72, bh / 2, -2.5);
+      bar.position.set(3.1 + b * 0.7, bh / 2, -2.5);
       bar.castShadow = true;
       s4Group.add(bar);
       growthBars.push(bar);
     }
 
     // ========================================================================
-    // 9. RESIZE & VISIBILITY HANDLERS
+    // 10. INTERACTIVE MOUSE PARALLAX & RESIZE HANDLER
     // ========================================================================
+    let mouseX = 0;
+    let mouseY = 0;
+    let smoothMouseX = 0;
+    let smoothMouseY = 0;
+
+    const handlePointerMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / Math.max(1, rect.width) - 0.5) * 2;
+      mouseY = ((e.clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 2;
+    };
+    container.addEventListener("mousemove", handlePointerMove);
+
     let isVisible = true;
     const io = new IntersectionObserver(
       (entries) => {
@@ -1135,119 +1071,149 @@ export default function NextIndustrialGrowth3D({
     );
     io.observe(container);
 
-    const updateSizes = () => {
+    const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth;
       const h = Math.max(1, container.clientHeight);
       const asp = w / h;
-
-      // Adjust Orthographic Camera frustum for mobile vs desktop
-      const fSize = w < 640 ? 13.5 : w < 1024 ? 12.2 : 11.2;
+      const fSize = w < 640 ? 13.5 : w < 1024 ? 12.0 : 11.0;
       camera.left = (-fSize * asp) / 2;
       camera.right = (fSize * asp) / 2;
       camera.top = fSize / 2;
       camera.bottom = -fSize / 2;
       camera.updateProjectionMatrix();
-
       renderer.setSize(w, h);
-
-      const pFactor = getPixelFactor(pixelModeRef.current, w);
-      const rtw = Math.max(160, Math.floor(w / pFactor));
-      const rth = Math.max(120, Math.floor(h / pFactor));
-      pixelRenderTarget.setSize(rtw, rth);
-      postMaterial.uniforms.uResolution.value.set(rtw, rth);
-      postMaterial.uniforms.uPixelGridStrength.value =
-        pixelModeRef.current === "voxel-crisp" ? 0.015 : 0.05;
     };
-
-    window.addEventListener("resize", updateSizes);
-    updateSizes();
+    window.addEventListener("resize", handleResize);
+    handleResize();
 
     // ========================================================================
-    // 10. DETERMINISTIC SCROLL-CONTROLLED RENDER LOOP
+    // 11. CONTINUOUS + SCROLL-SYNCHRONIZED ANIMATION LOOP
     // ========================================================================
     let rafId: number;
-    let lastMode = pixelModeRef.current;
     const clock = new THREE.Clock();
 
     const animate = () => {
       rafId = window.requestAnimationFrame(animate);
       if (!isVisible) return;
 
-      if (lastMode !== pixelModeRef.current) {
-        lastMode = pixelModeRef.current;
-        updateSizes();
-      }
-
-      const elapsed = clock.getElapsedTime();
+      const t = clock.getElapsedTime();
       const p = clamp(progressRef.current, 0, 1);
       const isReduced = reducedMotionRef.current;
+      const animTime = isReduced ? p * 10 : t;
+
+      smoothMouseX += (mouseX - smoothMouseX) * 0.08;
+      smoothMouseY += (mouseY - smoothMouseY) * 0.08;
 
       const s2Enter = smoothstep(0.18, 0.34, p);
       const s2Exit = smoothstep(0.52, 0.66, p);
       const s3Progress = smoothstep(0.44, 0.74, p);
       const s4Progress = smoothstep(0.7, 0.94, p);
 
-      // 1. Subtle Orthographic Camera Pan & Zoom across the 4 stages
-      const targetZoom = lerp(1.18, 0.96, smoothstep(0.2, 0.88, p));
-      camera.zoom = targetZoom;
-      const panX = lerp(-1.2, 0.35, smoothstep(0.22, 0.82, p));
-      const panY = lerp(1.0, 1.55, smoothstep(0.35, 0.9, p));
-      const azimuth = lerp(0.76, 0.84, p);
+      // ----------------------------------------------------------------------
+      // 1. CAMERA ORBIT + INTERACTIVE MOUSE PARALLAX
+      // ----------------------------------------------------------------------
+      camera.zoom = lerp(1.18, 0.98, smoothstep(0.2, 0.88, p));
+      const panX = lerp(-1.15, 0.35, smoothstep(0.22, 0.82, p));
+      const panY = lerp(1.0, 1.5, smoothstep(0.35, 0.9, p));
+      const azimuth = lerp(0.75, 0.84, p) + smoothMouseX * 0.06;
       camera.position.set(
         Math.cos(azimuth) * 18,
-        14.2,
+        14.2 - smoothMouseY * 0.6,
         Math.sin(azimuth) * 18
       );
       camera.lookAt(panX, panY, 0);
       camera.updateProjectionMatrix();
 
-      // 2. Scene 1 Voxel Gear & Conveyor Cubes (100% Scroll-Synced)
-      voxelGear.rotation.z = -p * Math.PI * 16;
-      s1Boxes.forEach((box, idx) => {
-        const travel = ((p * 5 + idx * 0.5) % 1) * 1.5;
-        box.position.x = -0.2 + travel;
+      // ----------------------------------------------------------------------
+      // 2. CONTINUOUS ENVIRONMENTAL & SCENE 1 ANIMATIONS
+      // ----------------------------------------------------------------------
+      // Trees gently swaying
+      trees.forEach((tr, i) => {
+        tr.rotation.z = Math.sin(animTime * 2.2 + i) * 0.04;
       });
 
-      // 3. Scene 2: 3D Pixel-Art NEXT Card & Orbiting Voxel Coins
-      s2CardGroup.visible = s2Enter > 0.01;
-      const stepBob = isReduced
-        ? 0
-        : Math.round(Math.sin(elapsed * 3) * 3) * 0.04; // Quantized pixel bobbing!
+      // Road lane dashes scrolling smoothly to give sense of active logistics
+      roadDashes.forEach((dash, i) => {
+        const flow = ((i * 1.05 + animTime * 1.2) % 11.55) - 5.775;
+        dash.position.x = flow;
+      });
+
+      // Workshop rooftop turbine & CNC machine gear + piston continuously working!
+      s1Turbine.rotation.y = animTime * 4.5;
+      cncGear.rotation.z = -animTime * 3.8;
+      cncPiston.position.y = 1.32 + Math.sin(animTime * 8) * 0.06;
+
+      // Initial Conveyor Packages continuously flowing
+      s1Packages.forEach((pkg, idx) => {
+        const flow = (animTime * 0.55 + idx / s1Packages.length) % 1;
+        pkg.position.x = -0.35 + flow * 1.85;
+        pkg.scale.setScalar(
+          Math.sin(flow * Math.PI) > 0.15
+            ? 1
+            : Math.max(0.01, Math.sin(flow * Math.PI) * 6)
+        );
+      });
+
+      // ----------------------------------------------------------------------
+      // 3. SCENE 2: 3D NEXT CARD, ORBITING COINS, PULSE RINGS & FOUNTAIN ORBS
+      // ----------------------------------------------------------------------
+      s2Group.visible = s2Enter > 0.01;
+      const cardFloat = Math.sin(animTime * 2.6) * 0.16;
       const cardX = lerp(-0.5, -2.5, s4Progress);
-      const cardY = lerp(6.8, 3.3, easeOutBack(s2Enter)) + s4Progress * 2.55 + stepBob;
-      const cardZ = lerp(-0.4, -2.9, s4Progress);
+      const cardY =
+        lerp(6.8, 3.25, easeOutBack(s2Enter)) + s4Progress * 2.6 + cardFloat;
+      const cardZ = lerp(-0.4, -2.8, s4Progress);
       nextCardMesh.position.set(cardX, cardY, cardZ);
       nextCardMesh.rotation.set(
-        lerp(0.45, 0.25, s2Enter),
-        lerp(-0.35, 0.15, p),
+        lerp(0.45, 0.25, s2Enter) + Math.cos(animTime * 1.8) * 0.05,
+        lerp(-0.35, 0.2, p) + Math.sin(animTime * 1.5) * 0.12,
         lerp(-0.15, -0.05, s2Enter)
       );
-      const cScale = lerp(0.01, 1, s2Enter) * lerp(1, 0.76, s4Progress);
+      const cScale = lerp(0.01, 1, s2Enter) * lerp(1, 0.78, s4Progress);
       nextCardMesh.scale.setScalar(Math.max(0.001, cScale));
 
-      // Orbiting Voxel Coins around the NEXT Card
-      const coinVis = clamp(s2Enter * (1 - s2Exit * 0.8), 0, 1);
-      voxelCoins.forEach((coin, i) => {
-        const angle = (i / voxelCoins.length) * Math.PI * 2 + p * Math.PI * 10;
+      // Orbiting 3D Coins spinning around the NEXT Card
+      const coinVis = clamp(s2Enter * (1 - s2Exit * 0.75), 0, 1);
+      coins.forEach((coin, i) => {
+        const angle = (i / coins.length) * Math.PI * 2 + animTime * 1.8;
         const radius = 2.15;
         coin.position.set(
           cardX + Math.cos(angle) * radius,
-          cardY + Math.sin(angle * 2) * 0.35,
+          cardY + Math.sin(angle * 2 + animTime) * 0.35,
           cardZ + Math.sin(angle) * radius * 0.75
         );
-        coin.rotation.y = angle;
+        coin.rotation.z = animTime * 3 + i;
         coin.scale.setScalar(Math.max(0.001, coinVis));
       });
 
-      energySquare.visible = s2Enter > 0.02 && s2Exit < 0.98;
-      energySquare.scale.setScalar(
-        Math.max(0.001, s2Enter * (1 - s2Exit * 0.9))
-      );
-      cardPointLight.position.set(cardX, cardY - 0.6, cardZ);
-      cardPointLight.intensity = s2Enter * (1 - s2Exit * 0.5) * 5.0;
+      // Rising Liquidity Fountain Orbs
+      energyOrbs.forEach((orb, i) => {
+        const cycle = (animTime * 0.65 + i * 0.19) % 1;
+        const angle = i * 1.7 + animTime * 0.8;
+        const rad = 0.6 + (i % 3) * 0.45;
+        orb.position.set(
+          cardX + Math.cos(angle) * rad,
+          0.2 + cycle * 3.4,
+          cardZ + Math.sin(angle) * rad
+        );
+        const fade = Math.sin(cycle * Math.PI) * coinVis;
+        orb.scale.setScalar(Math.max(0.001, fade));
+      });
 
-      // 4. Scene 3: Voxel Modules Dropping & Snapping into Place
+      // Floor Pulse Rings expanding outward
+      pulseRings.forEach((pr, idx) => {
+        const ringCycle = (animTime * 0.55 + idx * 0.5) % 1;
+        pr.mesh.scale.setScalar(0.5 + ringCycle * 2.2);
+        pr.mat.opacity = (1 - ringCycle) * coinVis * 0.65;
+      });
+
+      cardPointLight.position.set(cardX, cardY - 0.5, cardZ);
+      cardPointLight.intensity = s2Enter * (1 - s2Exit * 0.4) * 5.0;
+
+      // ----------------------------------------------------------------------
+      // 4. SCENE 3: ANIMATED ROBOTS, EXTENDED BELT, AGV FORKLIFT & OPERATORS
+      // ----------------------------------------------------------------------
       s3Group.visible = p > 0.42;
       s3Modules.forEach((m) => {
         const localT = smoothstep(m.startP, m.endP, p);
@@ -1257,19 +1223,40 @@ export default function NextIndustrialGrowth3D({
         m.obj.position.y = m.targetY + (1 - eased) * 2.8;
       });
 
-      s3Boxes.forEach((box, idx) => {
-        box.visible = s3Progress > 0.25;
-        const travel = ((p * 7 + idx * 0.25) % 1) * 4.1;
-        box.position.x = -0.4 + travel;
+      // Extended Conveyor Packages continuously flowing
+      s3Packages.forEach((pkg, idx) => {
+        pkg.visible = s3Progress > 0.2;
+        const flow = (animTime * 0.42 + idx / s3Packages.length) % 1;
+        pkg.position.x = -0.5 + flow * 4.2;
       });
 
-      robotArms.forEach((arm, idx) => {
-        // Stepped quantized robotic rotation for pixel-art feel
-        const rawAngle = Math.sin(p * Math.PI * 10 + idx * 1.5) * 0.7;
-        arm.rotation.y = Math.round(rawAngle * 8) / 8;
+      // Robotic Arms actively swiveling, dipping down to assemble, and flashing their emerald tip!
+      robots.forEach((rob, idx) => {
+        const phase = animTime * 3.2 + idx * 2.1;
+        rob.turret.rotation.y = Math.sin(phase) * 0.65;
+        rob.forearm.rotation.x = Math.max(0, Math.sin(phase * 2)) * 0.42;
+        const flash = Math.pow(Math.max(0, Math.sin(phase * 2)), 4);
+        rob.spark.scale.setScalar(0.8 + flash * 1.1);
       });
 
-      // 5. Scene 4: Consolidated Tower, Command Pod, Truck & Growth Bars
+      // Autonomous AGV Forklift gliding back and forth between the conveyor and storage racks
+      agvForklift.visible = s3Progress > 0.35;
+      const agvCycle = (Math.sin(animTime * 1.4) + 1) * 0.5;
+      agvForklift.position.x = lerp(1.1, 2.75, agvCycle);
+      agvForklift.position.z = lerp(0.55, 1.15, agvCycle);
+      agvForklift.rotation.y = Math.cos(animTime * 1.4) * 0.25;
+
+      // Operators actively moving their arms and heads while working
+      operators.forEach((op, idx) => {
+        const wPhase = animTime * 3.5 + idx * 1.7;
+        op.rightArm.rotation.x = -0.5 + Math.sin(wPhase) * 0.35;
+        op.leftArm.rotation.x = -0.3 - Math.sin(wPhase) * 0.25;
+        op.headGroup.rotation.y = Math.sin(wPhase * 0.6) * 0.28;
+      });
+
+      // ----------------------------------------------------------------------
+      // 5. SCENE 4: CONSOLIDATED TOWER, BEACON, MOVING TRUCK & GROWTH BARS
+      // ----------------------------------------------------------------------
       s4Group.visible = p > 0.68;
       s4Modules.forEach((m) => {
         const localT = smoothstep(m.startP, m.endP, p);
@@ -1279,54 +1266,66 @@ export default function NextIndustrialGrowth3D({
         m.obj.position.y = m.targetY + (1 - eased) * 3.2;
       });
 
-      // Logistics Truck drives along the front pixel highway
-      voxelTruck.visible = s4Progress > 0.02;
-      voxelTruck.position.x = lerp(6.8, 1.5, easeOutBack(s4Progress));
+      towerBeacon.rotation.y = animTime * 2.2;
 
-      // Monument Voxel Growth Bars rise in stepped blocks
+      // Delivery Truck glides into loading position and idles with subtle suspension bounce
+      truckGroup.visible = s4Progress > 0.02;
+      truckGroup.position.x =
+        lerp(6.8, 1.5, easeOutBack(s4Progress)) +
+        Math.sin(animTime * 1.8) * 0.18;
+      truckGroup.position.y = 0.03 + Math.abs(Math.sin(animTime * 12)) * 0.015;
+
       growthBars.forEach((bar, idx) => {
-        const bT = smoothstep(0.73 + idx * 0.04, 0.93 + idx * 0.02, p);
+        const bT = smoothstep(0.73 + idx * 0.04, 0.92 + idx * 0.02, p);
         bar.visible = bT > 0.01;
-        bar.scale.y = Math.max(0.001, bT);
-        bar.position.y = ((1.1 + idx * 0.85) * bT) / 2;
+        const pulse = 1 + Math.sin(animTime * 3 + idx) * 0.04;
+        const finalScale = Math.max(0.001, bT * pulse);
+        bar.scale.y = finalScale;
+        bar.position.y = ((1.15 + idx * 0.82) * finalScale) / 2;
       });
 
-      // 6. Entrepreneur Protagonist Journey across all 4 scenes
-      const entY = lerp(0.02, 0.64, smoothstep(0.76, 0.88, p));
-      const entX = lerp(lerp(-1.3, 0.0, s3Progress), -1.3, s4Progress);
+      // ----------------------------------------------------------------------
+      // 6. ENTREPRENEUR PROTAGONIST LIVELY ANIMATION ACROSS ALL 4 SCENES
+      // ----------------------------------------------------------------------
+      const entY = lerp(0.02, 0.56, smoothstep(0.75, 0.87, p));
+      const entX = lerp(lerp(-1.25, 0.0, s3Progress), -1.25, s4Progress);
       const entZ = lerp(1.35, 1.55, s4Progress);
       entrepreneur.root.position.set(entX, entY, entZ);
       entrepreneur.root.rotation.y = lerp(
         Math.PI * 0.2,
-        Math.PI * 0.28,
+        Math.PI * 0.26,
         s4Progress
       );
 
-      const armWave = clamp(s2Enter * (1 - s3Progress) + s4Progress, 0, 1);
-      entrepreneur.rightArm.rotation.x = lerp(0, -1.1, armWave);
-      entrepreneur.rightArm.rotation.z = lerp(0, -0.25, armWave);
+      // Lively breathing, head looking around, and enthusiastic arm gestures
+      entrepreneur.bodyGroup.position.y = Math.sin(animTime * 3.2) * 0.02;
+      entrepreneur.headGroup.rotation.y = Math.sin(animTime * 1.6) * 0.22;
+      entrepreneur.headGroup.rotation.x =
+        s2Enter > 0.2 && s3Progress < 0.5 ? -0.22 : 0; // Looks up at the floating NEXT Card in Scene 2!
 
-      // Render Pass 1: 3D Voxel World -> Low-Res Nearest-Neighbor Pixel Target
-      renderer.setRenderTarget(pixelRenderTarget);
-      renderer.clear();
+      const gestureWeight = clamp(
+        s2Enter * (1 - s3Progress * 0.5) + s4Progress,
+        0.15,
+        1
+      );
+      entrepreneur.rightArm.rotation.x =
+        lerp(-0.2, -1.15, gestureWeight) + Math.sin(animTime * 4.5) * 0.18;
+      entrepreneur.rightArm.rotation.z =
+        -0.2 + Math.cos(animTime * 4.5) * 0.1;
+      entrepreneur.leftArm.rotation.x = Math.sin(animTime * 2.8) * 0.15;
+
       renderer.render(scene, camera);
-
-      // Render Pass 2: Pixel-Art Post Shader -> Screen Canvas
-      renderer.setRenderTarget(null);
-      renderer.render(postScene, postCamera);
     };
 
     rafId = window.requestAnimationFrame(animate);
 
     return () => {
       window.cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", updateSizes);
+      window.removeEventListener("resize", handleResize);
+      container.removeEventListener("mousemove", handlePointerMove);
       io.disconnect();
 
       cardTexture.dispose();
-      pixelRenderTarget.dispose();
-      postMaterial.dispose();
-      postQuad.geometry.dispose();
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
       renderer.dispose();
@@ -1339,11 +1338,11 @@ export default function NextIndustrialGrowth3D({
   if (!webglSupported) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-sky-50 via-white to-sky-100 rounded-3xl border border-sky-200">
-        <div className="w-16 h-16 rounded-2xl bg-[#0F243C] text-[#38BDF8] flex items-center justify-center font-black text-xl mb-4 shadow-lg font-mono">
+        <div className="w-16 h-16 rounded-2xl bg-[#0F243C] text-[#38BDF8] flex items-center justify-center font-black text-xl mb-4 shadow-lg">
           NE➔XT
         </div>
         <h4 className="text-lg font-extrabold text-[#0F243C]">
-          Etapa {activeScene + 1} de 4 • Evolución Voxel NEXT
+          Etapa {activeScene + 1} de 4 • Evolución Industrial NEXT
         </h4>
         <p className="text-sm text-slate-600 max-w-md mt-2">
           Progreso de transformación empresarial: {Math.round(progress * 100)}%
@@ -1355,9 +1354,8 @@ export default function NextIndustrialGrowth3D({
   return (
     <div
       ref={mountRef}
-      className="w-full h-full relative"
-      style={{ imageRendering: "pixelated" }}
-      aria-label="Animación interactiva 3D estilo Pixel Art Voxel del crecimiento industrial con NEXT"
+      className="w-full h-full relative cursor-grab active:cursor-grabbing"
+      aria-label="Escena interactiva 3D de alta definición del crecimiento industrial con NEXT"
     />
   );
 }
