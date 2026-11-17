@@ -24,8 +24,14 @@ import {
   Award,
 } from "lucide-react";
 import { VerticalKey } from "@/src/types/common";
+import {
+  Finance3DVault,
+  Insurance3DShield,
+  Investment3DGrowth,
+} from "@/src/components/common/Icons3D";
 import NextGrowthScrollSection from "./NextGrowthScrollSection";
 import LuloStyleScrollExperience from "./LuloStyleScrollExperience";
+import ScrollShowcaseSection from "./ScrollShowcaseSection";
 
 interface ModernAppHomeProps {
   onSelectVertical?: (vertical: VerticalKey | any) => void;
@@ -376,11 +382,197 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 5. TRANSFORMACIÓN INDUSTRIAL 3D INTERACTIVA (Three.js Isométrico controlado por scroll: 0-25% Taller -> 25-50% Financiación NEXT -> 50-75% Expansión -> 75-100% Industria Consolidada) */}
+      {/* 5. SERVICIOS PRINCIPALES: FINANZAS, SEGUROS E INVERSIONES (3 Tarjetas Simétricas & Limpias) */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              Servicios Principales
+            </h2>
+            <p className="text-xs text-slate-500">
+              Soluciones integrales de finanzas, protección patrimonial e inversiones
+            </p>
+          </div>
+          <button
+            onClick={() => handleServiceClick("credito")}
+            className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-0.5 transition-colors cursor-pointer"
+          >
+            <span>Ver todo</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* 3 Balanced Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          {/* Card 1: Finanzas */}
+          <button
+            type="button"
+            onClick={() => handleServiceClick("credito")}
+            className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10 transition-all text-left flex flex-col justify-between relative overflow-hidden group cursor-pointer min-h-[250px] sm:min-h-[280px]"
+          >
+            <div className="space-y-2 z-10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
+                Tasas competitivas del mercado
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-sky-600 transition-colors">
+                Finanzas
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                Créditos para personas naturales y jurídicas con las mejores tasas: compra de cartera, capital de trabajo, cupos rotativos, créditos de vehículo, hipotecarios, confirming y factoring.
+              </p>
+            </div>
+
+            <div className="flex items-end justify-between mt-5 z-10">
+              <span className="text-xs font-bold text-sky-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Ver soluciones</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+              <div className="transition-transform duration-500 group-hover:scale-105 group-hover:rotate-2">
+                <Finance3DVault width={120} height={95} />
+              </div>
+            </div>
+
+            {/* Ambient Backlight */}
+            <div className="absolute right-0 bottom-0 w-44 h-44 rounded-full bg-sky-100/40 blur-3xl pointer-events-none" />
+          </button>
+
+          {/* Card 2: Seguros */}
+          <button
+            type="button"
+            onClick={() => handleServiceClick("seguros")}
+            className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 hover:border-teal-300 hover:shadow-xl hover:shadow-teal-500/10 transition-all text-left flex flex-col justify-between relative overflow-hidden group cursor-pointer min-h-[250px] sm:min-h-[280px]"
+          >
+            <div className="space-y-2 z-10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-100">
+                Ahorro hasta un 50% en pólizas actuales
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-teal-600 transition-colors">
+                Seguros
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                Nos especializamos en pólizas de salud, jubilación, educativas, pólizas de socios, pólizas de vehículos y blindaje empresarial integral.
+              </p>
+            </div>
+
+            <div className="flex items-end justify-between mt-5 z-10">
+              <span className="text-xs font-bold text-teal-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Ver coberturas</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+              <div className="transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-2">
+                <Insurance3DShield width={105} height={95} />
+              </div>
+            </div>
+
+            {/* Ambient Backlight */}
+            <div className="absolute right-0 bottom-0 w-44 h-44 rounded-full bg-teal-100/35 blur-3xl pointer-events-none" />
+          </button>
+
+          {/* Card 3: Inversiones */}
+          <button
+            type="button"
+            onClick={() => handleServiceClick("inversiones")}
+            className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 transition-all text-left flex flex-col justify-between relative overflow-hidden group cursor-pointer min-h-[250px] sm:min-h-[280px]"
+          >
+            <div className="space-y-2 z-10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
+                Rentabilidades anuales según el fondo
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
+                Inversiones
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                Portafolios de alta rentabilidad, rendimiento fiduciario respaldado y estrategias de crecimiento de capital.
+              </p>
+            </div>
+
+            <div className="flex items-end justify-between mt-5 z-10">
+              <span className="text-xs font-bold text-indigo-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Ver portafolios</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+              <div className="transition-transform duration-500 group-hover:scale-105 group-hover:rotate-2">
+                <Investment3DGrowth width={105} height={95} />
+              </div>
+            </div>
+
+            {/* Ambient Backlight */}
+            <div className="absolute right-0 bottom-0 w-44 h-44 rounded-full bg-indigo-100/35 blur-3xl pointer-events-none" />
+          </button>
+        </div>
+      </div>
+
+      {/* 6. TRANSFORMACIÓN INDUSTRIAL 2.5D ISOMÉTRICA CONTROLADA POR SCROLL */}
       <NextGrowthScrollSection onSelectVertical={handleServiceClick} />
 
-      {/* 6. EXPERIENCIA FULL-BLEED SCROLLYTELLING ESTILO LULO BANK (iPhone viajero 50/50 + 4 Tarjetas 3D en cascada + Órbita Ecosistema) */}
+      {/* 7. EXPERIENCIA FULL-BLEED SCROLLYTELLING ESTILO LULO BANK (Desembolso -> Empresa Creciendo + 4 Tarjetas 3D en cascada + Órbita Ecosistema) */}
       <LuloStyleScrollExperience onSelectVertical={handleServiceClick} />
+
+      {/* 8. ECOSISTEMA SCROLLYTELLING INTERACTIVO (Finanzas, Seguros, Inversiones) */}
+      <ScrollShowcaseSection onSelectVertical={handleServiceClick} />
+
+      {/* 9. CÓMO FUNCIONA: 3 PASOS ÁGILES & TRANSPARENTES */}
+      <div className="my-12 p-6 sm:p-8 rounded-3xl bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="max-w-xl mb-6">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-800">
+              Proceso 100% Digital
+            </span>
+            <h3 className="text-lg sm:text-xl font-black text-white tracking-tight mt-2">
+              ¿Cómo acceder a tus soluciones en NEXT?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              Sin filas, sin costos ocultos y con la agilidad que requiere tu negocio o patrimonio.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs mb-3 border border-sky-500/30">
+                  01
+                </div>
+                <h4 className="text-sm font-bold text-white mb-1">
+                  Solicitud Express
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Completa tu solicitud en 2 minutos con datos básicos, sin trámites notariales ni papeleos iniciales.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs mb-3 border border-sky-500/30">
+                  02
+                </div>
+                <h4 className="text-sm font-bold text-white mb-1">
+                  Diagnóstico Multientidad
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Comparamos tu perfil en más de 35 bancos y aseguradoras para presentarte la mejor tasa o cobertura del mercado.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-400/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs mb-3 border border-emerald-500/30">
+                  03
+                </div>
+                <h4 className="text-sm font-bold text-white mb-1">
+                  Aprobación & Desembolso
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Aprobación en tiempo récord con desembolso directo a tu cuenta bancaria o emisión inmediata de tu póliza.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
