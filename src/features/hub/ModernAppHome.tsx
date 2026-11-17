@@ -24,6 +24,7 @@ import {
   Award,
 } from "lucide-react";
 import { VerticalKey } from "@/src/types/common";
+import NextGrowthScrollSection from "./NextGrowthScrollSection";
 import LuloStyleScrollExperience from "./LuloStyleScrollExperience";
 
 interface ModernAppHomeProps {
@@ -375,7 +376,10 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 5. EXPERIENCIA FULL-BLEED SCROLLYTELLING ESTILO LULO BANK (iPhone viajero 50/50 + 4 Tarjetas 3D en cascada + Órbita Ecosistema) */}
+      {/* 5. TRANSFORMACIÓN INDUSTRIAL 3D INTERACTIVA (Three.js Isométrico controlado por scroll: 0-25% Taller -> 25-50% Financiación NEXT -> 50-75% Expansión -> 75-100% Industria Consolidada) */}
+      <NextGrowthScrollSection onSelectVertical={handleServiceClick} />
+
+      {/* 6. EXPERIENCIA FULL-BLEED SCROLLYTELLING ESTILO LULO BANK (iPhone viajero 50/50 + 4 Tarjetas 3D en cascada + Órbita Ecosistema) */}
       <LuloStyleScrollExperience onSelectVertical={handleServiceClick} />
     </div>
   );
