@@ -89,8 +89,9 @@ next-front/
     │       └── VerticalInfoModal.tsx     <-- Modal de detalle para cada vertical
     ├── features/
     │   └── hub/
-    │       ├── ModernAppHome.tsx         <-- Home principal (Hero, Avatar 3D, Servicios)
-    │       └── ScrollShowcaseSection.tsx <-- Scrollytelling interactivo estilo Lulo Bank (Sticky 3D)
+    │       ├── ModernAppHome.tsx              <-- Home principal (Hero, Avatar 3D, Servicios)
+    │       ├── CreditCardsScrollAnimation.tsx <-- Animación 3D abanico de tarjetas de crédito estilo Lulo Bank
+    │       └── ScrollShowcaseSection.tsx      <-- Scrollytelling interactivo con dispositivo fintech 3D
     └── types/
         └── common.ts                     <-- VerticalKey ('credito' | 'inversiones' | 'seguros' | 'fit')
 ```
