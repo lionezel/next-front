@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { VerticalKey } from "@/src/types/common";
 import ScrollShowcaseSection from "./ScrollShowcaseSection";
+import CreditCardsScrollAnimation from "./CreditCardsScrollAnimation";
 
 interface ModernAppHomeProps {
   onSelectVertical?: (vertical: VerticalKey | any) => void;
@@ -375,7 +376,10 @@ export default function ModernAppHome({
         </div>
       </div>
 
-      {/* 5. ECOSISTEMA SCROLLYTELLING INTERACTIVO (Inspirado en Lulo Bank) */}
+      {/* 5. TARJETAS DE CRÉDITO 3D ISOMÉTRICAS CON DESPLIEGUE EN ABANICO (Scroll-driven como en Lulo Bank) */}
+      <CreditCardsScrollAnimation onSelectVertical={handleServiceClick} />
+
+      {/* 6. ECOSISTEMA SCROLLYTELLING INTERACTIVO (Finanzas, Seguros, Inversiones) */}
       <ScrollShowcaseSection onSelectVertical={handleServiceClick} />
 
       {/* 6. CÓMO FUNCIONA: 3 PASOS ÁGILES & TRANSPARENTES (Inspirado en Sempli e Iris) */}
