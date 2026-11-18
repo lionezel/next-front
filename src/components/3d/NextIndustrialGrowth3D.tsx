@@ -1,6 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+
+export type PixelResolutionMode = "retro" | "hd-pixel" | "voxel-crisp";
 
 export interface NextIndustrialGrowth3DProps {
   /** Normalized scroll progress from 0.0 to 1.0 */
@@ -9,6 +12,8 @@ export interface NextIndustrialGrowth3DProps {
   activeScene: number;
   /** Reduced motion preference */
   reducedMotion?: boolean;
+  /** Pixelation resolution mode ("retro" = 3.2x pixel, "hd-pixel" = 2.2x pixel, "voxel-crisp" = 1x) */
+  pixelMode?: PixelResolutionMode;
 }
 
 function clamp(v: number, min: number, max: number) {
@@ -20,1195 +25,1339 @@ function smoothstep(edge0: number, edge1: number, x: number) {
   return t * t * (3 - 2 * t);
 }
 
-/**
- * Exact 30-degree Isometric Projection helper:
- * Converts 3D world coordinates (x: right-down, z: left-down, y: vertical up)
- * into 2D SVG canvas coordinates (px, py).
- */
-const COS30 = 0.8660254;
-const SIN30 = 0.5;
-
-function iso(
-  x: number,
-  z: number,
-  y: number = 0,
-  originX: number = 480,
-  originY: number = 320
-): [number, number] {
-  const px = originX + (x - z) * COS30;
-  const py = originY + (x + z) * SIN30 - y;
-  return [Number(px.toFixed(1)), Number(py.toFixed(1))];
-}
-
-function pts(coords: [number, number][]): string {
-  return coords.map(([x, y]) => `${x},${y}`).join(" ");
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
 }
 
 /**
- * Renders a crisp 3D Isometric Prism (Box) with Top, Left, and Right shaded faces
+ * Elastic ease-out for voxel blocks dropping & snapping into place
  */
-function IsoBox({
-  x,
-  z,
-  y = 0,
-  w,
-  d,
-  h,
-  topColor,
-  leftColor,
-  rightColor,
-  strokeColor,
-  strokeWidth = 0.6,
-  opacity = 1,
-}: {
-  x: number;
-  z: number;
-  y?: number;
-  w: number;
-  d: number;
-  h: number;
-  topColor: string;
-  leftColor: string;
-  rightColor: string;
-  strokeColor?: string;
-  strokeWidth?: number;
-  opacity?: number;
-}) {
-  // 8 vertices of the isometric box
-  const t00 = iso(x, z, y + h);
-  const t10 = iso(x + w, z, y + h);
-  const t11 = iso(x + w, z + d, y + h);
-  const t01 = iso(x, z + d, y + h);
+function easeOutBack(x: number): number {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  const p = clamp(x, 0, 1);
+  return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
+}
 
-  const b10 = iso(x + w, z, y);
-  const b11 = iso(x + w, z + d, y);
-  const b01 = iso(x, z + d, y);
+/**
+ * Creates a crisp Pixel-Art CanvasTexture (with NearestFilter) for the 3D NEXT Corporate Card
+ */
+function createPixelArtCardTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  // Low-res pixel-art canvas (128x80) scaled with NearestFilter for authentic pixel-art typography!
+  canvas.width = 128;
+  canvas.height = 80;
+  const ctx = canvas.getContext("2d")!;
+  ctx.imageSmoothingEnabled = false;
 
-  return (
-    <g opacity={opacity}>
-      {/* Left Face (faces +z, along x from 0 to w at z+d) */}
-      <polygon
-        points={pts([t01, t11, b11, b01])}
-        fill={leftColor}
-        stroke={strokeColor}
-        strokeWidth={strokeWidth}
-        strokeLinejoin="round"
-      />
-      {/* Right Face (faces +x, along z from 0 to d at x+w) */}
-      <polygon
-        points={pts([t10, t11, b11, b10])}
-        fill={rightColor}
-        stroke={strokeColor}
-        strokeWidth={strokeWidth}
-        strokeLinejoin="round"
-      />
-      {/* Top Face */}
-      <polygon
-        points={pts([t00, t10, t11, t01])}
-        fill={topColor}
-        stroke={strokeColor}
-        strokeWidth={strokeWidth}
-        strokeLinejoin="round"
-      />
-    </g>
+  // Deep Navy Background
+  ctx.fillStyle = "#081C45";
+  ctx.fillRect(0, 0, 128, 80);
+
+  // Stepped Pixel-Art Diagonal Sky-Blue Gradient Bands
+  const bands = [
+    { color: "#0C2D6B", x: 35, w: 30 },
+    { color: "#0369A1", x: 60, w: 28 },
+    { color: "#0284C7", x: 84, w: 26 },
+    { color: "#38BDF8", x: 104, w: 24 },
+  ];
+  bands.forEach((b) => {
+    ctx.fillStyle = b.color;
+    for (let y = 0; y < 80; y += 2) {
+      const shift = Math.floor(y * 0.45);
+      ctx.fillRect(b.x - shift, y, b.w, 2);
+    }
+  });
+
+  // Outer Pixel Border (Light Sky Blue)
+  ctx.fillStyle = "#7DD3FC";
+  ctx.fillRect(2, 2, 124, 2);
+  ctx.fillRect(2, 76, 124, 2);
+  ctx.fillRect(2, 2, 2, 76);
+  ctx.fillRect(124, 2, 2, 76);
+
+  // Corner Pixel Rivets
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(4, 4, 2, 2);
+  ctx.fillRect(122, 4, 2, 2);
+  ctx.fillRect(4, 74, 2, 2);
+  ctx.fillRect(122, 74, 2, 2);
+
+  // Pixel EMV Gold Chip (Left)
+  ctx.fillStyle = "#F59E0B";
+  ctx.fillRect(10, 26, 18, 14);
+  ctx.fillStyle = "#FDE68A";
+  ctx.fillRect(12, 28, 14, 10);
+  ctx.fillStyle = "#B45309";
+  ctx.fillRect(18, 26, 2, 14);
+  ctx.fillRect(10, 32, 18, 2);
+
+  // Pixel-Art "NEXT" Logo Text
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "bold 18px monospace";
+  ctx.fillText("NE", 34, 39);
+  ctx.fillStyle = "#38BDF8";
+  ctx.fillText(">", 56, 39);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText("XT", 67, 39);
+
+  // Bottom Pixel Label
+  ctx.fillStyle = "#BAE6FD";
+  ctx.font = "bold 8px monospace";
+  ctx.fillText("CREDITO EMPRESAS", 10, 58);
+
+  // Bottom White Pixel Number Blocks
+  ctx.fillStyle = "#FFFFFF";
+  for (let i = 0; i < 4; i++) {
+    ctx.fillRect(10 + i * 16, 64, 12, 3);
+  }
+
+  // Pixel Mastercard-style Overlapping Squares/Circles Bottom Right
+  ctx.fillStyle = "#38BDF8";
+  ctx.fillRect(96, 56, 12, 12);
+  ctx.fillStyle = "#10B981";
+  ctx.fillRect(104, 56, 12, 12);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(104, 56, 4, 12);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.NearestFilter;
+  texture.magFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/**
+ * Builds a charming 3D Voxel Character (Entrepreneur or Operator) out of crisp pixel cubes!
+ */
+function buildVoxelCharacter(options: {
+  suitColor: number;
+  shirtColor: number;
+  tieColor?: number;
+  hardhatColor?: number;
+  hasGlasses?: boolean;
+}): {
+  root: THREE.Group;
+  rightArm: THREE.Group;
+  leftArm: THREE.Group;
+  headGroup: THREE.Group;
+} {
+  const root = new THREE.Group();
+  const u = 0.09; // Base voxel unit size
+
+  const suitMat = new THREE.MeshStandardMaterial({
+    color: options.suitColor,
+    roughness: 0.4,
+  });
+  const skinMat = new THREE.MeshStandardMaterial({
+    color: 0xf1c29d,
+    roughness: 0.5,
+  });
+  const shirtMat = new THREE.MeshStandardMaterial({
+    color: options.shirtColor,
+    roughness: 0.35,
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x0f172a,
+    roughness: 0.4,
+  });
+  const shoeMat = new THREE.MeshStandardMaterial({
+    color: 0x1e293b,
+    roughness: 0.5,
+  });
+
+  // Voxel Shoes & Legs
+  const legGeo = new THREE.BoxGeometry(u * 1.3, u * 3.8, u * 1.4);
+  const shoeGeo = new THREE.BoxGeometry(u * 1.4, u * 0.9, u * 1.9);
+
+  const leftLeg = new THREE.Mesh(legGeo, suitMat);
+  leftLeg.position.set(-u * 0.85, u * 2.3, 0);
+  leftLeg.castShadow = true;
+  root.add(leftLeg);
+
+  const leftShoe = new THREE.Mesh(shoeGeo, shoeMat);
+  leftShoe.position.set(-u * 0.85, u * 0.45, u * 0.25);
+  root.add(leftShoe);
+
+  const rightLeg = new THREE.Mesh(legGeo, suitMat);
+  rightLeg.position.set(u * 0.85, u * 2.3, 0);
+  rightLeg.castShadow = true;
+  root.add(rightLeg);
+
+  const rightShoe = new THREE.Mesh(shoeGeo, shoeMat);
+  rightShoe.position.set(u * 0.85, u * 0.45, u * 0.25);
+  root.add(rightShoe);
+
+  // Voxel Torso (Blazer)
+  const torsoGeo = new THREE.BoxGeometry(u * 3.4, u * 4.4, u * 2.0);
+  const torso = new THREE.Mesh(torsoGeo, suitMat);
+  torso.position.set(0, u * 6.2, 0);
+  torso.castShadow = true;
+  root.add(torso);
+
+  // Voxel Shirt Front
+  const shirtGeo = new THREE.BoxGeometry(u * 1.4, u * 3.6, u * 0.3);
+  const shirt = new THREE.Mesh(shirtGeo, shirtMat);
+  shirt.position.set(0, u * 6.4, u * 0.95);
+  root.add(shirt);
+
+  // Voxel Sky-Blue Tie for the Entrepreneur
+  if (options.tieColor) {
+    const tieMat = new THREE.MeshStandardMaterial({
+      color: options.tieColor,
+      emissive: options.tieColor,
+      emissiveIntensity: 0.28,
+      roughness: 0.25,
+    });
+    const tieGeo = new THREE.BoxGeometry(u * 0.65, u * 2.8, u * 0.38);
+    const tie = new THREE.Mesh(tieGeo, tieMat);
+    tie.position.set(0, u * 6.2, u * 1.02);
+    root.add(tie);
+  }
+
+  // Voxel Head Group
+  const headGroup = new THREE.Group();
+  headGroup.position.set(0, u * 10.4, 0);
+  root.add(headGroup);
+
+  const headCube = new THREE.Mesh(
+    new THREE.BoxGeometry(u * 3.2, u * 3.2, u * 3.0),
+    skinMat
   );
+  headCube.castShadow = true;
+  headGroup.add(headCube);
+
+  // Voxel Eyes
+  const eyeGeo = new THREE.BoxGeometry(u * 0.45, u * 0.55, u * 0.2);
+  const leftEye = new THREE.Mesh(eyeGeo, darkMat);
+  leftEye.position.set(-u * 0.7, u * 0.2, u * 1.52);
+  headGroup.add(leftEye);
+
+  const rightEye = new THREE.Mesh(eyeGeo, darkMat);
+  rightEye.position.set(u * 0.7, u * 0.2, u * 1.52);
+  headGroup.add(rightEye);
+
+  // Voxel Executive Glasses for the Entrepreneur
+  if (options.hasGlasses) {
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.2,
+    });
+    const glassBridge = new THREE.Mesh(
+      new THREE.BoxGeometry(u * 2.6, u * 0.22, u * 0.28),
+      frameMat
+    );
+    glassBridge.position.set(0, u * 0.45, u * 1.58);
+    headGroup.add(glassBridge);
+  }
+
+  // Voxel Hair or Safety Hardhat
+  if (options.hardhatColor) {
+    const hatMat = new THREE.MeshStandardMaterial({
+      color: options.hardhatColor,
+      roughness: 0.25,
+    });
+    const hatMain = new THREE.Mesh(
+      new THREE.BoxGeometry(u * 3.5, u * 1.2, u * 3.4),
+      hatMat
+    );
+    hatMain.position.set(0, u * 1.8, 0);
+    headGroup.add(hatMain);
+
+    const hatVisor = new THREE.Mesh(
+      new THREE.BoxGeometry(u * 3.5, u * 0.35, u * 0.8),
+      hatMat
+    );
+    hatVisor.position.set(0, u * 1.35, u * 1.8);
+    headGroup.add(hatVisor);
+  } else {
+    // Layered Voxel Hair for Entrepreneur
+    const hairTop = new THREE.Mesh(
+      new THREE.BoxGeometry(u * 3.5, u * 1.0, u * 3.3),
+      darkMat
+    );
+    hairTop.position.set(0, u * 1.8, -u * 0.05);
+    headGroup.add(hairTop);
+
+    const hairBack = new THREE.Mesh(
+      new THREE.BoxGeometry(u * 3.4, u * 2.4, u * 0.8),
+      darkMat
+    );
+    hairBack.position.set(0, u * 0.6, -u * 1.35);
+    headGroup.add(hairBack);
+  }
+
+  // Voxel Arms
+  const armGeo = new THREE.BoxGeometry(u * 1.1, u * 3.6, u * 1.2);
+  const handGeo = new THREE.BoxGeometry(u * 1.0, u * 0.9, u * 1.0);
+
+  const leftArm = new THREE.Group();
+  leftArm.position.set(-u * 2.3, u * 8.0, 0);
+  const leftArmMesh = new THREE.Mesh(armGeo, suitMat);
+  leftArmMesh.position.set(0, -u * 1.6, 0);
+  leftArmMesh.castShadow = true;
+  leftArm.add(leftArmMesh);
+  const leftHand = new THREE.Mesh(handGeo, skinMat);
+  leftHand.position.set(0, -u * 3.6, 0);
+  leftArm.add(leftHand);
+  root.add(leftArm);
+
+  const rightArm = new THREE.Group();
+  rightArm.position.set(u * 2.3, u * 8.0, 0);
+  const rightArmMesh = new THREE.Mesh(armGeo, suitMat);
+  rightArmMesh.position.set(0, -u * 1.6, 0);
+  rightArmMesh.castShadow = true;
+  rightArm.add(rightArmMesh);
+  const rightHand = new THREE.Mesh(handGeo, skinMat);
+  rightHand.position.set(0, -u * 3.6, 0);
+  rightArm.add(rightHand);
+  root.add(rightArm);
+
+  return { root, rightArm, leftArm, headGroup };
 }
 
 /**
- * Stylized Flat-Vector Isometric Person (Matches the editorial illustration reference)
+ * Helper to create a Voxel Tree (Adds charm and scale to the isometric industrial campus)
  */
-function IsoPerson({
-  cx,
-  cy,
-  shirtColor = "#FFFFFF",
-  pantsColor = "#1E293B",
-  skinColor = "#F1C29D",
-  hairColor = "#0F172A",
-  facing = "right",
-  hasTablet = false,
-  hasLaptop = false,
-  scale = 1,
-}: {
-  cx: number;
-  cy: number;
-  shirtColor?: string;
-  pantsColor?: string;
-  skinColor?: string;
-  hairColor?: string;
-  facing?: "right" | "left";
-  hasTablet?: boolean;
-  hasLaptop?: boolean;
-  scale?: number;
-}) {
-  const flip = facing === "left" ? -1 : 1;
-  return (
-    <g transform={`translate(${cx}, ${cy}) scale(${flip * scale}, ${scale})`}>
-      {/* Soft Floor Shadow under feet */}
-      <ellipse cx="0" cy="2" rx="14" ry="7" fill="rgba(15, 36, 60, 0.14)" />
+function createVoxelTree(
+  trunkMat: THREE.Material,
+  leafMat1: THREE.Material,
+  leafMat2: THREE.Material
+): THREE.Group {
+  const tree = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.55, 0.22), trunkMat);
+  trunk.position.y = 0.275;
+  trunk.castShadow = true;
+  tree.add(trunk);
 
-      {/* Shoes */}
-      <ellipse cx="-5" cy="0" rx="5" ry="2.6" fill="#0F172A" />
-      <ellipse cx="5" cy="2" rx="5" ry="2.6" fill="#0F172A" />
+  const crown1 = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.45, 0.75), leafMat1);
+  crown1.position.y = 0.72;
+  crown1.castShadow = true;
+  tree.add(crown1);
 
-      {/* Trousers / Legs */}
-      <path
-        d="M-8,-36 L-2,-36 L-2,0 L-8,0 Z"
-        fill={pantsColor}
-      />
-      <path
-        d="M1,-36 L7,-36 L7,2 L1,2 Z"
-        fill="#0F172A"
-      />
+  const crown2 = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.55), leafMat2);
+  crown2.position.y = 1.1;
+  crown2.castShadow = true;
+  tree.add(crown2);
 
-      {/* Torso / Shirt */}
-      <path
-        d="M-10,-72 C-10,-75 9,-75 10,-72 L9,-35 L-9,-35 Z"
-        fill={shirtColor}
-        stroke="#CBD5E1"
-        strokeWidth="0.8"
-      />
+  const crown3 = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.28, 0.32), leafMat1);
+  crown3.position.y = 1.4;
+  crown3.castShadow = true;
+  tree.add(crown3);
 
-      {/* NEXT Sky-Blue Collar / Tie Accent */}
-      <path d="M-2,-72 L3,-72 L2,-54 L-1,-54 Z" fill="#0EA5E9" />
-
-      {/* Head & Neck */}
-      <rect x="-3" y="-80" width="6" height="9" rx="2" fill={skinColor} />
-      <circle cx="1" cy="-86" r="8.5" fill={skinColor} />
-
-      {/* Sculpted Flat-Vector Hair */}
-      <path
-        d="M-8,-88 C-8,-97 9,-98 10,-88 C10,-84 7,-83 4,-85 C0,-87 -4,-84 -7,-82 Z"
-        fill={hairColor}
-      />
-
-      {/* Extended Arm + Tablet / Laptop */}
-      <path
-        d="M4,-67 L17,-55 L12,-49 L1,-59 Z"
-        fill={skinColor}
-      />
-      {hasTablet && (
-        <polygon
-          points="15,-66 26,-60 23,-45 12,-51"
-          fill="#0F243C"
-          stroke="#38BDF8"
-          strokeWidth="1.5"
-        />
-      )}
-      {hasLaptop && (
-        <g transform="translate(10, -54)">
-          <polygon points="0,0 14,6 22,1 8,-5" fill="#CBD5E1" />
-          <polygon points="14,6 16,-8 24,-13 22,1" fill="#0EA5E9" />
-        </g>
-      )}
-    </g>
-  );
-}
-
-/**
- * Upright Isometric Card / Product traveling along the diagonal conveyor belt
- * (Matches the upright cards with avatar, bars & checkmark in the reference image)
- */
-function ConveyorIsoCard({
-  x,
-  z,
-  y,
-  status = "approved",
-  accent = "#10B981",
-}: {
-  x: number;
-  z: number;
-  y: number;
-  status?: "approved" | "processing";
-  accent?: string;
-}) {
-  // Upright card aligned along the x-axis of the conveyor belt
-  const pTopLeft = iso(x, z, y + 48);
-  const pTopRight = iso(x + 28, z, y + 48);
-  const pBotRight = iso(x + 28, z, y);
-  const pBotLeft = iso(x, z, y);
-
-  // Back thickness offset
-  const pBackTopLeft = iso(x, z - 4, y + 48);
-  const pBackTopRight = iso(x + 28, z - 4, y + 48);
-  const pBackBotRight = iso(x + 28, z - 4, y);
-
-  const badgePos = iso(x + 14, z + 2, y + 12);
-  const headerTopLeft = iso(x + 4, z + 1, y + 42);
-  const headerTopRight = iso(x + 24, z + 1, y + 42);
-  const headerBotRight = iso(x + 24, z + 1, y + 25);
-  const headerBotLeft = iso(x + 4, z + 1, y + 25);
-
-  return (
-    <g>
-      {/* Card 3D Side Thickness */}
-      <polygon
-        points={pts([pTopLeft, pBackTopLeft, pBackTopRight, pTopRight])}
-        fill="#CBD5E1"
-      />
-      <polygon
-        points={pts([pTopRight, pBackTopRight, pBackBotRight, pBotRight])}
-        fill="#94A3B8"
-      />
-
-      {/* Main Upright Card Face */}
-      <polygon
-        points={pts([pTopLeft, pTopRight, pBotRight, pBotLeft])}
-        fill="#FFFFFF"
-        stroke="#0F243C"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-
-      {/* Inner Dark Teal/Navy Profile Window */}
-      <polygon
-        points={pts([
-          headerTopLeft,
-          headerTopRight,
-          headerBotRight,
-          headerBotLeft,
-        ])}
-        fill="#0E7490"
-      />
-
-      {/* Circular Status Badge (Green Checkmark or Gold NEXT Star) */}
-      <circle
-        cx={badgePos[0]}
-        cy={badgePos[1]}
-        r="7.5"
-        fill={status === "approved" ? accent : "#F59E0B"}
-        stroke="#FFFFFF"
-        strokeWidth="1.5"
-      />
-      <path
-        d={`M${badgePos[0] - 3},${badgePos[1]} L${badgePos[0] - 0.5},${
-          badgePos[1] + 2.5
-        } L${badgePos[0] + 3.5},${badgePos[1] - 2.5}`}
-        fill="none"
-        stroke="#FFFFFF"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </g>
-  );
-}
-
-/**
- * Overhead Isometric Robotic Claw / Gripper mounted on the gantry rail
- */
-function IsoRoboticGripper({
-  x,
-  z,
-  y,
-  dipOffset = 0,
-}: {
-  x: number;
-  z: number;
-  y: number;
-  dipOffset?: number;
-}) {
-  const [px, py] = iso(x, z, y - dipOffset);
-  return (
-    <g transform={`translate(${px}, ${py})`}>
-      {/* Vertical Pneumatic Cylinder */}
-      <rect
-        x="-3.5"
-        y="-24"
-        width="7"
-        height={20 + dipOffset}
-        rx="2"
-        fill="#64748B"
-      />
-      {/* Gripper Housing Block */}
-      <polygon
-        points="-9,-4 9,-4 12,4 -12,4"
-        fill="#334155"
-        stroke="#E2E8F0"
-        strokeWidth="0.8"
-      />
-      {/* Left & Right Mechanical Claws */}
-      <path
-        d="M-8,4 L-12,12 L-6,17"
-        fill="none"
-        stroke="#475569"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8,4 L12,12 L6,17"
-        fill="none"
-        stroke="#475569"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Glowing Cyan Indicator LED */}
-      <circle cx="0" cy="0" r="2.2" fill="#38BDF8" />
-    </g>
-  );
+  return tree;
 }
 
 export default function NextIndustrialGrowth3D({
   progress,
+  activeScene,
+  reducedMotion = false,
+  pixelMode = "hd-pixel",
 }: NextIndustrialGrowth3DProps) {
-  const p = clamp(progress, 0, 1);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const [webglSupported, setWebglSupported] = useState<boolean>(true);
 
-  // Stage activation weights (0.0 -> 1.0)
-  // Stage 1 (0-25%): Left Pedestal, Entrepreneur & Processing Portal Machine
-  // Stage 2 (25-50%): Diagonal Conveyor Belt, Scanner Beam, Robotic Claws & NEXT Cards
-  // Stage 3 (50-75%): Upper Digital Control Platform, Specialist & Giant Browser Screen
-  // Stage 4 (75-100%): Right Consolidated Industry Platform, 3D Bar Charts & 6 Dashboard Screens
-  const s1Weight = smoothstep(0.0, 0.15, p);
-  const s2Weight = smoothstep(0.18, 0.45, p);
-  const s3Weight = smoothstep(0.45, 0.72, p);
-  const s4Weight = smoothstep(0.7, 0.96, p);
+  const progressRef = useRef<number>(progress);
+  progressRef.current = progress;
 
-  // Scroll-scrubbed conveyor offset (also combined with CSS continuous flow)
-  const beltCards = [0, 1, 2, 3, 4, 5];
+  const reducedMotionRef = useRef<boolean>(reducedMotion);
+  reducedMotionRef.current = reducedMotion;
+
+  const pixelModeRef = useRef<PixelResolutionMode>(pixelMode);
+  pixelModeRef.current = pixelMode;
+
+  useEffect(() => {
+    const container = mountRef.current;
+    if (!container) return;
+
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: false, // Disabled for crisp pixel-art edges!
+        alpha: true,
+        powerPreference: "high-performance",
+      });
+      renderer.setPixelRatio(1); // Controlled via offscreen pixel-art render target
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.BasicShadowMap; // Crisp pixel-art shadows!
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.12;
+    } catch {
+      setWebglSupported(false);
+      return;
+    }
+
+    container.innerHTML = "";
+    // Force crisp-edges CSS rendering on the WebGL canvas
+    renderer.domElement.style.imageRendering = "pixelated";
+    container.appendChild(renderer.domElement);
+
+    // ========================================================================
+    // 1. POST-PROCESSING PIXEL-ART RENDER TARGET & SHADER PASS
+    // ========================================================================
+    const getPixelFactor = (mode: PixelResolutionMode, width: number) => {
+      const mobileAdjust = width < 640 ? 0.85 : 1;
+      if (mode === "retro") return 3.4 * mobileAdjust;
+      if (mode === "hd-pixel") return 2.25 * mobileAdjust;
+      return 1.15;
+    };
+
+    const initFactor = getPixelFactor(pixelModeRef.current, container.clientWidth);
+    const rtWidth = Math.max(
+      160,
+      Math.floor(container.clientWidth / initFactor)
+    );
+    const rtHeight = Math.max(
+      120,
+      Math.floor(container.clientHeight / initFactor)
+    );
+
+    const pixelRenderTarget = new THREE.WebGLRenderTarget(rtWidth, rtHeight, {
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+      format: THREE.RGBAFormat,
+      generateMipmaps: false,
+    });
+
+    // Full-screen quad scene for crisp Pixel-Art presentation + subtle color pop
+    const postScene = new THREE.Scene();
+    const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const postMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        tDiffuse: { value: pixelRenderTarget.texture },
+        uResolution: { value: new THREE.Vector2(rtWidth, rtHeight) },
+        uPixelGridStrength: { value: 0.045 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform vec2 uResolution;
+        uniform float uPixelGridStrength;
+        varying vec2 vUv;
+
+        void main() {
+          vec4 texel = texture2D(tDiffuse, vUv);
+
+          // Neighbor texel sampling for subtle pixel-art edge crispness
+          vec2 px = 1.0 / uResolution;
+          vec4 n = texture2D(tDiffuse, vUv + vec2(0.0, px.y));
+          vec4 e = texture2D(tDiffuse, vUv + vec2(px.x, 0.0));
+          float edge = length(texel.rgb - n.rgb) + length(texel.rgb - e.rgb);
+
+          // Quantize color levels slightly for authentic HD-2D pixel art feel
+          vec3 col = floor(texel.rgb * 36.0 + 0.5) / 36.0;
+          col = mix(col, col * 0.86, clamp(edge * 0.45, 0.0, 0.25));
+
+          // Ultra-subtle pixel grid bevel
+          vec2 cellUv = fract(vUv * uResolution);
+          float gridLine = step(0.92, max(cellUv.x, cellUv.y));
+          col -= gridLine * uPixelGridStrength * texel.a;
+
+          gl_FragColor = vec4(col, texel.a);
+        }
+      `,
+      transparent: true,
+    });
+    const postQuad = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      postMaterial
+    );
+    postScene.add(postQuad);
+
+    // ========================================================================
+    // 2. TRUE ORTHOGRAPHIC ISOMETRIC CAMERA & SCENE
+    // ========================================================================
+    const scene = new THREE.Scene();
+
+    const aspect = container.clientWidth / Math.max(1, container.clientHeight);
+    const frustumSize = 11.5;
+    const camera = new THREE.OrthographicCamera(
+      (-frustumSize * aspect) / 2,
+      (frustumSize * aspect) / 2,
+      frustumSize / 2,
+      -frustumSize / 2,
+      -30,
+      60
+    );
+    camera.position.set(14, 11.5, 14);
+    camera.lookAt(0, 1.4, 0);
+
+    // Crisp Isometric Studio Lighting
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbae6fd, 1.45);
+    hemiLight.position.set(0, 20, 0);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    dirLight.position.set(10, 18, 8);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    const d = 10;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    dirLight.shadow.bias = -0.001;
+    scene.add(dirLight);
+
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.1);
+    rimLight.position.set(-12, 10, -10);
+    scene.add(rimLight);
+
+    const cardPointLight = new THREE.PointLight(0x38bdf8, 0, 14);
+    scene.add(cardPointLight);
+
+    // ========================================================================
+    // 3. VOXEL PALETTE MATERIALS
+    // ========================================================================
+    const materials: THREE.Material[] = [];
+    const geometries: THREE.BufferGeometry[] = [];
+    const mat = <T extends THREE.Material>(m: T): T => {
+      materials.push(m);
+      return m;
+    };
+    const geo = <T extends THREE.BufferGeometry>(g: T): T => {
+      geometries.push(g);
+      return g;
+    };
+
+    const matWhite = mat(
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })
+    );
+    const matIce = mat(
+      new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.4 })
+    );
+    const matSkyLight = mat(
+      new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.3 })
+    );
+    const matSky = mat(
+      new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.25,
+        roughness: 0.25,
+      })
+    );
+    const matRoyal = mat(
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 })
+    );
+    const matNavy = mat(
+      new THREE.MeshStandardMaterial({ color: 0x0f243c, roughness: 0.35 })
+    );
+    const matSlate = mat(
+      new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.45 })
+    );
+    const matRoad = mat(
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 })
+    );
+    const matEmerald = mat(
+      new THREE.MeshStandardMaterial({
+        color: 0x10b981,
+        emissive: 0x059669,
+        emissiveIntensity: 0.3,
+        roughness: 0.3,
+      })
+    );
+    const matGold = mat(
+      new THREE.MeshStandardMaterial({
+        color: 0xfbbf24,
+        emissive: 0xd97706,
+        emissiveIntensity: 0.35,
+        roughness: 0.25,
+      })
+    );
+    const matLeaf1 = mat(
+      new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.5 })
+    );
+    const matLeaf2 = mat(
+      new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.5 })
+    );
+    const matTrunk = mat(
+      new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 })
+    );
+
+    // ========================================================================
+    // 4. LAYERED VOXEL DIORAMA ISLAND BASE
+    // ========================================================================
+    const worldGroup = new THREE.Group();
+    scene.add(worldGroup);
+
+    // Bottom Navy Bedrock Slab
+    const bedrock = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(12.4, 0.45, 10.4)),
+      matNavy
+    );
+    bedrock.position.set(0, -0.68, 0);
+    worldGroup.add(bedrock);
+
+    // Middle Glowing Sky-Blue Circuit Rim
+    const circuitSlab = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(12.1, 0.22, 10.1)),
+      matSky
+    );
+    circuitSlab.position.set(0, -0.35, 0);
+    worldGroup.add(circuitSlab);
+
+    // Top White & Ice Voxel Platform
+    const topSlab = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(11.8, 0.26, 9.8)),
+      matWhite
+    );
+    topSlab.position.set(0, -0.13, 0);
+    topSlab.receiveShadow = true;
+    worldGroup.add(topSlab);
+
+    // Voxel Logistics Road along the Front Edge (+ Dashed Pixel Lane Markings)
+    const roadMesh = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(11.8, 0.04, 1.5)),
+      matRoad
+    );
+    roadMesh.position.set(0, 0.02, 3.6);
+    roadMesh.receiveShadow = true;
+    worldGroup.add(roadMesh);
+
+    for (let i = -5; i <= 5; i++) {
+      const dash = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(0.55, 0.06, 0.12)),
+        matWhite
+      );
+      dash.position.set(i * 1.0, 0.03, 3.6);
+      worldGroup.add(dash);
+    }
+
+    // Voxel Checkerboard Floor Tiles on Factory Plaza
+    const tileGeo = geo(new THREE.BoxGeometry(0.95, 0.03, 0.95));
+    for (let gx = -5; gx <= 5; gx++) {
+      for (let gz = -4; gz <= 2; gz++) {
+        if ((gx + gz) % 2 === 0) {
+          const tile = new THREE.Mesh(tileGeo, matIce);
+          tile.position.set(gx * 1.0, 0.015, gz * 1.0);
+          tile.receiveShadow = true;
+          worldGroup.add(tile);
+        }
+      }
+    }
+
+    // 4 Voxel Trees framing the Isometric Plaza
+    const treeCoords: [number, number][] = [
+      [-5.1, 2.3],
+      [-5.1, -3.8],
+      [5.1, 2.3],
+      [5.1, -3.8],
+    ];
+    treeCoords.forEach(([tx, tz]) => {
+      const t = createVoxelTree(matTrunk, matLeaf1, matLeaf2);
+      t.position.set(tx, 0, tz);
+      worldGroup.add(t);
+    });
+
+    // ========================================================================
+    // 5. SCENE 1 (0% – 25%): INITIAL SMALL MANUFACTURING WORKSHOP
+    // ========================================================================
+    const s1Group = new THREE.Group();
+    s1Group.position.set(-2.3, 0, -0.8);
+    worldGroup.add(s1Group);
+
+    // Stepped Voxel Back & Side Cutaway Walls
+    const s1BackWall = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(3.6, 2.2, 0.3)),
+      matWhite
+    );
+    s1BackWall.position.set(0, 1.1, -1.5);
+    s1BackWall.castShadow = true;
+    s1BackWall.receiveShadow = true;
+    s1Group.add(s1BackWall);
+
+    const s1SideWall = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.3, 2.2, 3.0)),
+      matWhite
+    );
+    s1SideWall.position.set(-1.65, 1.1, -0.15);
+    s1SideWall.castShadow = true;
+    s1SideWall.receiveShadow = true;
+    s1Group.add(s1SideWall);
+
+    // Voxel Saw-Tooth Roof Cornice Blocks (Navy & Sky Blue)
+    const s1RoofRim = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(3.7, 0.35, 0.42)),
+      matNavy
+    );
+    s1RoofRim.position.set(0, 2.25, -1.48);
+    s1Group.add(s1RoofRim);
+
+    const s1SideRim = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.42, 0.35, 3.1)),
+      matNavy
+    );
+    s1SideRim.position.set(-1.65, 2.25, -0.15);
+    s1Group.add(s1SideRim);
+
+    // Glowing Pixel Window Blocks on Initial Workshop Wall
+    for (let w = 0; w < 3; w++) {
+      const win = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(0.65, 0.65, 0.36)),
+        matSky
+      );
+      win.position.set(-0.95 + w * 0.95, 1.4, -1.5);
+      s1Group.add(win);
+    }
+
+    // Voxel CNC Machine #1 + Spinning Voxel Gear
+    const cncBody = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.95, 1.25, 0.95)),
+      matSlate
+    );
+    cncBody.position.set(-0.9, 0.625, -0.45);
+    cncBody.castShadow = true;
+    s1Group.add(cncBody);
+
+    const cncHeader = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(1.02, 0.25, 1.02)),
+      matRoyal
+    );
+    cncHeader.position.set(-0.9, 1.32, -0.45);
+    s1Group.add(cncHeader);
+
+    // Voxel Gear attached to CNC Machine (Rotates with scroll)
+    const voxelGear = new THREE.Group();
+    voxelGear.position.set(-0.9, 0.75, 0.08);
+    const gearBar1 = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.55, 0.16, 0.12)),
+      matGold
+    );
+    const gearBar2 = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.16, 0.55, 0.12)),
+      matGold
+    );
+    voxelGear.add(gearBar1, gearBar2);
+    s1Group.add(voxelGear);
+
+    // Initial Short Voxel Conveyor Belt
+    const s1Belt = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.1, 0.4, 0.65)),
+      matNavy
+    );
+    s1Belt.position.set(0.55, 0.2, -0.45);
+    s1Belt.castShadow = true;
+    s1Group.add(s1Belt);
+
+    // Voxel Product Cubes on Initial Belt
+    const prodBoxGeo = geo(new THREE.BoxGeometry(0.38, 0.38, 0.38));
+    const s1Boxes: THREE.Mesh[] = [];
+    for (let i = 0; i < 2; i++) {
+      const b = new THREE.Mesh(prodBoxGeo, matSkyLight);
+      b.position.set(0.0 + i * 0.85, 0.59, -0.45);
+      b.castShadow = true;
+      s1Group.add(b);
+      s1Boxes.push(b);
+    }
+
+    // THE VOXEL ENTREPRENEUR PROTAGONIST (Consistent across all 4 scenes!)
+    const entrepreneur = buildVoxelCharacter({
+      suitColor: 0x0f243c,
+      shirtColor: 0xffffff,
+      tieColor: 0x38bdf8,
+      hasGlasses: true,
+    });
+    entrepreneur.root.position.set(-1.3, 0.02, 1.35);
+    entrepreneur.root.rotation.y = Math.PI * 0.2;
+    worldGroup.add(entrepreneur.root);
+
+    // ========================================================================
+    // 6. SCENE 2 (25% – 50%): 3D PIXEL-ART NEXT CARD & VOXEL COINS CASCADE
+    // ========================================================================
+    const s2CardGroup = new THREE.Group();
+    worldGroup.add(s2CardGroup);
+
+    const cardTexture = createPixelArtCardTexture();
+    const cardTopMat = mat(
+      new THREE.MeshStandardMaterial({
+        map: cardTexture,
+        roughness: 0.25,
+        metalness: 0.2,
+      })
+    );
+    const cardEdgeMat = mat(
+      new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.35,
+      })
+    );
+
+    const cardMaterials = [
+      cardEdgeMat,
+      cardEdgeMat,
+      cardTopMat,
+      cardTopMat,
+      cardEdgeMat,
+      cardEdgeMat,
+    ];
+    const nextCardMesh = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(3.5, 0.16, 2.2)),
+      cardMaterials
+    );
+    nextCardMesh.castShadow = true;
+    s2CardGroup.add(nextCardMesh);
+
+    // Orbiting Voxel Coins / Liquidity Blocks around the NEXT Card
+    const voxelCoins: THREE.Mesh[] = [];
+    const coinGeo = geo(new THREE.BoxGeometry(0.32, 0.32, 0.12));
+    for (let c = 0; c < 8; c++) {
+      const coin = new THREE.Mesh(
+        coinGeo,
+        c % 2 === 0 ? matGold : matEmerald
+      );
+      coin.castShadow = true;
+      s2CardGroup.add(coin);
+      voxelCoins.push(coin);
+    }
+
+    // Stepped Voxel Energy Square on the Floor beneath the Card
+    const energySquare = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(3.8, 0.05, 2.6)),
+      matSky
+    );
+    energySquare.position.set(-0.5, 0.03, -0.5);
+    worldGroup.add(energySquare);
+
+    // ========================================================================
+    // 7. SCENE 3 (50% – 75%): VOXEL BLOCK-BY-BLOCK FACTORY EXPANSION
+    // ========================================================================
+    const s3Group = new THREE.Group();
+    worldGroup.add(s3Group);
+
+    // We store individual expandable voxel modules so each drops in with staggered scroll timing!
+    const s3Modules: {
+      obj: THREE.Object3D;
+      targetY: number;
+      startP: number;
+      endP: number;
+    }[] = [];
+
+    // Module A: Middle Production Hall Back Wall & Skylight Roof
+    const hall2Wall = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(4.6, 2.6, 0.3)),
+      matWhite
+    );
+    hall2Wall.position.set(1.8, 1.3, -2.3);
+    hall2Wall.castShadow = true;
+    hall2Wall.receiveShadow = true;
+    s3Group.add(hall2Wall);
+    s3Modules.push({ obj: hall2Wall, targetY: 1.3, startP: 0.44, endP: 0.56 });
+
+    const hall2Cornice = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(4.7, 0.38, 0.42)),
+      matRoyal
+    );
+    hall2Cornice.position.set(1.8, 2.65, -2.28);
+    s3Group.add(hall2Cornice);
+    s3Modules.push({
+      obj: hall2Cornice,
+      targetY: 2.65,
+      startP: 0.47,
+      endP: 0.58,
+    });
+
+    // Module B: Extended Long Voxel Conveyor Line
+    const longBelt = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(4.8, 0.4, 0.7)),
+      matNavy
+    );
+    longBelt.position.set(1.6, 0.2, -0.45);
+    longBelt.castShadow = true;
+    s3Group.add(longBelt);
+    s3Modules.push({ obj: longBelt, targetY: 0.2, startP: 0.48, endP: 0.58 });
+
+    // Module C: 3 Articulated Voxel Robotic Assembly Arms
+    const robotArms: THREE.Group[] = [];
+    for (let r = 0; r < 3; r++) {
+      const rGroup = new THREE.Group();
+      rGroup.position.set(0.1 + r * 1.45, 0, -1.35);
+
+      const baseBlock = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(0.55, 0.55, 0.55)),
+        matSlate
+      );
+      baseBlock.position.y = 0.275;
+      baseBlock.castShadow = true;
+      rGroup.add(baseBlock);
+
+      const pivot = new THREE.Group();
+      pivot.position.y = 0.55;
+
+      const mast = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(0.24, 0.95, 0.24)),
+        matSky
+      );
+      mast.position.y = 0.45;
+      mast.castShadow = true;
+      pivot.add(mast);
+
+      const boom = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(0.22, 0.22, 0.75)),
+        matGold
+      );
+      boom.position.set(0, 0.85, 0.3);
+      boom.castShadow = true;
+      pivot.add(boom);
+
+      rGroup.add(pivot);
+      s3Group.add(rGroup);
+      robotArms.push(pivot);
+      s3Modules.push({
+        obj: rGroup,
+        targetY: 0,
+        startP: 0.5 + r * 0.04,
+        endP: 0.62 + r * 0.04,
+      });
+    }
+
+    // Module D: Moving Packages on Extended Belt
+    const s3Boxes: THREE.Mesh[] = [];
+    for (let i = 0; i < 4; i++) {
+      const box = new THREE.Mesh(
+        prodBoxGeo,
+        i % 2 === 0 ? matSky : matEmerald
+      );
+      box.position.set(-0.2 + i * 1.1, 0.59, -0.45);
+      box.castShadow = true;
+      s3Group.add(box);
+      s3Boxes.push(box);
+    }
+
+    // Module E: High-Bay Voxel Warehouse Racks (Right Wing)
+    const warehouseGroup = new THREE.Group();
+    warehouseGroup.position.set(3.8, 0, 1.0);
+    for (let lvl = 0; lvl < 3; lvl++) {
+      const rackShelf = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(1.9, 0.1, 0.95)),
+        matSlate
+      );
+      rackShelf.position.y = 0.45 + lvl * 0.68;
+      rackShelf.castShadow = true;
+      warehouseGroup.add(rackShelf);
+
+      for (let c = 0; c < 2; c++) {
+        const crate = new THREE.Mesh(
+          geo(new THREE.BoxGeometry(0.6, 0.46, 0.6)),
+          lvl === 2 ? matEmerald : lvl === 1 ? matSkyLight : matGold
+        );
+        crate.position.set(-0.45 + c * 0.9, 0.73 + lvl * 0.68, 0);
+        crate.castShadow = true;
+        warehouseGroup.add(crate);
+      }
+    }
+    s3Group.add(warehouseGroup);
+    s3Modules.push({
+      obj: warehouseGroup,
+      targetY: 0,
+      startP: 0.56,
+      endP: 0.68,
+    });
+
+    // Module F: 3 Voxel Operators in Sky-Blue Hardhats
+    const opPositions: [number, number, number][] = [
+      [0.4, 0.45, Math.PI],
+      [1.85, 0.45, Math.PI * 0.9],
+      [2.6, 1.5, -Math.PI * 0.35],
+    ];
+    opPositions.forEach(([ox, oz, rot], idx) => {
+      const op = buildVoxelCharacter({
+        suitColor: 0x1e293b,
+        shirtColor: 0x38bdf8,
+        hardhatColor: 0x38bdf8,
+      });
+      op.root.position.set(ox, 0.02, oz);
+      op.root.rotation.y = rot;
+      s3Group.add(op.root);
+      s3Modules.push({
+        obj: op.root,
+        targetY: 0.02,
+        startP: 0.58 + idx * 0.03,
+        endP: 0.7 + idx * 0.03,
+      });
+    });
+
+    // ========================================================================
+    // 8. SCENE 4 (75% – 100%): CONSOLIDATED VOXEL SMART INDUSTRY & TOWER
+    // ========================================================================
+    const s4Group = new THREE.Group();
+    worldGroup.add(s4Group);
+
+    const s4Modules: {
+      obj: THREE.Object3D;
+      targetY: number;
+      startP: number;
+      endP: number;
+    }[] = [];
+
+    // Consolidated Voxel Corporate Skyscraper Tower (Rear-Left)
+    const towerGroup = new THREE.Group();
+    towerGroup.position.set(-2.5, 0, -2.9);
+
+    const towerBody = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(3.0, 4.8, 2.2)),
+      matNavy
+    );
+    towerBody.position.y = 2.4;
+    towerBody.castShadow = true;
+    towerBody.receiveShadow = true;
+    towerGroup.add(towerBody);
+
+    // Pixel Grid Windows on Corporate Tower
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 3; col++) {
+        const winBlock = new THREE.Mesh(
+          geo(new THREE.BoxGeometry(0.62, 0.52, 0.12)),
+          (row + col) % 2 === 0 ? matSky : matSkyLight
+        );
+        winBlock.position.set(-0.8 + col * 0.8, 0.85 + row * 0.82, 1.12);
+        towerGroup.add(winBlock);
+      }
+    }
+
+    // Rooftop Crown & Solar Array on Tower
+    const towerCrown = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(3.15, 0.35, 2.35)),
+      matSky
+    );
+    towerCrown.position.y = 4.95;
+    towerGroup.add(towerCrown);
+
+    s4Group.add(towerGroup);
+    s4Modules.push({ obj: towerGroup, targetY: 0, startP: 0.72, endP: 0.86 });
+
+    // Executive Command Sky-Balcony (Where Entrepreneur directs the industry in Scene 4)
+    const commandPlatform = new THREE.Group();
+    commandPlatform.position.set(-1.3, 0, 1.55);
+    const podBase = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.1, 0.55, 1.35)),
+      matWhite
+    );
+    podBase.position.y = 0.275;
+    podBase.castShadow = true;
+    commandPlatform.add(podBase);
+
+    const podRim = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.18, 0.12, 1.42)),
+      matSky
+    );
+    podRim.position.y = 0.58;
+    commandPlatform.add(podRim);
+
+    s4Group.add(commandPlatform);
+    s4Modules.push({
+      obj: commandPlatform,
+      targetY: 0,
+      startP: 0.74,
+      endP: 0.86,
+    });
+
+    // Voxel Logistics Delivery Truck on the Front Road
+    const voxelTruck = new THREE.Group();
+    voxelTruck.position.set(1.5, 0.04, 3.55);
+
+    const trailerBox = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.2, 1.05, 0.92)),
+      matWhite
+    );
+    trailerBox.position.set(0, 0.65, 0);
+    trailerBox.castShadow = true;
+    voxelTruck.add(trailerBox);
+
+    const trailerBand = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(2.24, 0.22, 0.95)),
+      matSky
+    );
+    trailerBand.position.set(0, 0.72, 0);
+    voxelTruck.add(trailerBand);
+
+    const truckCab = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.85, 0.85, 0.88)),
+      matNavy
+    );
+    truckCab.position.set(-1.58, 0.55, 0);
+    truckCab.castShadow = true;
+    voxelTruck.add(truckCab);
+
+    const truckWindshield = new THREE.Mesh(
+      geo(new THREE.BoxGeometry(0.12, 0.38, 0.76)),
+      matSkyLight
+    );
+    truckWindshield.position.set(-1.98, 0.68, 0);
+    voxelTruck.add(truckWindshield);
+
+    // 6 Voxel Wheels
+    const wheelGeo = geo(new THREE.BoxGeometry(0.32, 0.32, 0.98));
+    [-1.55, -0.55, 0.65].forEach((wx) => {
+      const wheel = new THREE.Mesh(wheelGeo, matRoad);
+      wheel.position.set(wx, 0.16, 0);
+      voxelTruck.add(wheel);
+    });
+
+    s4Group.add(voxelTruck);
+
+    // 4 Ascending Voxel Financial Growth Bars (Rear-Right)
+    const growthBars: THREE.Mesh[] = [];
+    for (let b = 0; b < 4; b++) {
+      const bh = 1.1 + b * 0.85;
+      const bar = new THREE.Mesh(
+        geo(new THREE.BoxGeometry(0.55, bh, 0.55)),
+        b === 3 ? matEmerald : b === 2 ? matSky : matRoyal
+      );
+      bar.position.set(3.1 + b * 0.72, bh / 2, -2.5);
+      bar.castShadow = true;
+      s4Group.add(bar);
+      growthBars.push(bar);
+    }
+
+    // ========================================================================
+    // 9. RESIZE & VISIBILITY HANDLERS
+    // ========================================================================
+    let isVisible = true;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          isVisible = e.isIntersecting;
+        });
+      },
+      { threshold: 0.05 }
+    );
+    io.observe(container);
+
+    const updateSizes = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      const h = Math.max(1, container.clientHeight);
+      const asp = w / h;
+
+      // Adjust Orthographic Camera frustum for mobile vs desktop
+      const fSize = w < 640 ? 13.5 : w < 1024 ? 12.2 : 11.2;
+      camera.left = (-fSize * asp) / 2;
+      camera.right = (fSize * asp) / 2;
+      camera.top = fSize / 2;
+      camera.bottom = -fSize / 2;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(w, h);
+
+      const pFactor = getPixelFactor(pixelModeRef.current, w);
+      const rtw = Math.max(160, Math.floor(w / pFactor));
+      const rth = Math.max(120, Math.floor(h / pFactor));
+      pixelRenderTarget.setSize(rtw, rth);
+      postMaterial.uniforms.uResolution.value.set(rtw, rth);
+      postMaterial.uniforms.uPixelGridStrength.value =
+        pixelModeRef.current === "voxel-crisp" ? 0.015 : 0.05;
+    };
+
+    window.addEventListener("resize", updateSizes);
+    updateSizes();
+
+    // ========================================================================
+    // 10. DETERMINISTIC SCROLL-CONTROLLED RENDER LOOP
+    // ========================================================================
+    let rafId: number;
+    let lastMode = pixelModeRef.current;
+    const clock = new THREE.Clock();
+
+    const animate = () => {
+      rafId = window.requestAnimationFrame(animate);
+      if (!isVisible) return;
+
+      if (lastMode !== pixelModeRef.current) {
+        lastMode = pixelModeRef.current;
+        updateSizes();
+      }
+
+      const elapsed = clock.getElapsedTime();
+      const p = clamp(progressRef.current, 0, 1);
+      const isReduced = reducedMotionRef.current;
+
+      const s2Enter = smoothstep(0.18, 0.34, p);
+      const s2Exit = smoothstep(0.52, 0.66, p);
+      const s3Progress = smoothstep(0.44, 0.74, p);
+      const s4Progress = smoothstep(0.7, 0.94, p);
+
+      // 1. Subtle Orthographic Camera Pan & Zoom across the 4 stages
+      const targetZoom = lerp(1.18, 0.96, smoothstep(0.2, 0.88, p));
+      camera.zoom = targetZoom;
+      const panX = lerp(-1.2, 0.35, smoothstep(0.22, 0.82, p));
+      const panY = lerp(1.0, 1.55, smoothstep(0.35, 0.9, p));
+      const azimuth = lerp(0.76, 0.84, p);
+      camera.position.set(
+        Math.cos(azimuth) * 18,
+        14.2,
+        Math.sin(azimuth) * 18
+      );
+      camera.lookAt(panX, panY, 0);
+      camera.updateProjectionMatrix();
+
+      // 2. Scene 1 Voxel Gear & Conveyor Cubes (100% Scroll-Synced)
+      voxelGear.rotation.z = -p * Math.PI * 16;
+      s1Boxes.forEach((box, idx) => {
+        const travel = ((p * 5 + idx * 0.5) % 1) * 1.5;
+        box.position.x = -0.2 + travel;
+      });
+
+      // 3. Scene 2: 3D Pixel-Art NEXT Card & Orbiting Voxel Coins
+      s2CardGroup.visible = s2Enter > 0.01;
+      const stepBob = isReduced
+        ? 0
+        : Math.round(Math.sin(elapsed * 3) * 3) * 0.04; // Quantized pixel bobbing!
+      const cardX = lerp(-0.5, -2.5, s4Progress);
+      const cardY = lerp(6.8, 3.3, easeOutBack(s2Enter)) + s4Progress * 2.55 + stepBob;
+      const cardZ = lerp(-0.4, -2.9, s4Progress);
+      nextCardMesh.position.set(cardX, cardY, cardZ);
+      nextCardMesh.rotation.set(
+        lerp(0.45, 0.25, s2Enter),
+        lerp(-0.35, 0.15, p),
+        lerp(-0.15, -0.05, s2Enter)
+      );
+      const cScale = lerp(0.01, 1, s2Enter) * lerp(1, 0.76, s4Progress);
+      nextCardMesh.scale.setScalar(Math.max(0.001, cScale));
+
+      // Orbiting Voxel Coins around the NEXT Card
+      const coinVis = clamp(s2Enter * (1 - s2Exit * 0.8), 0, 1);
+      voxelCoins.forEach((coin, i) => {
+        const angle = (i / voxelCoins.length) * Math.PI * 2 + p * Math.PI * 10;
+        const radius = 2.15;
+        coin.position.set(
+          cardX + Math.cos(angle) * radius,
+          cardY + Math.sin(angle * 2) * 0.35,
+          cardZ + Math.sin(angle) * radius * 0.75
+        );
+        coin.rotation.y = angle;
+        coin.scale.setScalar(Math.max(0.001, coinVis));
+      });
+
+      energySquare.visible = s2Enter > 0.02 && s2Exit < 0.98;
+      energySquare.scale.setScalar(
+        Math.max(0.001, s2Enter * (1 - s2Exit * 0.9))
+      );
+      cardPointLight.position.set(cardX, cardY - 0.6, cardZ);
+      cardPointLight.intensity = s2Enter * (1 - s2Exit * 0.5) * 5.0;
+
+      // 4. Scene 3: Voxel Modules Dropping & Snapping into Place
+      s3Group.visible = p > 0.42;
+      s3Modules.forEach((m) => {
+        const localT = smoothstep(m.startP, m.endP, p);
+        const eased = easeOutBack(localT);
+        m.obj.visible = localT > 0.01;
+        m.obj.scale.setScalar(Math.max(0.001, localT));
+        m.obj.position.y = m.targetY + (1 - eased) * 2.8;
+      });
+
+      s3Boxes.forEach((box, idx) => {
+        box.visible = s3Progress > 0.25;
+        const travel = ((p * 7 + idx * 0.25) % 1) * 4.1;
+        box.position.x = -0.4 + travel;
+      });
+
+      robotArms.forEach((arm, idx) => {
+        // Stepped quantized robotic rotation for pixel-art feel
+        const rawAngle = Math.sin(p * Math.PI * 10 + idx * 1.5) * 0.7;
+        arm.rotation.y = Math.round(rawAngle * 8) / 8;
+      });
+
+      // 5. Scene 4: Consolidated Tower, Command Pod, Truck & Growth Bars
+      s4Group.visible = p > 0.68;
+      s4Modules.forEach((m) => {
+        const localT = smoothstep(m.startP, m.endP, p);
+        const eased = easeOutBack(localT);
+        m.obj.visible = localT > 0.01;
+        m.obj.scale.setScalar(Math.max(0.001, localT));
+        m.obj.position.y = m.targetY + (1 - eased) * 3.2;
+      });
+
+      // Logistics Truck drives along the front pixel highway
+      voxelTruck.visible = s4Progress > 0.02;
+      voxelTruck.position.x = lerp(6.8, 1.5, easeOutBack(s4Progress));
+
+      // Monument Voxel Growth Bars rise in stepped blocks
+      growthBars.forEach((bar, idx) => {
+        const bT = smoothstep(0.73 + idx * 0.04, 0.93 + idx * 0.02, p);
+        bar.visible = bT > 0.01;
+        bar.scale.y = Math.max(0.001, bT);
+        bar.position.y = ((1.1 + idx * 0.85) * bT) / 2;
+      });
+
+      // 6. Entrepreneur Protagonist Journey across all 4 scenes
+      const entY = lerp(0.02, 0.64, smoothstep(0.76, 0.88, p));
+      const entX = lerp(lerp(-1.3, 0.0, s3Progress), -1.3, s4Progress);
+      const entZ = lerp(1.35, 1.55, s4Progress);
+      entrepreneur.root.position.set(entX, entY, entZ);
+      entrepreneur.root.rotation.y = lerp(
+        Math.PI * 0.2,
+        Math.PI * 0.28,
+        s4Progress
+      );
+
+      const armWave = clamp(s2Enter * (1 - s3Progress) + s4Progress, 0, 1);
+      entrepreneur.rightArm.rotation.x = lerp(0, -1.1, armWave);
+      entrepreneur.rightArm.rotation.z = lerp(0, -0.25, armWave);
+
+      // Render Pass 1: 3D Voxel World -> Low-Res Nearest-Neighbor Pixel Target
+      renderer.setRenderTarget(pixelRenderTarget);
+      renderer.clear();
+      renderer.render(scene, camera);
+
+      // Render Pass 2: Pixel-Art Post Shader -> Screen Canvas
+      renderer.setRenderTarget(null);
+      renderer.render(postScene, postCamera);
+    };
+
+    rafId = window.requestAnimationFrame(animate);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", updateSizes);
+      io.disconnect();
+
+      cardTexture.dispose();
+      pixelRenderTarget.dispose();
+      postMaterial.dispose();
+      postQuad.geometry.dispose();
+      geometries.forEach((g) => g.dispose());
+      materials.forEach((m) => m.dispose());
+      renderer.dispose();
+      if (renderer.domElement && renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
+
+  if (!webglSupported) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-sky-50 via-white to-sky-100 rounded-3xl border border-sky-200">
+        <div className="w-16 h-16 rounded-2xl bg-[#0F243C] text-[#38BDF8] flex items-center justify-center font-black text-xl mb-4 shadow-lg font-mono">
+          NE➔XT
+        </div>
+        <h4 className="text-lg font-extrabold text-[#0F243C]">
+          Etapa {activeScene + 1} de 4 • Evolución Voxel NEXT
+        </h4>
+        <p className="text-sm text-slate-600 max-w-md mt-2">
+          Progreso de transformación empresarial: {Math.round(progress * 100)}%
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-white relative overflow-hidden select-none">
-      <style>{`
-        @keyframes isoFloatSlow {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-7px); }
-        }
-        @keyframes isoFloatAlt {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(6px); }
-        }
-        @keyframes isoClawWork {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(8px); }
-        }
-        @keyframes isoScanPulse {
-          0%, 100% { opacity: 0.45; }
-          50% { opacity: 0.88; }
-        }
-        @keyframes isoDashFlow {
-          to { stroke-dashoffset: -48; }
-        }
-        .anim-iso-float {
-          animation: isoFloatSlow 4.2s ease-in-out infinite;
-        }
-        .anim-iso-float-alt {
-          animation: isoFloatAlt 3.8s ease-in-out infinite;
-        }
-        .anim-iso-claw-1 {
-          animation: isoClawWork 2.4s ease-in-out infinite;
-        }
-        .anim-iso-claw-2 {
-          animation: isoClawWork 2.4s ease-in-out 0.8s infinite;
-        }
-        .anim-iso-claw-3 {
-          animation: isoClawWork 2.4s ease-in-out 1.6s infinite;
-        }
-        .anim-iso-scan {
-          animation: isoScanPulse 2s ease-in-out infinite;
-        }
-        .anim-iso-wire {
-          animation: isoDashFlow 2.2s linear infinite;
-        }
-      `}</style>
-
-      <svg
-        viewBox="0 0 960 640"
-        className="w-full h-full max-h-[560px]"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          {/* Vertical Warm/Sky Light Beam Gradient above Processing Machine */}
-          <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.0" />
-            <stop offset="45%" stopColor="#BAE6FD" stopOpacity="0.32" />
-            <stop offset="100%" stopColor="#FDE68A" stopOpacity="0.55" />
-          </linearGradient>
-
-          {/* Scanner Golden/Cyan Laser Beam Gradient */}
-          <linearGradient id="scannerBeam" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#FDE68A" stopOpacity="0.05" />
-          </linearGradient>
-
-          {/* Soft Isometric Drop Shadow Filter */}
-          <filter id="isoShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow
-              dx="0"
-              dy="10"
-              stdDeviation="8"
-              floodColor="#0F243C"
-              floodOpacity="0.12"
-            />
-          </filter>
-        </defs>
-
-        {/* ================================================================ */}
-        {/* FLOOR DATA CIRCUIT WIRES CONNECTING THE 4 ISOMETRIC ZONES        */}
-        {/* ================================================================ */}
-        <g opacity={0.85}>
-          {/* Wire 1: Left Pedestal to Processing Machine */}
-          <path
-            d="M 155 475 L 195 452 L 178 438 L 212 418"
-            stroke="#94A3B8"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M 155 475 L 195 452 L 178 438 L 212 418"
-            stroke="#0EA5E9"
-            strokeWidth="2"
-            strokeDasharray="6 6"
-            className="anim-iso-wire"
-          />
-
-          {/* Wire 2: Conveyor Machine to Top-Center Control Pedestal */}
-          <g opacity={s3Weight}>
-            <path
-              d="M 415 305 L 465 275 L 485 288 L 525 262"
-              stroke="#94A3B8"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M 415 305 L 465 275 L 485 288 L 525 262"
-              stroke="#0EA5E9"
-              strokeWidth="2.2"
-              strokeDasharray="6 6"
-              className="anim-iso-wire"
-            />
-          </g>
-
-          {/* Wire 3: Top-Center Control Pedestal to Right Consolidated Platform */}
-          <g opacity={s4Weight}>
-            <path
-              d="M 555 278 L 605 308 L 580 325 L 650 368"
-              stroke="#94A3B8"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M 555 278 L 605 308 L 580 325 L 650 368"
-              stroke="#10B981"
-              strokeWidth="2.2"
-              strokeDasharray="6 6"
-              className="anim-iso-wire"
-            />
-          </g>
-        </g>
-
-        {/* ================================================================ */}
-        {/* ZONE 1 (0% – 25%): ENTREPRENEUR PEDESTAL & PROCESSING MACHINE    */}
-        {/* ================================================================ */}
-        <g opacity={Math.max(0.25, s1Weight)}>
-          {/* Soft Floor Shadow under Left Pedestal */}
-          <polygon
-            points={pts([
-              iso(-185, 115, -6),
-              iso(-115, 115, -6),
-              iso(-115, 185, -6),
-              iso(-185, 185, -6),
-            ])}
-            fill="rgba(15, 36, 60, 0.1)"
-          />
-
-          {/* Left Isometric Pedestal for Entrepreneur */}
-          <IsoBox
-            x={-185}
-            z={115}
-            y={0}
-            w={68}
-            d={68}
-            h={14}
-            topColor="#F8FAFC"
-            leftColor="#CBD5E1"
-            rightColor="#94A3B8"
-            strokeColor="#94A3B8"
-          />
-          <IsoBox
-            x={-175}
-            z={125}
-            y={14}
-            w={48}
-            d={48}
-            h={6}
-            topColor="#FFFFFF"
-            leftColor="#E2E8F0"
-            rightColor="#CBD5E1"
-          />
-
-          {/* THE ENTREPRENEUR (Standing on Left Pedestal with Tablet) */}
-          <IsoPerson
-            cx={iso(-150, 150, 20)[0]}
-            cy={iso(-150, 150, 20)[1]}
-            shirtColor="#FFFFFF"
-            pantsColor="#1E293B"
-            facing="right"
-            hasTablet={true}
-          />
-
-          {/* Isometric Stepped Base of Processing Portal Machine */}
-          <IsoBox
-            x={-155}
-            z={5}
-            y={0}
-            w={95}
-            d={95}
-            h={38}
-            topColor="#64748B"
-            leftColor="#334155"
-            rightColor="#475569"
-          />
-          {/* Teal/Cyan Main Processing Arch Machine (Matches reference image!) */}
-          <IsoBox
-            x={-135}
-            z={12}
-            y={38}
-            w={75}
-            d={78}
-            h={105}
-            topColor="#0F766E"
-            leftColor="#0E7490"
-            rightColor="#1E293B"
-          />
-          {/* Dark Control Console Screen & Keypad on Left Side of Machine */}
-          <polygon
-            points={pts([
-              iso(-125, 91, 112),
-              iso(-75, 91, 112),
-              iso(-75, 91, 74),
-              iso(-125, 91, 74),
-            ])}
-            fill="#1E293B"
-            stroke="#38BDF8"
-            strokeWidth="1.2"
-          />
-          {/* Control Keypad Slope */}
-          <IsoBox
-            x={-130}
-            z={90}
-            y={38}
-            w={62}
-            d={26}
-            h={16}
-            topColor="#0E7490"
-            leftColor="#1E293B"
-            rightColor="#0F172A"
-          />
-
-          {/* Vertical Glowing Light Column & Floating FinTech Icons Above Machine */}
-          <g className="anim-iso-float">
-            <polygon
-              points="210,120 305,120 305,275 210,275"
-              fill="url(#beamGrad)"
-            />
-
-            {/* Golden Envelope / Solicitud NEXT Card entering the Machine */}
-            <g transform="translate(232, 222)">
-              <rect
-                x="0"
-                y="0"
-                width="52"
-                height="34"
-                rx="5"
-                fill="#FBBF24"
-                stroke="#F59E0B"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M2,2 L26,19 L50,2"
-                fill="none"
-                stroke="#FEF3C7"
-                strokeWidth="2.5"
-              />
-            </g>
-
-            {/* Floating Social / Business Verification Bubbles (Exact match to reference!) */}
-            {/* Teal Thumbs-Up Circle */}
-            <g transform="translate(216, 178)">
-              <circle cx="0" cy="0" r="16" fill="#0E7490" />
-              <path
-                d="M-4,2 L-4,-3 L0,-8 L3,-8 L2,-3 L7,-3 L6,5 L-2,5 Z"
-                fill="#FFFFFF"
-              />
-            </g>
-
-            {/* Orange User Profile Circle */}
-            <g transform="translate(256, 148)">
-              <circle cx="0" cy="0" r="18" fill="#F97316" />
-              <circle cx="0" cy="-4" r="5" fill="#FFFFFF" />
-              <path
-                d="M-9,9 C-9,3 9,3 9,9 Z"
-                fill="#FFFFFF"
-              />
-            </g>
-
-            {/* Dark Slate User Circle */}
-            <g transform="translate(258, 194)">
-              <circle cx="0" cy="0" r="16" fill="#334155" />
-              <circle cx="0" cy="-3.5" r="4.5" fill="#FFFFFF" />
-              <path
-                d="M-8,8 C-8,2.5 8,2.5 8,8 Z"
-                fill="#FFFFFF"
-              />
-            </g>
-
-            {/* Orange Speech Bubble with Heart / Approval */}
-            <g transform="translate(278, 154)">
-              <rect
-                x="0"
-                y="0"
-                width="42"
-                height="28"
-                rx="6"
-                fill="#F97316"
-              />
-              <polygon points="16,28 24,28 20,35" fill="#F97316" />
-              <path
-                d="M21,20 C21,20 13,14 13,9.5 C13,7 15,5.5 17.5,5.5 C19,5.5 20.5,6.5 21,8 C21.5,6.5 23,5.5 24.5,5.5 C27,5.5 29,7 29,9.5 C29,14 21,20 21,20 Z"
-                fill="#FFFFFF"
-              />
-            </g>
-
-            {/* Top Teal Badge */}
-            <g transform="translate(268, 106)">
-              <circle cx="0" cy="0" r="15" fill="#0284C7" />
-              <path
-                d="M-5,0 L-1,4 L6,-4"
-                stroke="#FFFFFF"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </g>
-          </g>
-        </g>
-
-        {/* ================================================================ */}
-        {/* ZONE 2 (25% – 50%): DIAGONAL CONVEYOR BELT, SCANNER & CLAWS      */}
-        {/* ================================================================ */}
-        <g
-          opacity={Math.max(0.18, s2Weight)}
-          style={{
-            transform: `translateY(${(1 - s2Weight) * 18}px)`,
-            transition: "opacity 0.2s ease-out",
-          }}
-        >
-          {/* Long Diagonal Isometric Conveyor Bed (x from -60 to +240, z from 20 to 80) */}
-          <IsoBox
-            x={-65}
-            z={20}
-            y={0}
-            w={310}
-            d={58}
-            h={36}
-            topColor="#F1F5F9"
-            leftColor="#64748B"
-            rightColor="#475569"
-            strokeColor="#475569"
-          />
-
-          {/* Conveyor Belt Surface Track */}
-          <IsoBox
-            x={-60}
-            z={27}
-            y={36}
-            w={300}
-            d={44}
-            h={4}
-            topColor="#E2E8F0"
-            leftColor="#94A3B8"
-            rightColor="#64748B"
-          />
-
-          {/* Isometric Roller Lines along the Belt */}
-          {[0, 1, 2, 3, 4, 5, 6].map((idx) => {
-            const rx = -40 + idx * 42;
-            const p1 = iso(rx, 27, 40.5);
-            const p2 = iso(rx, 71, 40.5);
-            return (
-              <line
-                key={idx}
-                x1={p1[0]}
-                y1={p1[1]}
-                x2={p2[0]}
-                y2={p2[1]}
-                stroke="#CBD5E1"
-                strokeWidth="1.5"
-              />
-            );
-          })}
-
-          {/* Upright NEXT Cards / Products traveling along the Conveyor Belt */}
-          {beltCards.map((cIdx) => {
-            // Position along belt shifted smoothly by scroll progress
-            const shift = ((p * 3 + cIdx / beltCards.length) % 1) * 255;
-            const cx = -45 + shift;
-            const isApproved = shift > 55;
-            return (
-              <ConveyorIsoCard
-                key={cIdx}
-                x={cx}
-                z={48}
-                y={42}
-                status={isApproved ? "approved" : "processing"}
-                accent={cIdx % 2 === 0 ? "#10B981" : "#0EA5E9"}
-              />
-            );
-          })}
-
-          {/* Isometric Optical Scanner Camera & Overhead Gantry Rail */}
-          {/* Rear Support Pillar for Scanner & Gantry */}
-          <IsoBox
-            x={15}
-            z={-25}
-            y={0}
-            w={32}
-            d={32}
-            h={115}
-            topColor="#E2E8F0"
-            leftColor="#94A3B8"
-            rightColor="#64748B"
-          />
-          {/* Scanner Camera Head pointing at the Belt */}
-          <IsoBox
-            x={-10}
-            z={-5}
-            y={98}
-            w={46}
-            d={26}
-            h={22}
-            topColor="#F8FAFC"
-            leftColor="#CBD5E1"
-            rightColor="#64748B"
-          />
-
-          {/* Glowing Golden/Cyan Optical Scanner Cone hitting the first Card */}
-          <polygon
-            points={pts([
-              iso(-5, 18, 102),
-              iso(18, 18, 102),
-              iso(24, 52, 65),
-              iso(-15, 52, 65),
-            ])}
-            fill="url(#scannerBeam)"
-            className="anim-iso-scan"
-          />
-
-          {/* Overhead Gantry Rail Pipe carrying the 3 Robotic Claws */}
-          <polyline
-            points={pts([
-              iso(35, -10, 106),
-              iso(195, -10, 106),
-              iso(195, 46, 106),
-            ])}
-            fill="none"
-            stroke="#94A3B8"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <polyline
-            points={pts([
-              iso(45, 46, 106),
-              iso(215, 46, 106),
-            ])}
-            fill="none"
-            stroke="#64748B"
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
-
-          {/* 3 Animated Robotic Grippers working over the Conveyor Belt */}
-          <g className="anim-iso-claw-1">
-            <IsoRoboticGripper x={65} z={46} y={102} />
-          </g>
-          <g className="anim-iso-claw-2">
-            <IsoRoboticGripper x={125} z={46} y={102} />
-          </g>
-          <g className="anim-iso-claw-3">
-            <IsoRoboticGripper x={185} z={46} y={102} />
-          </g>
-
-          {/* Teal Isometric Collection Crate at the Bottom-Right End of Conveyor */}
-          <IsoBox
-            x={235}
-            z={14}
-            y={0}
-            w={78}
-            d={72}
-            h={54}
-            topColor="#0F766E"
-            leftColor="#0E7490"
-            rightColor="#155E75"
-            strokeColor="#083344"
-          />
-          {/* Inner Dark Recess of Collection Crate */}
-          <polygon
-            points={pts([
-              iso(243, 22, 54),
-              iso(305, 22, 54),
-              iso(305, 78, 54),
-              iso(243, 78, 54),
-            ])}
-            fill="#0F172A"
-          />
-          {/* Vertical Ventilation Slots on Crate Side */}
-          {[0, 1, 2, 3].map((slot) => {
-            const sx = 248 + slot * 14;
-            const sTop = iso(sx, 86, 42);
-            const sBot = iso(sx, 86, 14);
-            return (
-              <line
-                key={slot}
-                x1={sTop[0]}
-                y1={sTop[1]}
-                x2={sBot[0]}
-                y2={sBot[1]}
-                stroke="#0F172A"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-              />
-            );
-          })}
-          {/* Processed NEXT Cards stacked neatly inside the Crate */}
-          <ConveyorIsoCard x={250} z={58} y={32} status="approved" />
-          <ConveyorIsoCard x={268} z={44} y={36} status="approved" />
-        </g>
-
-        {/* ================================================================ */}
-        {/* ZONE 3 (50% – 75%): UPPER CONTROL PLATFORM & GIANT BROWSER UI    */}
-        {/* ================================================================ */}
-        <g
-          opacity={Math.max(0.12, s3Weight)}
-          style={{
-            transform: `translateY(${(1 - s3Weight) * 24}px)`,
-          }}
-        >
-          {/* Upper Isometric Pedestal */}
-          <IsoBox
-            x={-20}
-            z={-185}
-            y={0}
-            w={76}
-            d={76}
-            h={16}
-            topColor="#F8FAFC"
-            leftColor="#CBD5E1"
-            rightColor="#94A3B8"
-          />
-
-          {/* GIANT ISOMETRIC BROWSER / ERP DASHBOARD SCREEN (Matches top-center of reference!) */}
-          <g className="anim-iso-float">
-            {/* Screen Back Frame */}
-            <polygon
-              points={pts([
-                iso(-15, -195, 195),
-                iso(125, -195, 195),
-                iso(125, -195, 35),
-                iso(-15, -195, 35),
-              ])}
-              fill="#1E293B"
-              stroke="#0F172A"
-              strokeWidth="2"
-            />
-            {/* Screen White Canvas */}
-            <polygon
-              points={pts([
-                iso(-10, -192, 190),
-                iso(120, -192, 190),
-                iso(120, -192, 40),
-                iso(-10, -192, 40),
-              ])}
-              fill="#FFFFFF"
-              stroke="#CBD5E1"
-              strokeWidth="1"
-            />
-            {/* Browser Top Search Header Bar (Golden/Sky Accent) */}
-            <polygon
-              points={pts([
-                iso(-10, -191, 190),
-                iso(120, -191, 190),
-                iso(120, -191, 168),
-                iso(-10, -191, 168),
-              ])}
-              fill="#0284C7"
-            />
-            {/* Search Input Pill inside Browser Header */}
-            <polygon
-              points={pts([
-                iso(-2, -190, 184),
-                iso(95, -190, 184),
-                iso(95, -190, 173),
-                iso(-2, -190, 173),
-              ])}
-              fill="#FFFFFF"
-            />
-            {/* Content Skeleton Lines & Analytics Widget on Giant Screen */}
-            {[0, 1, 2, 3, 4].map((ln) => (
-              <line
-                key={ln}
-                x1={iso(0, -190, 152 - ln * 14)[0]}
-                y1={iso(0, -190, 152 - ln * 14)[1]}
-                x2={iso(68, -190, 152 - ln * 14)[0]}
-                y2={iso(68, -190, 152 - ln * 14)[1]}
-                stroke="#CBD5E1"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-              />
-            ))}
-            {/* Right Sidebar Widget inside Giant Screen */}
-            <polygon
-              points={pts([
-                iso(78, -190, 156),
-                iso(112, -190, 156),
-                iso(112, -190, 92),
-                iso(78, -190, 92),
-              ])}
-              fill="#E0F2FE"
-              stroke="#38BDF8"
-              strokeWidth="1"
-            />
-          </g>
-
-          {/* Specialist with Laptop standing on the Upper Pedestal */}
-          <IsoPerson
-            cx={iso(18, -145, 16)[0]}
-            cy={iso(18, -145, 16)[1]}
-            shirtColor="#0E7490"
-            pantsColor="#0F172A"
-            facing="left"
-            hasLaptop={true}
-          />
-
-          {/* Floating Translucent Holographic Bar-Chart Panel in front of Specialist */}
-          <g className="anim-iso-float-alt">
-            <polygon
-              points={pts([
-                iso(-55, -135, 118),
-                iso(-5, -135, 118),
-                iso(-5, -135, 68),
-                iso(-55, -135, 68),
-              ])}
-              fill="rgba(251, 191, 36, 0.28)"
-              stroke="#F59E0B"
-              strokeWidth="1.2"
-            />
-            {/* 4 Mini Bars inside Hologram */}
-            {[16, 26, 20, 34].map((bh, idx) => {
-              const bx = -46 + idx * 10;
-              const pTop = iso(bx, -134, 74 + bh);
-              const pBot = iso(bx, -134, 74);
-              return (
-                <line
-                  key={idx}
-                  x1={pBot[0]}
-                  y1={pBot[1]}
-                  x2={pTop[0]}
-                  y2={pTop[1]}
-                  stroke="#FFFFFF"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-              );
-            })}
-          </g>
-        </g>
-
-        {/* ================================================================ */}
-        {/* ZONE 4 (75% – 100%): CONSOLIDATED PLATFORM, 3D BARS & DASHBOARDS */}
-        {/* ================================================================ */}
-        <g
-          opacity={Math.max(0.1, s4Weight)}
-          style={{
-            transform: `translateY(${(1 - s4Weight) * 28}px)`,
-          }}
-        >
-          {/* Large Executive Right Isometric Platform */}
-          <IsoBox
-            x={155}
-            z={-155}
-            y={0}
-            w={215}
-            d={145}
-            h={18}
-            topColor="#F8FAFC"
-            leftColor="#CBD5E1"
-            rightColor="#94A3B8"
-            strokeColor="#94A3B8"
-          />
-
-          {/* 4 Ascending 3D Isometric Bar Charts on Left Edge of Platform */}
-          {[
-            { h: 52, x: 172, z: -45 },
-            { h: 42, x: 194, z: -45 },
-            { h: 32, x: 216, z: -45 },
-            { h: 24, x: 238, z: -45 },
-          ].map((bar, bIdx) => {
-            const animatedH = Math.max(4, bar.h * s4Weight);
-            return (
-              <IsoBox
-                key={bIdx}
-                x={bar.x}
-                z={bar.z}
-                y={18}
-                w={15}
-                d={15}
-                h={animatedH}
-                topColor="#FCD34D"
-                leftColor="#F59E0B"
-                rightColor="#D97706"
-              />
-            );
-          })}
-
-          {/* Wall of 6 Floating Isometric Analytics & Approval Screens (Matches reference!) */}
-          <g className="anim-iso-float">
-            {/* Screen 1 (Left-Top): Verified Profile Card */}
-            <polygon
-              points={pts([
-                iso(155, -135, 148),
-                iso(215, -135, 148),
-                iso(215, -135, 92),
-                iso(155, -135, 92),
-              ])}
-              fill="#334155"
-              stroke="#FFFFFF"
-              strokeWidth="2"
-            />
-            {/* Screen 2 (Left-Bottom): Teal Metrics Card */}
-            <polygon
-              points={pts([
-                iso(155, -135, 84),
-                iso(215, -135, 84),
-                iso(215, -135, 34),
-                iso(155, -135, 34),
-              ])}
-              fill="#0E7490"
-              stroke="#FFFFFF"
-              strokeWidth="2"
-            />
-
-            {/* Screen 3 (Center-Top): Golden/Amber Financial Card with Green Checkmark */}
-            <polygon
-              points={pts([
-                iso(225, -135, 148),
-                iso(285, -135, 148),
-                iso(285, -135, 96),
-                iso(225, -135, 96),
-              ])}
-              fill="#F59E0B"
-              stroke="#FFFFFF"
-              strokeWidth="2"
-            />
-            <circle
-              cx={iso(282, -135, 138)[0]}
-              cy={iso(282, -135, 138)[1]}
-              r="9"
-              fill="#10B981"
-              stroke="#FFFFFF"
-              strokeWidth="1.5"
-            />
-
-            {/* Screen 4 (Right Wing Top): Dark Analytics & Donut Chart */}
-            <polygon
-              points={pts([
-                iso(295, -135, 152),
-                iso(295, -75, 152),
-                iso(295, -75, 98),
-                iso(295, -135, 98),
-              ])}
-              fill="#1E293B"
-              stroke="#FFFFFF"
-              strokeWidth="2"
-            />
-            <circle
-              cx={iso(295, -92, 122)[0]}
-              cy={iso(295, -92, 122)[1]}
-              r="9"
-              fill="none"
-              stroke="#F59E0B"
-              strokeWidth="3"
-            />
-
-            {/* Screen 5 (Right Wing Bottom-Left): Amber Summary Card */}
-            <polygon
-              points={pts([
-                iso(295, -135, 90),
-                iso(295, -75, 90),
-                iso(295, -75, 42),
-                iso(295, -135, 42),
-              ])}
-              fill="#FBBF24"
-              stroke="#FFFFFF"
-              strokeWidth="2"
-            />
-
-            {/* Screen 6 (Right Wing Far-Right): Sky-Teal Growth Card */}
-            <polygon
-              points={pts([
-                iso(295, -65, 138),
-                iso(295, -5, 138),
-                iso(295, -5, 78),
-                iso(295, -65, 78),
-              ])}
-              fill="#0284C7"
-              stroke="#FFFFFF"
-              strokeWidth="2"
-            />
-          </g>
-
-          {/* Isometric Folder, Document & Magnifying Glass on Right Side of Platform */}
-          <g transform={`translate(${iso(315, -35, 22)[0]}, ${iso(315, -35, 22)[1]})`}>
-            {/* Golden Isometric Folder */}
-            <polygon
-              points="-24,-10 12,-28 24,5 -12,22"
-              fill="#F59E0B"
-              stroke="#FEF3C7"
-              strokeWidth="1"
-            />
-            {/* White Document Page emerging from Folder */}
-            <polygon
-              points="-16,-36 16,-50 22,-8 -10,6"
-              fill="#FFFFFF"
-              stroke="#CBD5E1"
-              strokeWidth="1"
-            />
-            {/* Magnifying Glass */}
-            <circle
-              cx="24"
-              cy="-22"
-              r="12"
-              fill="rgba(56, 189, 248, 0.2)"
-              stroke="#1E293B"
-              strokeWidth="3"
-            />
-            <line
-              x1="24"
-              y1="-10"
-              x2="24"
-              y2="6"
-              stroke="#1E293B"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-            />
-          </g>
-
-          {/* THE ENTREPRENEUR / DIRECTOR (Now directing the Consolidated Ecosystem on the Right Platform!) */}
-          <IsoPerson
-            cx={iso(258, -68, 18)[0]}
-            cy={iso(258, -68, 18)[1]}
-            shirtColor="#FFFFFF"
-            pantsColor="#1E293B"
-            facing="left"
-            hasTablet={true}
-          />
-        </g>
-      </svg>
-    </div>
+    <div
+      ref={mountRef}
+      className="w-full h-full relative"
+      style={{ imageRendering: "pixelated" }}
+      aria-label="Animación interactiva 3D estilo Pixel Art Voxel del crecimiento industrial con NEXT"
+    />
   );
 }
