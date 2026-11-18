@@ -29,9 +29,6 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-/**
- * Elastic ease-out for voxel blocks dropping & snapping into place
- */
 function easeOutBack(x: number): number {
   const c1 = 1.70158;
   const c3 = c1 + 1;
@@ -40,76 +37,123 @@ function easeOutBack(x: number): number {
 }
 
 /**
- * Creates a crisp, high-resolution Voxel-styled CanvasTexture for the 3D NEXT Corporate Card
+ * Creates a smooth 3D Rounded Box Geometry (Soft clay/beveled aesthetic, zero harsh square edges!)
  */
-function createCrispVoxelCardTexture(): THREE.CanvasTexture {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 320;
-  const ctx = canvas.getContext("2d")!;
+function createRoundedBox(
+  width: number,
+  height: number,
+  depth: number,
+  radius: number = 0.08,
+  smoothness: number = 5
+): THREE.BufferGeometry {
+  const r = Math.min(radius, width * 0.35, height * 0.35, depth * 0.35);
+  const w = Math.max(0.01, width - r * 2);
+  const h = Math.max(0.01, height - r * 2);
+  const d = Math.max(0.01, depth - r * 2);
 
-  // Deep Navy Background
-  ctx.fillStyle = "#081C45";
-  ctx.fillRect(0, 0, 512, 320);
+  const shape = new THREE.Shape();
+  const hw = w / 2;
+  const hh = h / 2;
+  shape.moveTo(-hw, -hh + r);
+  shape.lineTo(-hw, hh - r);
+  shape.quadraticCurveTo(-hw, hh, -hw + r, hh);
+  shape.lineTo(hw - r, hh);
+  shape.quadraticCurveTo(hw, hh, hw, hh - r);
+  shape.lineTo(hw, -hh + r);
+  shape.quadraticCurveTo(hw, -hh, hw - r, -hh);
+  shape.lineTo(-hw + r, -hh);
+  shape.quadraticCurveTo(-hw, -hh, -hw, -hh + r);
 
-  // Stepped Voxel-Style Diagonal Sky-Blue Gradient Bands (Crisp at 512x320)
-  const bands = [
-    { color: "#0C2D6B", x: 140, w: 120 },
-    { color: "#0369A1", x: 240, w: 112 },
-    { color: "#0284C7", x: 336, w: 104 },
-    { color: "#38BDF8", x: 416, w: 96 },
-  ];
-  bands.forEach((b) => {
-    ctx.fillStyle = b.color;
-    for (let y = 0; y < 320; y += 8) {
-      const shift = Math.floor(y * 0.45);
-      ctx.fillRect(b.x - shift, y, b.w, 8);
-    }
+  const geom = new THREE.ExtrudeGeometry(shape, {
+    depth: d,
+    bevelEnabled: true,
+    bevelSegments: smoothness,
+    steps: 1,
+    bevelSize: r,
+    bevelThickness: r,
+    curveSegments: smoothness * 2,
   });
 
-  // Outer Border (Light Sky Blue)
-  ctx.fillStyle = "#7DD3FC";
-  ctx.fillRect(8, 8, 496, 6);
-  ctx.fillRect(8, 306, 496, 6);
-  ctx.fillRect(8, 8, 6, 304);
-  ctx.fillRect(498, 8, 6, 304);
+  geom.center();
+  geom.computeVertexNormals();
+  return geom;
+}
 
-  // Gold EMV Chip (Left)
+/**
+ * High-Resolution CanvasTexture with smooth curves for the 3D NEXT Corporate Card
+ */
+function createSmoothCardTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 640;
+  const ctx = canvas.getContext("2d")!;
+
+  // Smooth Deep Navy to Sky-Blue Gradient
+  const grad = ctx.createLinearGradient(0, 0, 1024, 640);
+  grad.addColorStop(0, "#081C45");
+  grad.addColorStop(0.55, "#0D3270");
+  grad.addColorStop(1, "#0284C7");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, 1024, 640, 64);
+  ctx.fill();
+
+  // Soft Curved Light Wave
+  ctx.fillStyle = "rgba(125, 211, 252, 0.16)";
+  ctx.beginPath();
+  ctx.arc(820, 120, 420, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Rounded Inner Rim
+  ctx.strokeStyle = "rgba(125, 211, 252, 0.55)";
+  ctx.lineWidth = 10;
+  ctx.beginPath();
+  ctx.roundRect(24, 24, 976, 592, 48);
+  ctx.stroke();
+
+  // Rounded Gold EMV Chip
   ctx.fillStyle = "#F59E0B";
-  ctx.fillRect(40, 104, 72, 56);
+  ctx.beginPath();
+  ctx.roundRect(88, 215, 136, 102, 24);
+  ctx.fill();
   ctx.fillStyle = "#FDE68A";
-  ctx.fillRect(48, 112, 56, 40);
-  ctx.fillStyle = "#B45309";
-  ctx.fillRect(72, 104, 6, 56);
-  ctx.fillRect(40, 128, 72, 6);
+  ctx.beginPath();
+  ctx.roundRect(102, 229, 108, 74, 16);
+  ctx.fill();
 
-  // Crisp "NE➔XT" Logo Text
+  // Smooth "NE➔XT" Logo
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "900 68px system-ui, -apple-system, sans-serif";
-  ctx.fillText("NE", 136, 156);
+  ctx.font = "900 104px system-ui, -apple-system, sans-serif";
+  ctx.fillText("NE", 268, 305);
   ctx.fillStyle = "#38BDF8";
-  ctx.fillText("➔", 232, 154);
+  ctx.fillText("➔", 418, 303);
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText("XT", 296, 156);
+  ctx.fillText("XT", 522, 305);
 
-  // Bottom Label
+  // Subtitle
   ctx.fillStyle = "#BAE6FD";
-  ctx.font = "800 22px monospace";
-  ctx.fillText("CRÉDITO EMPRESAS", 40, 232);
+  ctx.font = "700 30px system-ui, -apple-system, sans-serif";
+  ctx.fillText("CRÉDITO EMPRESARIAL", 88, 465);
 
-  // Bottom White Blocks
+  // Pill Dots
   ctx.fillStyle = "#FFFFFF";
   for (let i = 0; i < 4; i++) {
-    ctx.fillRect(40 + i * 64, 256, 48, 10);
+    ctx.beginPath();
+    ctx.roundRect(88 + i * 125, 505, 92, 18, 9);
+    ctx.fill();
   }
 
-  // Mastercard-style Dual Squares Bottom Right
+  // Circular Mastercard-style Dual Rings Bottom Right
   ctx.fillStyle = "#38BDF8";
-  ctx.fillRect(384, 224, 48, 48);
+  ctx.beginPath();
+  ctx.arc(820, 500, 52, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = "#10B981";
-  ctx.fillRect(416, 224, 48, 48);
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(416, 224, 16, 48);
+  ctx.globalAlpha = 0.88;
+  ctx.beginPath();
+  ctx.arc(888, 500, 52, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.anisotropy = 4;
@@ -118,9 +162,9 @@ function createCrispVoxelCardTexture(): THREE.CanvasTexture {
 }
 
 /**
- * Builds a charming 3D Voxel Character (Entrepreneur or Operator) out of crisp 3D cubes
+ * Builds an Organic, Smooth, Rounded 3D Character (Capsule & Sphere geometry — NOT boxy!)
  */
-function buildVoxelCharacter(options: {
+function buildSmoothCharacter(options: {
   suitColor: number;
   shirtColor: number;
   tieColor?: number;
@@ -133,15 +177,14 @@ function buildVoxelCharacter(options: {
   headGroup: THREE.Group;
 } {
   const root = new THREE.Group();
-  const u = 0.09; // Base voxel unit size
 
   const suitMat = new THREE.MeshStandardMaterial({
     color: options.suitColor,
-    roughness: 0.35,
+    roughness: 0.32,
   });
   const skinMat = new THREE.MeshStandardMaterial({
     color: 0xf1c29d,
-    roughness: 0.45,
+    roughness: 0.42,
   });
   const shirtMat = new THREE.MeshStandardMaterial({
     color: options.shirtColor,
@@ -151,155 +194,169 @@ function buildVoxelCharacter(options: {
     color: 0x0f172a,
     roughness: 0.35,
   });
-  const shoeMat = new THREE.MeshStandardMaterial({
-    color: 0x1e293b,
-    roughness: 0.45,
-  });
 
-  // Voxel Shoes & Legs
-  const legGeo = new THREE.BoxGeometry(u * 1.3, u * 3.8, u * 1.4);
-  const shoeGeo = new THREE.BoxGeometry(u * 1.4, u * 0.9, u * 1.9);
+  // Smooth Capsule Legs & Rounded Shoes
+  const legGeo = new THREE.CapsuleGeometry(0.068, 0.24, 10, 16);
+  const shoeGeo = new THREE.SphereGeometry(0.082, 16, 12);
 
   const leftLeg = new THREE.Mesh(legGeo, suitMat);
-  leftLeg.position.set(-u * 0.85, u * 2.3, 0);
+  leftLeg.position.set(-0.085, 0.22, 0);
   leftLeg.castShadow = true;
   root.add(leftLeg);
 
-  const leftShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  leftShoe.position.set(-u * 0.85, u * 0.45, u * 0.25);
+  const leftShoe = new THREE.Mesh(shoeGeo, darkMat);
+  leftShoe.scale.set(0.95, 0.65, 1.35);
+  leftShoe.position.set(-0.085, 0.05, 0.03);
   root.add(leftShoe);
 
   const rightLeg = new THREE.Mesh(legGeo, suitMat);
-  rightLeg.position.set(u * 0.85, u * 2.3, 0);
+  rightLeg.position.set(0.085, 0.22, 0);
   rightLeg.castShadow = true;
   root.add(rightLeg);
 
-  const rightShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  rightShoe.position.set(u * 0.85, u * 0.45, u * 0.25);
+  const rightShoe = new THREE.Mesh(shoeGeo, darkMat);
+  rightShoe.scale.set(0.95, 0.65, 1.35);
+  rightShoe.position.set(0.085, 0.05, 0.03);
   root.add(rightShoe);
 
-  // Voxel Torso (Blazer)
-  const torsoGeo = new THREE.BoxGeometry(u * 3.4, u * 4.4, u * 2.0);
-  const torso = new THREE.Mesh(torsoGeo, suitMat);
-  torso.position.set(0, u * 6.2, 0);
+  // Smooth Sculpted Capsule Torso
+  const torso = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.165, 0.28, 14, 24),
+    suitMat
+  );
+  torso.position.set(0, 0.58, 0);
+  torso.scale.set(1.08, 1, 0.78);
   torso.castShadow = true;
   root.add(torso);
 
-  // Voxel Shirt Front
-  const shirtGeo = new THREE.BoxGeometry(u * 1.4, u * 3.6, u * 0.3);
-  const shirt = new THREE.Mesh(shirtGeo, shirtMat);
-  shirt.position.set(0, u * 6.4, u * 0.95);
+  // Rounded Shirt & Sky-Blue Tie
+  const shirt = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08, 0.06, 0.24, 16),
+    shirtMat
+  );
+  shirt.position.set(0, 0.65, 0.07);
   root.add(shirt);
 
-  // Voxel Sky-Blue Tie for the Entrepreneur
   if (options.tieColor) {
     const tieMat = new THREE.MeshStandardMaterial({
       color: options.tieColor,
       emissive: options.tieColor,
       emissiveIntensity: 0.28,
-      roughness: 0.25,
+      roughness: 0.22,
     });
-    const tieGeo = new THREE.BoxGeometry(u * 0.65, u * 2.8, u * 0.38);
-    const tie = new THREE.Mesh(tieGeo, tieMat);
-    tie.position.set(0, u * 6.2, u * 1.02);
+    const tie = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.026, 0.18, 8, 12),
+      tieMat
+    );
+    tie.position.set(0, 0.6, 0.135);
     root.add(tie);
   }
 
-  // Voxel Head Group
+  // Smooth Spherical Head Group
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, u * 10.4, 0);
+  headGroup.position.set(0, 0.96, 0);
   root.add(headGroup);
 
-  const headCube = new THREE.Mesh(
-    new THREE.BoxGeometry(u * 3.2, u * 3.2, u * 3.0),
+  const headSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.165, 28, 28),
     skinMat
   );
-  headCube.castShadow = true;
-  headGroup.add(headCube);
+  headSphere.castShadow = true;
+  headGroup.add(headSphere);
 
-  // Voxel Eyes
-  const eyeGeo = new THREE.BoxGeometry(u * 0.45, u * 0.55, u * 0.2);
+  // Round Eyes
+  const eyeGeo = new THREE.SphereGeometry(0.024, 12, 12);
   const leftEye = new THREE.Mesh(eyeGeo, darkMat);
-  leftEye.position.set(-u * 0.7, u * 0.2, u * 1.52);
+  leftEye.position.set(-0.058, 0.02, 0.148);
   headGroup.add(leftEye);
 
   const rightEye = new THREE.Mesh(eyeGeo, darkMat);
-  rightEye.position.set(u * 0.7, u * 0.2, u * 1.52);
+  rightEye.position.set(0.058, 0.02, 0.148);
   headGroup.add(rightEye);
 
-  // Voxel Executive Glasses for the Entrepreneur
+  // Smooth Rounded Glasses
   if (options.hasGlasses) {
     const frameMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
       emissive: 0x0284c7,
-      emissiveIntensity: 0.2,
+      emissiveIntensity: 0.25,
     });
-    const glassBridge = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 2.6, u * 0.22, u * 0.28),
+    const leftLensRim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.042, 0.008, 10, 24),
       frameMat
     );
-    glassBridge.position.set(0, u * 0.45, u * 1.58);
-    headGroup.add(glassBridge);
+    leftLensRim.position.set(-0.058, 0.025, 0.155);
+    headGroup.add(leftLensRim);
+
+    const rightLensRim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.042, 0.008, 10, 24),
+      frameMat
+    );
+    rightLensRim.position.set(0.058, 0.025, 0.155);
+    headGroup.add(rightLensRim);
   }
 
-  // Voxel Hair or Safety Hardhat
+  // Smooth Dome Hardhat or Sculpted Hair
   if (options.hardhatColor) {
     const hatMat = new THREE.MeshStandardMaterial({
       color: options.hardhatColor,
-      roughness: 0.25,
+      roughness: 0.2,
     });
-    const hatMain = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.5, u * 1.2, u * 3.4),
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(
+        0.18,
+        24,
+        16,
+        0,
+        Math.PI * 2,
+        0,
+        Math.PI * 0.54
+      ),
       hatMat
     );
-    hatMain.position.set(0, u * 1.8, 0);
-    headGroup.add(hatMain);
-
-    const hatVisor = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.5, u * 0.35, u * 0.8),
-      hatMat
-    );
-    hatVisor.position.set(0, u * 1.35, u * 1.8);
-    headGroup.add(hatVisor);
+    dome.position.set(0, 0.02, 0);
+    headGroup.add(dome);
   } else {
-    const hairTop = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.5, u * 1.0, u * 3.3),
+    const hairDome = new THREE.Mesh(
+      new THREE.SphereGeometry(
+        0.176,
+        24,
+        18,
+        0,
+        Math.PI * 2,
+        0,
+        Math.PI * 0.62
+      ),
       darkMat
     );
-    hairTop.position.set(0, u * 1.8, -u * 0.05);
-    headGroup.add(hairTop);
-
-    const hairBack = new THREE.Mesh(
-      new THREE.BoxGeometry(u * 3.4, u * 2.4, u * 0.8),
-      darkMat
-    );
-    hairBack.position.set(0, u * 0.6, -u * 1.35);
-    headGroup.add(hairBack);
+    hairDome.position.set(0, 0.03, -0.015);
+    hairDome.rotation.x = -0.18;
+    headGroup.add(hairDome);
   }
 
-  // Voxel Arms
-  const armGeo = new THREE.BoxGeometry(u * 1.1, u * 3.6, u * 1.2);
-  const handGeo = new THREE.BoxGeometry(u * 1.0, u * 0.9, u * 1.0);
+  // Smooth Capsule Arms & Spherical Hands
+  const armGeo = new THREE.CapsuleGeometry(0.052, 0.24, 10, 16);
+  const handGeo = new THREE.SphereGeometry(0.052, 14, 14);
 
   const leftArm = new THREE.Group();
-  leftArm.position.set(-u * 2.3, u * 8.0, 0);
+  leftArm.position.set(-0.22, 0.72, 0);
   const leftArmMesh = new THREE.Mesh(armGeo, suitMat);
-  leftArmMesh.position.set(0, -u * 1.6, 0);
+  leftArmMesh.position.set(0, -0.12, 0);
   leftArmMesh.castShadow = true;
   leftArm.add(leftArmMesh);
   const leftHand = new THREE.Mesh(handGeo, skinMat);
-  leftHand.position.set(0, -u * 3.6, 0);
+  leftHand.position.set(0, -0.26, 0);
   leftArm.add(leftHand);
   root.add(leftArm);
 
   const rightArm = new THREE.Group();
-  rightArm.position.set(u * 2.3, u * 8.0, 0);
+  rightArm.position.set(0.22, 0.72, 0);
   const rightArmMesh = new THREE.Mesh(armGeo, suitMat);
-  rightArmMesh.position.set(0, -u * 1.6, 0);
+  rightArmMesh.position.set(0, -0.12, 0);
   rightArmMesh.castShadow = true;
   rightArm.add(rightArmMesh);
   const rightHand = new THREE.Mesh(handGeo, skinMat);
-  rightHand.position.set(0, -u * 3.6, 0);
+  rightHand.position.set(0, -0.26, 0);
   rightArm.add(rightHand);
   root.add(rightArm);
 
@@ -307,16 +364,16 @@ function buildVoxelCharacter(options: {
 }
 
 /**
- * Helper to create a Voxel Tree
+ * Helper to create an Organic Lush Tree with Smooth Spherical Canopy & Cylindrical Trunk
  */
-function createVoxelTree(
+function createOrganicTree(
   trunkMat: THREE.Material,
   leafMat1: THREE.Material,
   leafMat2: THREE.Material
 ): THREE.Group {
   const tree = new THREE.Group();
   const trunk = new THREE.Mesh(
-    new THREE.BoxGeometry(0.22, 0.55, 0.22),
+    new THREE.CylinderGeometry(0.08, 0.13, 0.55, 16),
     trunkMat
   );
   trunk.position.y = 0.275;
@@ -324,26 +381,26 @@ function createVoxelTree(
   tree.add(trunk);
 
   const crown1 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.75, 0.45, 0.75),
+    new THREE.SphereGeometry(0.42, 24, 24),
     leafMat1
   );
-  crown1.position.y = 0.72;
+  crown1.position.set(0, 0.75, 0);
   crown1.castShadow = true;
   tree.add(crown1);
 
   const crown2 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.55, 0.4, 0.55),
+    new THREE.SphereGeometry(0.32, 22, 22),
     leafMat2
   );
-  crown2.position.y = 1.1;
+  crown2.position.set(0.16, 1.05, 0.1);
   crown2.castShadow = true;
   tree.add(crown2);
 
   const crown3 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.32, 0.28, 0.32),
+    new THREE.SphereGeometry(0.26, 20, 20),
     leafMat1
   );
-  crown3.position.y = 1.4;
+  crown3.position.set(-0.14, 1.15, -0.08);
   crown3.castShadow = true;
   tree.add(crown3);
 
@@ -368,7 +425,6 @@ export default function NextIndustrialGrowth3D({
     const container = mountRef.current;
     if (!container) return;
 
-    // 1. Native High-DPI Retina Renderer (Crisp Voxel cubes without blurry pixelation!)
     let renderer: THREE.WebGLRenderer;
     try {
       const isMobile = window.innerWidth < 768;
@@ -393,7 +449,6 @@ export default function NextIndustrialGrowth3D({
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
 
-    // 2. Orthographic Isometric Camera
     const scene = new THREE.Scene();
 
     const aspect = container.clientWidth / Math.max(1, container.clientHeight);
@@ -409,7 +464,7 @@ export default function NextIndustrialGrowth3D({
     camera.position.set(14, 11.5, 14);
     camera.lookAt(0, 1.4, 0);
 
-    // 3. Crisp Isometric Studio Lighting
+    // Studio Lighting
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbae6fd, 1.45);
     hemiLight.position.set(0, 20, 0);
     scene.add(hemiLight);
@@ -436,7 +491,7 @@ export default function NextIndustrialGrowth3D({
     scene.add(cardPointLight);
 
     // ========================================================================
-    // 4. VOXEL PALETTE MATERIALS
+    // MATERIALS & ROUNDED GEOMETRIES
     // ========================================================================
     const materials: THREE.Material[] = [];
     const geometries: THREE.BufferGeometry[] = [];
@@ -450,40 +505,40 @@ export default function NextIndustrialGrowth3D({
     };
 
     const matWhite = mat(
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.26 })
     );
     const matIce = mat(
-      new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.35 })
+      new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.32 })
     );
     const matSkyLight = mat(
-      new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.28 })
+      new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.25 })
     );
     const matSky = mat(
       new THREE.MeshStandardMaterial({
         color: 0x38bdf8,
         emissive: 0x0284c7,
         emissiveIntensity: 0.25,
-        roughness: 0.22,
+        roughness: 0.2,
       })
     );
     const matRoyal = mat(
-      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.28 })
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.26 })
     );
     const matNavy = mat(
-      new THREE.MeshStandardMaterial({ color: 0x0f243c, roughness: 0.32 })
+      new THREE.MeshStandardMaterial({ color: 0x0f243c, roughness: 0.3 })
     );
     const matSlate = mat(
-      new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 })
+      new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.35 })
     );
     const matRoad = mat(
-      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.55 })
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 })
     );
     const matEmerald = mat(
       new THREE.MeshStandardMaterial({
         color: 0x10b981,
         emissive: 0x059669,
         emissiveIntensity: 0.3,
-        roughness: 0.28,
+        roughness: 0.25,
       })
     );
     const matGold = mat(
@@ -491,97 +546,94 @@ export default function NextIndustrialGrowth3D({
         color: 0xfbbf24,
         emissive: 0xd97706,
         emissiveIntensity: 0.35,
-        roughness: 0.25,
+        roughness: 0.22,
       })
     );
     const matLeaf1 = mat(
-      new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.45 })
+      new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.4 })
     );
     const matLeaf2 = mat(
-      new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.45 })
+      new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.4 })
     );
     const matTrunk = mat(
-      new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.65 })
+      new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.6 })
     );
 
     // ========================================================================
-    // 5. LAYERED VOXEL DIORAMA ISLAND BASE
+    // ROUNDED SQUIRCLE DIORAMA ISLAND BASE
     // ========================================================================
     const worldGroup = new THREE.Group();
     scene.add(worldGroup);
 
-    const bedrock = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(12.4, 0.45, 10.4)),
-      matNavy
-    );
+    // Rounded Squircle Island Layers (Rotated so flat face is horizontal)
+    const bedrockGeo = geo(createRoundedBox(12.4, 10.4, 0.45, 0.85, 6));
+    bedrockGeo.rotateX(Math.PI / 2);
+    const bedrock = new THREE.Mesh(bedrockGeo, matNavy);
     bedrock.position.set(0, -0.68, 0);
     worldGroup.add(bedrock);
 
-    const circuitSlab = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(12.1, 0.22, 10.1)),
-      matSky
-    );
+    const circuitGeo = geo(createRoundedBox(12.1, 10.1, 0.22, 0.8, 6));
+    circuitGeo.rotateX(Math.PI / 2);
+    const circuitSlab = new THREE.Mesh(circuitGeo, matSky);
     circuitSlab.position.set(0, -0.35, 0);
     worldGroup.add(circuitSlab);
 
-    const topSlab = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(11.8, 0.26, 9.8)),
-      matWhite
-    );
+    const topSlabGeo = geo(createRoundedBox(11.8, 9.8, 0.26, 0.75, 6));
+    topSlabGeo.rotateX(Math.PI / 2);
+    const topSlab = new THREE.Mesh(topSlabGeo, matWhite);
     topSlab.position.set(0, -0.13, 0);
     topSlab.receiveShadow = true;
     worldGroup.add(topSlab);
 
-    const roadMesh = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(11.8, 0.04, 1.5)),
-      matRoad
-    );
+    // Rounded Avenue Strip
+    const roadGeo = geo(createRoundedBox(11.2, 1.45, 0.04, 0.35, 4));
+    roadGeo.rotateX(Math.PI / 2);
+    const roadMesh = new THREE.Mesh(roadGeo, matRoad);
     roadMesh.position.set(0, 0.02, 3.6);
     roadMesh.receiveShadow = true;
     worldGroup.add(roadMesh);
 
+    const dashGeo = geo(new THREE.CapsuleGeometry(0.05, 0.42, 6, 12));
+    dashGeo.rotateZ(Math.PI / 2);
     for (let i = -5; i <= 5; i++) {
-      const dash = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.55, 0.06, 0.12)),
-        matWhite
-      );
+      const dash = new THREE.Mesh(dashGeo, matWhite);
       dash.position.set(i * 1.0, 0.03, 3.6);
       worldGroup.add(dash);
     }
 
-    const tileGeo = geo(new THREE.BoxGeometry(0.95, 0.03, 0.95));
-    for (let gx = -5; gx <= 5; gx++) {
-      for (let gz = -4; gz <= 2; gz++) {
-        if ((gx + gz) % 2 === 0) {
-          const tile = new THREE.Mesh(tileGeo, matIce);
-          tile.position.set(gx * 1.0, 0.015, gz * 1.0);
-          tile.receiveShadow = true;
-          worldGroup.add(tile);
-        }
+    // Soft Circular Plaza Dots instead of harsh square grid tiles
+    const dotGeo = geo(new THREE.CylinderGeometry(0.18, 0.18, 0.02, 20));
+    for (let gx = -4; gx <= 4; gx += 2) {
+      for (let gz = -3; gz <= 2; gz += 2) {
+        const dot = new THREE.Mesh(dotGeo, matIce);
+        dot.position.set(gx * 1.0, 0.01, gz * 1.0);
+        dot.receiveShadow = true;
+        worldGroup.add(dot);
       }
     }
 
+    // 4 Organic Spherical Trees
     const treeCoords: [number, number][] = [
-      [-5.1, 2.3],
-      [-5.1, -3.8],
-      [5.1, 2.3],
-      [5.1, -3.8],
+      [-5.0, 2.2],
+      [-5.0, -3.7],
+      [5.0, 2.2],
+      [5.0, -3.7],
     ];
     treeCoords.forEach(([tx, tz]) => {
-      const t = createVoxelTree(matTrunk, matLeaf1, matLeaf2);
+      const t = createOrganicTree(matTrunk, matLeaf1, matLeaf2);
       t.position.set(tx, 0, tz);
       worldGroup.add(t);
     });
 
     // ========================================================================
-    // 6. SCENE 1 (0% – 25%): INITIAL SMALL MANUFACTURING WORKSHOP
+    // SCENE 1 (0% – 25%): ROUNDED INITIAL MANUFACTURING WORKSHOP
     // ========================================================================
     const s1Group = new THREE.Group();
     s1Group.position.set(-2.3, 0, -0.8);
     worldGroup.add(s1Group);
 
     const s1BackWall = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.6, 2.2, 0.3)),
+      geo(createRoundedBox(3.6, 2.2, 0.32, 0.12, 5)),
       matWhite
     );
     s1BackWall.position.set(0, 1.1, -1.5);
@@ -590,7 +642,7 @@ export default function NextIndustrialGrowth3D({
     s1Group.add(s1BackWall);
 
     const s1SideWall = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.3, 2.2, 3.0)),
+      geo(createRoundedBox(0.32, 2.2, 3.0, 0.12, 5)),
       matWhite
     );
     s1SideWall.position.set(-1.65, 1.1, -0.15);
@@ -599,65 +651,73 @@ export default function NextIndustrialGrowth3D({
     s1Group.add(s1SideWall);
 
     const s1RoofRim = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.7, 0.35, 0.42)),
+      geo(createRoundedBox(3.72, 0.36, 0.44, 0.14, 5)),
       matNavy
     );
     s1RoofRim.position.set(0, 2.25, -1.48);
     s1Group.add(s1RoofRim);
 
     const s1SideRim = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.42, 0.35, 3.1)),
+      geo(createRoundedBox(0.44, 0.36, 3.12, 0.14, 5)),
       matNavy
     );
     s1SideRim.position.set(-1.65, 2.25, -0.15);
     s1Group.add(s1SideRim);
 
+    // Porthole / Rounded Windows on Initial Workshop Wall
+    const winGeo = geo(createRoundedBox(0.65, 0.65, 0.38, 0.18, 5));
     for (let w = 0; w < 3; w++) {
-      const win = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.65, 0.65, 0.36)),
-        matSky
-      );
+      const win = new THREE.Mesh(winGeo, matSky);
       win.position.set(-0.95 + w * 0.95, 1.4, -1.5);
       s1Group.add(win);
     }
 
+    // Rounded CNC Machine + Circular Spinning Gear
     const cncBody = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.95, 1.25, 0.95)),
+      geo(createRoundedBox(0.96, 1.25, 0.96, 0.16, 5)),
       matSlate
     );
     cncBody.position.set(-0.9, 0.625, -0.45);
     cncBody.castShadow = true;
     s1Group.add(cncBody);
 
-    const cncHeader = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(1.02, 0.25, 1.02)),
+    const cncDome = new THREE.Mesh(
+      geo(new THREE.CylinderGeometry(0.36, 0.42, 0.25, 24)),
       matRoyal
     );
-    cncHeader.position.set(-0.9, 1.32, -0.45);
-    s1Group.add(cncHeader);
+    cncDome.position.set(-0.9, 1.32, -0.45);
+    s1Group.add(cncDome);
 
+    // Circular Gear Wheel
     const voxelGear = new THREE.Group();
     voxelGear.position.set(-0.9, 0.75, 0.08);
-    const gearBar1 = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.55, 0.16, 0.12)),
+    const gearRing = new THREE.Mesh(
+      geo(new THREE.TorusGeometry(0.2, 0.055, 12, 24)),
       matGold
     );
-    const gearBar2 = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.16, 0.55, 0.12)),
+    const gearSpoke1 = new THREE.Mesh(
+      geo(new THREE.CapsuleGeometry(0.04, 0.38, 6, 12)),
       matGold
     );
-    voxelGear.add(gearBar1, gearBar2);
+    const gearSpoke2 = new THREE.Mesh(
+      geo(new THREE.CapsuleGeometry(0.04, 0.38, 6, 12)),
+      matGold
+    );
+    gearSpoke2.rotation.z = Math.PI / 2;
+    voxelGear.add(gearRing, gearSpoke1, gearSpoke2);
     s1Group.add(voxelGear);
 
+    // Rounded Capsule-shaped Conveyor Belt
     const s1Belt = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.1, 0.4, 0.65)),
+      geo(createRoundedBox(2.15, 0.4, 0.68, 0.18, 5)),
       matNavy
     );
     s1Belt.position.set(0.55, 0.2, -0.45);
     s1Belt.castShadow = true;
     s1Group.add(s1Belt);
 
-    const prodBoxGeo = geo(new THREE.BoxGeometry(0.38, 0.38, 0.38));
+    // Rounded Product Packages
+    const prodBoxGeo = geo(createRoundedBox(0.4, 0.38, 0.4, 0.1, 4));
     const s1Boxes: THREE.Mesh[] = [];
     for (let i = 0; i < 2; i++) {
       const b = new THREE.Mesh(prodBoxGeo, matSkyLight);
@@ -667,8 +727,8 @@ export default function NextIndustrialGrowth3D({
       s1Boxes.push(b);
     }
 
-    // THE VOXEL ENTREPRENEUR PROTAGONIST
-    const entrepreneur = buildVoxelCharacter({
+    // THE ENTREPRENEUR PROTAGONIST (Smooth organic character)
+    const entrepreneur = buildSmoothCharacter({
       suitColor: 0x0f243c,
       shirtColor: 0xffffff,
       tieColor: 0x38bdf8,
@@ -679,44 +739,31 @@ export default function NextIndustrialGrowth3D({
     worldGroup.add(entrepreneur.root);
 
     // ========================================================================
-    // 7. SCENE 2 (25% – 50%): 3D NEXT CARD & VOXEL COINS CASCADE
+    // SCENE 2 (25% – 50%): ROUNDED 3D NEXT CARD & CIRCULAR COINS
     // ========================================================================
     const s2CardGroup = new THREE.Group();
     worldGroup.add(s2CardGroup);
 
-    const cardTexture = createCrispVoxelCardTexture();
-    const cardTopMat = mat(
-      new THREE.MeshStandardMaterial({
+    const cardTexture = createSmoothCardTexture();
+    const cardMat = mat(
+      new THREE.MeshPhysicalMaterial({
         map: cardTexture,
-        roughness: 0.2,
+        roughness: 0.18,
         metalness: 0.25,
+        clearcoat: 0.7,
+        clearcoatRoughness: 0.15,
       })
     );
-    const cardEdgeMat = mat(
-      new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
-        emissive: 0x0284c7,
-        emissiveIntensity: 0.35,
-      })
-    );
-
-    const cardMaterials = [
-      cardEdgeMat,
-      cardEdgeMat,
-      cardTopMat,
-      cardTopMat,
-      cardEdgeMat,
-      cardEdgeMat,
-    ];
-    const nextCardMesh = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.5, 0.16, 2.2)),
-      cardMaterials
-    );
+    const cardGeom = geo(createRoundedBox(3.5, 2.2, 0.14, 0.22, 6));
+    cardGeom.rotateX(Math.PI / 2);
+    const nextCardMesh = new THREE.Mesh(cardGeom, cardMat);
     nextCardMesh.castShadow = true;
     s2CardGroup.add(nextCardMesh);
 
+    // True Round 3D Coins orbiting the NEXT Card
     const voxelCoins: THREE.Mesh[] = [];
-    const coinGeo = geo(new THREE.BoxGeometry(0.32, 0.32, 0.12));
+    const coinGeo = geo(new THREE.CylinderGeometry(0.22, 0.22, 0.07, 28));
+    coinGeo.rotateX(Math.PI / 2);
     for (let c = 0; c < 8; c++) {
       const coin = new THREE.Mesh(
         coinGeo,
@@ -727,15 +774,17 @@ export default function NextIndustrialGrowth3D({
       voxelCoins.push(coin);
     }
 
-    const energySquare = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.8, 0.05, 2.6)),
+    // Circular Glowing Halo on the Floor beneath the Card
+    const energyHalo = new THREE.Mesh(
+      geo(new THREE.RingGeometry(1.3, 1.58, 48)),
       matSky
     );
-    energySquare.position.set(-0.5, 0.03, -0.5);
-    worldGroup.add(energySquare);
+    energyHalo.rotation.x = -Math.PI / 2;
+    energyHalo.position.set(-0.5, 0.03, -0.5);
+    worldGroup.add(energyHalo);
 
     // ========================================================================
-    // 8. SCENE 3 (50% – 75%): VOXEL BLOCK-BY-BLOCK FACTORY EXPANSION
+    // SCENE 3 (50% – 75%): SMOOTH ROUNDED FACTORY EXPANSION & CYLINDRICAL ROBOTS
     // ========================================================================
     const s3Group = new THREE.Group();
     worldGroup.add(s3Group);
@@ -748,7 +797,7 @@ export default function NextIndustrialGrowth3D({
     }[] = [];
 
     const hall2Wall = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(4.6, 2.6, 0.3)),
+      geo(createRoundedBox(4.6, 2.6, 0.32, 0.14, 5)),
       matWhite
     );
     hall2Wall.position.set(1.8, 1.3, -2.3);
@@ -758,7 +807,7 @@ export default function NextIndustrialGrowth3D({
     s3Modules.push({ obj: hall2Wall, targetY: 1.3, startP: 0.44, endP: 0.56 });
 
     const hall2Cornice = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(4.7, 0.38, 0.42)),
+      geo(createRoundedBox(4.72, 0.38, 0.44, 0.16, 5)),
       matRoyal
     );
     hall2Cornice.position.set(1.8, 2.65, -2.28);
@@ -771,7 +820,7 @@ export default function NextIndustrialGrowth3D({
     });
 
     const longBelt = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(4.8, 0.4, 0.7)),
+      geo(createRoundedBox(4.8, 0.4, 0.72, 0.18, 5)),
       matNavy
     );
     longBelt.position.set(1.6, 0.2, -0.45);
@@ -779,35 +828,44 @@ export default function NextIndustrialGrowth3D({
     s3Group.add(longBelt);
     s3Modules.push({ obj: longBelt, targetY: 0.2, startP: 0.48, endP: 0.58 });
 
+    // Cylindrical & Capsule Robotic Arms
     const robotArms: THREE.Group[] = [];
     for (let r = 0; r < 3; r++) {
       const rGroup = new THREE.Group();
       rGroup.position.set(0.1 + r * 1.45, 0, -1.35);
 
-      const baseBlock = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.55, 0.55, 0.55)),
+      const baseCyl = new THREE.Mesh(
+        geo(new THREE.CylinderGeometry(0.26, 0.32, 0.52, 24)),
         matSlate
       );
-      baseBlock.position.y = 0.275;
-      baseBlock.castShadow = true;
-      rGroup.add(baseBlock);
+      baseCyl.position.y = 0.26;
+      baseCyl.castShadow = true;
+      rGroup.add(baseCyl);
 
       const pivot = new THREE.Group();
-      pivot.position.y = 0.55;
+      pivot.position.y = 0.52;
 
       const mast = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.24, 0.95, 0.24)),
+        geo(new THREE.CapsuleGeometry(0.11, 0.72, 10, 16)),
         matSky
       );
       mast.position.y = 0.45;
       mast.castShadow = true;
       pivot.add(mast);
 
+      const jointSphere = new THREE.Mesh(
+        geo(new THREE.SphereGeometry(0.15, 16, 16)),
+        matNavy
+      );
+      jointSphere.position.set(0, 0.85, 0);
+      pivot.add(jointSphere);
+
       const boom = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.22, 0.22, 0.75)),
+        geo(new THREE.CapsuleGeometry(0.09, 0.55, 10, 16)),
         matGold
       );
-      boom.position.set(0, 0.85, 0.3);
+      boom.rotation.x = Math.PI / 2;
+      boom.position.set(0, 0.85, 0.32);
       boom.castShadow = true;
       pivot.add(boom);
 
@@ -834,20 +892,20 @@ export default function NextIndustrialGrowth3D({
       s3Boxes.push(box);
     }
 
+    // Rounded Storage Racks & Rounded Cargo Pods
     const warehouseGroup = new THREE.Group();
     warehouseGroup.position.set(3.8, 0, 1.0);
+    const shelfGeo = geo(createRoundedBox(1.9, 0.1, 0.95, 0.04, 4));
+    const crateGeo = geo(createRoundedBox(0.6, 0.46, 0.6, 0.12, 5));
     for (let lvl = 0; lvl < 3; lvl++) {
-      const rackShelf = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(1.9, 0.1, 0.95)),
-        matSlate
-      );
+      const rackShelf = new THREE.Mesh(shelfGeo, matSlate);
       rackShelf.position.y = 0.45 + lvl * 0.68;
       rackShelf.castShadow = true;
       warehouseGroup.add(rackShelf);
 
       for (let c = 0; c < 2; c++) {
         const crate = new THREE.Mesh(
-          geo(new THREE.BoxGeometry(0.6, 0.46, 0.6)),
+          crateGeo,
           lvl === 2 ? matEmerald : lvl === 1 ? matSkyLight : matGold
         );
         crate.position.set(-0.45 + c * 0.9, 0.73 + lvl * 0.68, 0);
@@ -863,13 +921,14 @@ export default function NextIndustrialGrowth3D({
       endP: 0.68,
     });
 
+    // 3 Smooth Organic Operators
     const opPositions: [number, number, number][] = [
       [0.4, 0.45, Math.PI],
       [1.85, 0.45, Math.PI * 0.9],
       [2.6, 1.5, -Math.PI * 0.35],
     ];
     opPositions.forEach(([ox, oz, rot], idx) => {
-      const op = buildVoxelCharacter({
+      const op = buildSmoothCharacter({
         suitColor: 0x1e293b,
         shirtColor: 0x38bdf8,
         hardhatColor: 0x38bdf8,
@@ -886,7 +945,7 @@ export default function NextIndustrialGrowth3D({
     });
 
     // ========================================================================
-    // 9. SCENE 4 (75% – 100%): CONSOLIDATED VOXEL SMART INDUSTRY & TOWER
+    // SCENE 4 (75% – 100%): CURVED CORPORATE TOWER, BALCONY & ROUNDED TRUCK
     // ========================================================================
     const s4Group = new THREE.Group();
     worldGroup.add(s4Group);
@@ -898,11 +957,12 @@ export default function NextIndustrialGrowth3D({
       endP: number;
     }[] = [];
 
+    // Curved-Corner Executive Tower
     const towerGroup = new THREE.Group();
     towerGroup.position.set(-2.5, 0, -2.9);
 
     const towerBody = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.0, 4.8, 2.2)),
+      geo(createRoundedBox(3.0, 4.8, 2.2, 0.35, 6)),
       matNavy
     );
     towerBody.position.y = 2.4;
@@ -910,31 +970,33 @@ export default function NextIndustrialGrowth3D({
     towerBody.receiveShadow = true;
     towerGroup.add(towerBody);
 
+    const winPillGeo = geo(createRoundedBox(0.62, 0.52, 0.14, 0.14, 4));
     for (let row = 0; row < 5; row++) {
       for (let col = 0; col < 3; col++) {
         const winBlock = new THREE.Mesh(
-          geo(new THREE.BoxGeometry(0.62, 0.52, 0.12)),
+          winPillGeo,
           (row + col) % 2 === 0 ? matSky : matSkyLight
         );
-        winBlock.position.set(-0.8 + col * 0.8, 0.85 + row * 0.82, 1.12);
+        winBlock.position.set(-0.8 + col * 0.8, 0.85 + row * 0.82, 1.1);
         towerGroup.add(winBlock);
       }
     }
 
     const towerCrown = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(3.15, 0.35, 2.35)),
+      geo(createRoundedBox(3.15, 0.36, 2.35, 0.16, 5)),
       matSky
     );
-    towerCrown.position.y = 4.95;
+    towerCrown.position.y = 4.92;
     towerGroup.add(towerCrown);
 
     s4Group.add(towerGroup);
     s4Modules.push({ obj: towerGroup, targetY: 0, startP: 0.72, endP: 0.86 });
 
+    // Circular / Oval Executive Command Pod Balcony
     const commandPlatform = new THREE.Group();
     commandPlatform.position.set(-1.3, 0, 1.55);
     const podBase = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.1, 0.55, 1.35)),
+      geo(new THREE.CylinderGeometry(0.95, 0.82, 0.55, 32)),
       matWhite
     );
     podBase.position.y = 0.275;
@@ -942,10 +1004,11 @@ export default function NextIndustrialGrowth3D({
     commandPlatform.add(podBase);
 
     const podRim = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.18, 0.12, 1.42)),
+      geo(new THREE.TorusGeometry(0.95, 0.06, 12, 36)),
       matSky
     );
-    podRim.position.y = 0.58;
+    podRim.rotation.x = Math.PI / 2;
+    podRim.position.y = 0.56;
     commandPlatform.add(podRim);
 
     s4Group.add(commandPlatform);
@@ -956,11 +1019,12 @@ export default function NextIndustrialGrowth3D({
       endP: 0.86,
     });
 
+    // Streamlined Rounded Logistics Truck with Cylindrical Wheels
     const voxelTruck = new THREE.Group();
     voxelTruck.position.set(1.5, 0.04, 3.55);
 
     const trailerBox = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.2, 1.05, 0.92)),
+      geo(createRoundedBox(2.2, 1.05, 0.92, 0.18, 5)),
       matWhite
     );
     trailerBox.position.set(0, 0.65, 0);
@@ -968,41 +1032,37 @@ export default function NextIndustrialGrowth3D({
     voxelTruck.add(trailerBox);
 
     const trailerBand = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(2.24, 0.22, 0.95)),
+      geo(createRoundedBox(2.24, 0.22, 0.95, 0.08, 4)),
       matSky
     );
     trailerBand.position.set(0, 0.72, 0);
     voxelTruck.add(trailerBand);
 
     const truckCab = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.85, 0.85, 0.88)),
+      geo(createRoundedBox(0.88, 0.85, 0.88, 0.22, 5)),
       matNavy
     );
-    truckCab.position.set(-1.58, 0.55, 0);
+    truckCab.position.set(-1.55, 0.55, 0);
     truckCab.castShadow = true;
     voxelTruck.add(truckCab);
 
-    const truckWindshield = new THREE.Mesh(
-      geo(new THREE.BoxGeometry(0.12, 0.38, 0.76)),
-      matSkyLight
-    );
-    truckWindshield.position.set(-1.98, 0.68, 0);
-    voxelTruck.add(truckWindshield);
-
-    const wheelGeo = geo(new THREE.BoxGeometry(0.32, 0.32, 0.98));
+    // Cylindrical Wheels
+    const wheelGeo = geo(new THREE.CylinderGeometry(0.18, 0.18, 0.98, 24));
+    wheelGeo.rotateX(Math.PI / 2);
     [-1.55, -0.55, 0.65].forEach((wx) => {
       const wheel = new THREE.Mesh(wheelGeo, matRoad);
-      wheel.position.set(wx, 0.16, 0);
+      wheel.position.set(wx, 0.18, 0);
       voxelTruck.add(wheel);
     });
 
     s4Group.add(voxelTruck);
 
+    // Cylindrical / Capsule Financial Growth Columns (Back-Right)
     const growthBars: THREE.Mesh[] = [];
     for (let b = 0; b < 4; b++) {
       const bh = 1.1 + b * 0.85;
       const bar = new THREE.Mesh(
-        geo(new THREE.BoxGeometry(0.55, bh, 0.55)),
+        geo(new THREE.CylinderGeometry(0.28, 0.28, bh, 28)),
         b === 3 ? matEmerald : b === 2 ? matSky : matRoyal
       );
       bar.position.set(3.1 + b * 0.72, bh / 2, -2.5);
@@ -1012,7 +1072,7 @@ export default function NextIndustrialGrowth3D({
     }
 
     // ========================================================================
-    // 10. RESIZE & VISIBILITY HANDLERS
+    // RESIZE & VISIBILITY HANDLERS
     // ========================================================================
     let isVisible = true;
     const io = new IntersectionObserver(
@@ -1045,7 +1105,7 @@ export default function NextIndustrialGrowth3D({
     updateSizes();
 
     // ========================================================================
-    // 11. DETERMINISTIC SCROLL-CONTROLLED RENDER LOOP
+    // SCROLL-CONTROLLED RENDER LOOP
     // ========================================================================
     let rafId: number;
     const clock = new THREE.Clock();
@@ -1063,7 +1123,6 @@ export default function NextIndustrialGrowth3D({
       const s3Progress = smoothstep(0.44, 0.74, p);
       const s4Progress = smoothstep(0.7, 0.94, p);
 
-      // 1. Subtle Orthographic Camera Pan, Zoom & Scroll Rotation (Like Lulo Cards!)
       const targetZoom = lerp(1.16, 0.98, smoothstep(0.15, 0.88, p));
       camera.zoom = targetZoom;
       const panX = lerp(-1.1, 0.35, smoothstep(0.2, 0.82, p));
@@ -1077,14 +1136,13 @@ export default function NextIndustrialGrowth3D({
       camera.lookAt(panX, panY, 0);
       camera.updateProjectionMatrix();
 
-      // 2. Scene 1 Voxel Gear & Conveyor Cubes
       voxelGear.rotation.z = -p * Math.PI * 16 - (isReduced ? 0 : elapsed * 2);
       s1Boxes.forEach((box, idx) => {
-        const travel = ((p * 5 + idx * 0.5 + (isReduced ? 0 : elapsed * 0.25)) % 1) * 1.5;
+        const travel =
+          ((p * 5 + idx * 0.5 + (isReduced ? 0 : elapsed * 0.25)) % 1) * 1.5;
         box.position.x = -0.2 + travel;
       });
 
-      // 3. Scene 2: 3D NEXT Card & Orbiting Voxel Coins
       s2CardGroup.visible = s2Enter > 0.01;
       const floatBob = isReduced ? 0 : Math.sin(elapsed * 2.8) * 0.14;
       const cardX = lerp(-0.5, -2.5, s4Progress);
@@ -1094,7 +1152,8 @@ export default function NextIndustrialGrowth3D({
       nextCardMesh.position.set(cardX, cardY, cardZ);
       nextCardMesh.rotation.set(
         lerp(0.45, 0.25, s2Enter),
-        lerp(-0.35, 0.15, p) + (isReduced ? 0 : Math.sin(elapsed * 1.4) * 0.08),
+        lerp(-0.35, 0.15, p) +
+          (isReduced ? 0 : Math.sin(elapsed * 1.4) * 0.08),
         lerp(-0.15, -0.05, s2Enter)
       );
       const cScale = lerp(0.01, 1, s2Enter) * lerp(1, 0.76, s4Progress);
@@ -1116,14 +1175,13 @@ export default function NextIndustrialGrowth3D({
         coin.scale.setScalar(Math.max(0.001, coinVis));
       });
 
-      energySquare.visible = s2Enter > 0.02 && s2Exit < 0.98;
-      energySquare.scale.setScalar(
+      energyHalo.visible = s2Enter > 0.02 && s2Exit < 0.98;
+      energyHalo.scale.setScalar(
         Math.max(0.001, s2Enter * (1 - s2Exit * 0.9))
       );
       cardPointLight.position.set(cardX, cardY - 0.6, cardZ);
       cardPointLight.intensity = s2Enter * (1 - s2Exit * 0.5) * 5.0;
 
-      // 4. Scene 3: Voxel Modules Dropping & Snapping into Place
       s3Group.visible = p > 0.42;
       s3Modules.forEach((m) => {
         const localT = smoothstep(m.startP, m.endP, p);
@@ -1142,11 +1200,11 @@ export default function NextIndustrialGrowth3D({
 
       robotArms.forEach((arm, idx) => {
         arm.rotation.y =
-          Math.sin(p * Math.PI * 10 + idx * 1.5 + (isReduced ? 0 : elapsed * 2.5)) *
-          0.65;
+          Math.sin(
+            p * Math.PI * 10 + idx * 1.5 + (isReduced ? 0 : elapsed * 2.5)
+          ) * 0.65;
       });
 
-      // 5. Scene 4: Consolidated Tower, Command Pod, Truck & Growth Bars
       s4Group.visible = p > 0.68;
       s4Modules.forEach((m) => {
         const localT = smoothstep(m.startP, m.endP, p);
@@ -1166,8 +1224,7 @@ export default function NextIndustrialGrowth3D({
         bar.position.y = ((1.1 + idx * 0.85) * bT) / 2;
       });
 
-      // 6. Entrepreneur Protagonist Journey across all 4 scenes
-      const entY = lerp(0.02, 0.64, smoothstep(0.76, 0.88, p));
+      const entY = lerp(0.02, 0.58, smoothstep(0.76, 0.88, p));
       const entX = lerp(lerp(-1.3, 0.0, s3Progress), -1.3, s4Progress);
       const entZ = lerp(1.35, 1.55, s4Progress);
       entrepreneur.root.position.set(entX, entY, entZ);
@@ -1208,7 +1265,7 @@ export default function NextIndustrialGrowth3D({
           NE➔XT
         </div>
         <h4 className="text-lg font-extrabold text-[#0F243C]">
-          Etapa {activeScene + 1} de 4 • Evolución Voxel NEXT
+          Etapa {activeScene + 1} de 4 • Evolución 3D NEXT
         </h4>
       </div>
     );
@@ -1218,7 +1275,7 @@ export default function NextIndustrialGrowth3D({
     <div
       ref={mountRef}
       className="w-full h-full relative"
-      aria-label="Animación interactiva 3D Voxel de crecimiento industrial con NEXT"
+      aria-label="Animación interactiva 3D con bordes redondeados del crecimiento industrial con NEXT"
     />
   );
 }
